@@ -2,6 +2,11 @@ import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Question, QuestionType, AnalyticsFeedback, ExamSession } from '../types';
 import { STATIC_EXAM_DATA } from '../data/examData';
 
+// [CRITICAL FIX] Declare process to satisfy TypeScript compiler (TS2580)
+// This enables 'process.env.API_KEY' usage without errors, even in browser environment
+// where Vite will replace it with the string value at build time.
+declare const process: any;
+
 // --- Helper Functions ---
 
 // [CRITICAL FIX] Do not initialize 'ai' globally. Initialize inside functions.

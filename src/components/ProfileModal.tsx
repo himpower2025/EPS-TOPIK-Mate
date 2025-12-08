@@ -37,7 +37,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLog
 
     // Settings
     const boxSize = 280;
-    const offset = 100; // Shift for the second box
     const radius = 60; // Rounded corner radius
 
     // Helper for custom rounded corners

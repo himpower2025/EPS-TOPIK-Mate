@@ -1,5 +1,3 @@
-import React from 'react';
-
 // Export default to prevent named import errors
 export default function LoadingSpinner({ message = "Loading..." }: { message?: string }) {
   return (
