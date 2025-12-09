@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Bottom-Right Purple 'A' Box -->
+  <rect x="210" y="210" width="270" height="270" rx="60" fill="#a855f7" />
+  <text x="345" y="355" font-family="sans-serif" font-weight="900" font-size="160" fill="white" text-anchor="middle" dominant-baseline="central">A</text>
+  
+  <!-- Top-Left Indigo '가' Box with thick white stroke to create the sticker/overlap effect -->
+  <rect x="32" y="32" width="270" height="270" rx="60" fill="#4f46e5" stroke="white" stroke-width="24" />
+  <text x="167" y="175" font-family="sans-serif" font-weight="900" font-size="160" fill="white" text-anchor="middle" dominant-baseline="central">가</text>
+</svg>
