@@ -34,20 +34,17 @@
     </script>
 
     <!-- PWA Settings -->
-    <link rel="manifest" href="manifest.json?v=6" />
+    <!-- manifest.json도 public 폴더 혹은 최상위 루트에 있어야 합니다 -->
+    <link rel="manifest" href="/manifest.json?v=8" />
     <meta name="theme-color" content="#4f46e5" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="EPS-TOPIK" />
     
-    <!-- 
-      [Fundamental Solution] Direct SVG Embedding
-      The icon is drawn using code (SVG) instead of linking to a file. 
-      This bypasses 404 errors and cache issues completely.
-    -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' style='background:white'%3E%3Crect width='512' height='512' fill='white' rx='100'/%3E%3Crect x='40' y='40' width='280' height='280' rx='60' fill='%234f46e5'/%3E%3Ctext x='180' y='210' font-family='sans-serif' font-weight='bold' font-size='180' fill='white' text-anchor='middle'%3E가%3C/text%3E%3Crect x='192' y='192' width='280' height='280' rx='60' fill='%23a855f7'/%3E%3Ctext x='332' y='362' font-family='sans-serif' font-weight='bold' font-size='180' fill='white' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E" />
-    
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' style='background:white'%3E%3Crect width='512' height='512' fill='white' rx='100'/%3E%3Crect x='40' y='40' width='280' height='280' rx='60' fill='%234f46e5'/%3E%3Ctext x='180' y='210' font-family='sans-serif' font-weight='bold' font-size='180' fill='white' text-anchor='middle'%3E가%3C/text%3E%3Crect x='192' y='192' width='280' height='280' rx='60' fill='%23a855f7'/%3E%3Ctext x='332' y='362' font-family='sans-serif' font-weight='bold' font-size='180' fill='white' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E" />
+    <!-- Icons: 'public' 폴더(src와 같은 레벨)에 있는 파일을 절대 경로(/)로 참조합니다 -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/logo-192.png?v=8" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/logo-512.png?v=8" />
+    <link rel="apple-touch-icon" href="/logo-192.png?v=8" />
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
