@@ -1,25 +1,23 @@
 {
-  "id": "eps-topik-mate",
-  "short_name": "EPS-TOPIK",
   "name": "EPS-TOPIK Mate",
+  "short_name": "EPS-TOPIK",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAMAAABlApw1AAAAKlBMVEVPeOX///9PeOX///9PeOX///9PeOX///9PeOX///9PeOX///9PeOX///+80313AAAADXRSTlMAESIzRFVmd4iZqrvM3R4XDwAAAFZJREFUeNrtwTEBAAAAwqD1T20ND6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH4M0OAAAYSxr4QAAAAASUVORK5CYII=",
+      "src": "https://cdn-icons-png.flaticon.com/512/3407/3407023.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAMAAADDpiTIAAAAKlBMVEVPeOX///9PeOX///9PeOX///9PeOX///9PeOX///9PeOX///9PeOX///+80313AAAADXRSTlMAESIzRFVmd4iZqrvM3R4XDwAAAJRJREFUeNrtwTEBAAAAwqD1T20MH6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgB8DQAAB148zagAAAABJRU5ErkJggg==",
+      "src": "https://cdn-icons-png.flaticon.com/512/3407/3407023.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ],
-  "start_url": "/",
-  "scope": "/",
-  "display": "standalone",
-  "theme_color": "#4f46e5",
-  "background_color": "#ffffff",
-  "orientation": "portrait"
+  ]
 }
