@@ -5,7 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>EPS-TOPIK Mate - Your Exam Partner</title>
     
-    <!-- [비상용 에러 표시기] 앱이 죽어서 흰 화면이 나올 때 에러를 화면에 출력합니다. -->
+    <!-- [Dynamic Favicon Generator] 
+         파일 경로 문제나 캐시 문제를 원천 차단하기 위해, 
+         앱 실행 시 자바스크립트가 SVG 로고를 직접 그려서 브라우저 탭에 적용합니다. 
+    -->
+    <script id="dynamic-favicon">
+      (function() {
+        // 1. 우리가 원하는 로고 디자인 (SVG 코드)
+        const svgCode = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+            <rect x="210" y="210" width="270" height="270" rx="60" fill="#a855f7" />
+            <text x="345" y="355" font-family="sans-serif" font-weight="900" font-size="160" fill="white" text-anchor="middle" dominant-baseline="central">A</text>
+            <rect x="32" y="32" width="270" height="270" rx="60" fill="#4f46e5" stroke="white" stroke-width="24" />
+            <text x="167" y="175" font-family="sans-serif" font-weight="900" font-size="160" fill="white" text-anchor="middle" dominant-baseline="central">가</text>
+          </svg>
+        `.trim();
+
+        // 2. SVG를 브라우저가 이해할 수 있는 URL로 변환
+        const blob = new Blob([svgCode], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+
+        // 3. <link> 태그 생성 및 헤더에 주입
+        const linkIcon = document.createElement('link');
+        linkIcon.rel = 'icon';
+        linkIcon.href = url;
+        document.head.appendChild(linkIcon);
+
+        const linkApple = document.createElement('link');
+        linkApple.rel = 'apple-touch-icon';
+        linkApple.href = url;
+        document.head.appendChild(linkApple);
+      })();
+    </script>
+
+    <!-- [비상용 에러 표시기] -->
     <style>
       #startup-error {
         display: none;
@@ -29,20 +62,15 @@
           el.innerHTML += "Error: " + msg + "\nAt: " + url + ":" + line + ":" + col + "\n\n";
         }
       };
-      // process 폴리필
       window.process = window.process || { env: { API_KEY: '' } };
     </script>
 
     <!-- PWA Settings -->
-    <link rel="manifest" href="manifest.json?v=15" />
+    <link rel="manifest" href="manifest.json?v=16" />
     <meta name="theme-color" content="#4f46e5" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="EPS-TOPIK" />
-    
-    <!-- Icons: 파일 경로 문제 해결을 위해 SVG 데이터를 직접 Base64로 삽입했습니다. -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+PHJlY3QgeD0iMjEwIiB5PSIyMTAiIHdpZHRoPSIyNzAiIGhlaWdodD0iMjcwIiByeD0iNjAiIGZpbGw9IiNhODU1ZjciIC8+PHRleHQgeD0iMzQ1IiB5PSIzNTUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXdlaWdodD0iOTAwIiBmb250LXNpemU9IjE2MCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJjZW50cmFsIj5BPC90ZXh0PjxyZWN0IHg9IjMyIiB5PSIzMiIgd2lkdGg9IjI3MCIgaGVpZ2h0PSIyNzAiIHJ4PSI2MCIgZmlsbD0iIzRmNDZlNSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyNCIgLz48dGV4dCB4PSIxNjciIHk9IjE3NSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtd2VpZ2h0PSI5MDAiIGZvbnQtc2l6ZT0iMTYwIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9ImNlbnRyYWwiPuqwgDwvdGV4dD48L3N2Zz4=" />
-    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+PHJlY3QgeD0iMjEwIiB5PSIyMTAiIHdpZHRoPSIyNzAiIGhlaWdodD0iMjcwIiByeD0iNjAiIGZpbGw9IiNhODU1ZjciIC8+PHRleHQgeD0iMzQ1IiB5PSIzNTUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXdlaWdodD0iOTAwIiBmb250LXNpemU9IjE2MCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJjZW50cmFsIj5BPC90ZXh0PjxyZWN0IHg9IjMyIiB5PSIzMiIgd2lkdGg9IjI3MCIgaGVpZ2h0PSIyNzAiIHJ4PSI2MCIgZmlsbD0iIzRmNDZlNSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyNCIgLz48dGV4dCB4PSIxNjciIHk9IjE3NSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtd2VpZ2h0PSI5MDAiIGZvbnQtc2l6ZT0iMTYwIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9ImNlbnRyYWwiPuqwgDwvdGV4dD48L3N2Zz4=" />
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
