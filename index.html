@@ -5,65 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>EPS-TOPIK Mate - Your Exam Partner</title>
     
-    <!-- 
-      [Icon System]
-      아이콘은 src/components/FaviconManager.tsx 에서 동적으로 생성되어 주입됩니다.
-      이곳에 정적 <link> 태그를 두지 않음으로써 캐시 충돌을 방지합니다.
-    -->
-
-    <!-- [비상용 에러 표시기] -->
-    <style>
-      #startup-error {
-        display: none;
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: white;
-        z-index: 9999;
-        padding: 20px;
-        color: #ef4444;
-        font-family: monospace;
-        white-space: pre-wrap;
-        overflow: auto;
-      }
-    </style>
-    <div id="startup-error"></div>
-    <script>
-      window.onerror = function(msg, url, line, col, error) {
-        var el = document.getElementById('startup-error');
-        if (el) {
-          el.style.display = 'block';
-          el.innerHTML += "Error: " + msg + "\nAt: " + url + ":" + line + ":" + col + "\n\n";
-        }
-      };
-      window.process = window.process || { env: { API_KEY: '' } };
-
-      // [PWA Service Worker Registration]
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/service-worker.js')
-            .then((registration) => {
-              console.log('SW registered: ', registration);
-            })
-            .catch((registrationError) => {
-              console.log('SW registration failed: ', registrationError);
-            });
-        });
-      }
-    </script>
-
     <!-- PWA Settings -->
-    <!-- Updated version to v23 to force refresh -->
-    <link rel="manifest" href="manifest.json?v=23" />
+    <!-- Force refresh with high version number -->
+    <link rel="manifest" href="manifest.json?v=99" />
     <meta name="theme-color" content="#4f46e5" />
     
     <!-- Android/Chrome Specific PWA Settings -->
     <meta name="mobile-web-app-capable" content="yes">
 
-    <!-- iOS Specific PWA Settings (Critical for Standalone) -->
+    <!-- iOS Specific PWA Settings -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-touch-fullscreen" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="EPS-TOPIK" />
+
+    <!-- Error Reporting -->
+    <style>
+      #startup-error { display: none; }
+    </style>
+    <div id="startup-error"></div>
+    <script>
+      // Global error handler
+      window.onerror = function(msg, url, line, col, error) {
+        console.error("Global Error:", msg);
+      };
+      
+      // Inject API Key placeholder if needed
+      window.process = window.process || { env: { API_KEY: '' } };
+
+      // Service Worker Registration
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then((registration) => {
+              console.log('SW Registered with scope:', registration.scope);
+              // Force update check
+              registration.update();
+            })
+            .catch((error) => {
+              console.error('SW Registration failed:', error);
+            });
+        });
+      }
+    </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -127,7 +111,6 @@
         scrollbar-width: none;
       }
       
-      /* Mobile Optimization Utilities */
       .safe-area-pt {
         padding-top: env(safe-area-inset-top);
       }
