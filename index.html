@@ -6,7 +6,7 @@
     <title>EPS-TOPIK Mate - Your Exam Partner</title>
     
     <!-- PWA Settings -->
-    <link rel="manifest" href="manifest.json?v=99" />
+    <link rel="manifest" href="./manifest.json?v=103" />
     <meta name="theme-color" content="#4f46e5" />
     
     <!-- Android/Chrome Specific PWA Settings -->
@@ -30,12 +30,16 @@
 
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/service-worker.js')
+          // Register with relative path. The file must be in 'public/service-worker.js' in source,
+          // which becomes '/service-worker.js' or './service-worker.js' in build.
+          navigator.serviceWorker.register('./service-worker.js', { scope: './' })
             .then((registration) => {
-              console.log('SW Registered');
+              console.log('SW Registered with scope:', registration.scope);
               registration.update();
             })
-            .catch((error) => console.error('SW Fail:', error));
+            .catch((error) => {
+              console.error('SW Fail:', error);
+            });
         });
       }
     </script>

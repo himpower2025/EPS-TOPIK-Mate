@@ -1,16 +1,13 @@
-const CACHE_NAME = 'eps-topik-mate-v99-final';
-// Only cache local critical files. 
-// Do NOT cache external CDNs here, as CORS issues will crash the SW installation.
+const CACHE_NAME = 'eps-topik-mate-v103';
+// Cache relative paths to support sub-directory deployments
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json'
+  './',
+  './index.html',
+  './manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
-  // Force the waiting service worker to become the active service worker.
   self.skipWaiting();
-  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -24,10 +21,7 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  // Tell the active service worker to take control of the page immediately.
   event.waitUntil(self.clients.claim());
-  
-  // Clean up old caches
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -43,14 +37,11 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Network First, Fallback to Cache for HTML (Ensures fresh content but works offline)
-  // Stale-While-Revalidate for assets
-  
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
         .catch(() => {
-          return caches.match('/index.html');
+          return caches.match('./index.html');
         })
     );
     return;

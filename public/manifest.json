@@ -1,12 +1,12 @@
 {
   "name": "EPS-TOPIK Mate",
   "short_name": "EPS-TOPIK",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4f46e5",
   "orientation": "portrait",
-  "scope": "/",
+  "scope": "./",
   "icons": [
     {
       "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAMAAABlApw1AAAAKlBMVEVPeOX///9PeOX///9PeOX///9PeOX///9PeOX///9PeOX///9PeOX///+80313AAAADXRSTlMAESIzRFVmd4iZqrvM3R4XDwAAAFZJREFUeNrtwTEBAAAAwqD1T20ND6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH4M0OAAAYSxr4QAAAAASUVORK5CYII=",

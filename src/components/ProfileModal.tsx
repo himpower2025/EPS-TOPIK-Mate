@@ -99,7 +99,14 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLog
                  {isPremium ? <><Crown className="w-5 h-5 text-yellow-400 fill-current" /><span>Premium</span></> : <span>Free Starter</span>}
                </div>
                {isPremium ? (
-                 <div className="flex items-center gap-2 text-sm opacity-90"><Calendar className="w-4 h-4" /><span>Ends: {new Date(user.subscriptionExpiry!).toLocaleDateString()}</span></div>
+                 <div className="space-y-2">
+                   <div className="flex items-center gap-2 text-sm opacity-90"><Calendar className="w-4 h-4" /><span>Ends: {new Date(user.subscriptionExpiry!).toLocaleDateString()}</span></div>
+                   {daysRemaining <= 5 && (
+                     <div className="text-yellow-300 text-xs font-bold bg-white/10 px-2 py-1 rounded inline-block">
+                       ⚠️ {daysRemaining} days left
+                     </div>
+                   )}
+                 </div>
                ) : (
                  <div className="text-sm opacity-80 border-t border-white/20 pt-2 mt-2">Daily limit applied.</div>
                )}

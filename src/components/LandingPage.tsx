@@ -1,5 +1,5 @@
 import React from 'react';
-import { PlayCircle, Award, ShieldCheck, ArrowRight, CheckCircle2, Zap } from 'lucide-react';
+import { PlayCircle, ShieldCheck, ArrowRight, Zap } from 'lucide-react';
 
 interface LandingPageProps {
   onLoginClick: () => void;
