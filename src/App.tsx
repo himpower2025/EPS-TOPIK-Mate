@@ -6,7 +6,8 @@ import { PaywallModal } from './components/PaywallModal';
 import { LandingPage } from './components/LandingPage';
 import { LoginModal } from './components/LoginModal';
 import { ProfileModal } from './components/ProfileModal';
-import { FaviconManager } from './components/FaviconManager'; // Import the new manager
+import { FaviconManager } from './components/FaviconManager';
+import { InstallPwa } from './components/InstallPwa'; // Import Install Prompt
 import { ExamSession, User, PlanType } from './types';
 
 enum AppState {
@@ -129,6 +130,7 @@ const App: React.FC = () => {
     return (
       <>
         <FaviconManager /> {/* Generate Favicon */}
+        <InstallPwa />     {/* Prompt Install */}
         <LandingPage onLoginClick={() => setShowLoginModal(true)} />
         {showLoginModal && (
           <LoginModal 
@@ -143,6 +145,7 @@ const App: React.FC = () => {
   return (
     <div className="h-full w-full bg-gray-100">
       <FaviconManager /> {/* Generate Favicon */}
+      <InstallPwa />     {/* Prompt Install */}
       {currentState === AppState.DASHBOARD && user && (
         <Dashboard 
           user={user}
