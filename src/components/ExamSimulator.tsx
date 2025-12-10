@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Question, QuestionType, ExamSession } from '../types';
 import { generateQuestions, generateSpeech } from '../services/geminiService';
-import { Play, CheckCircle, AlertCircle, Clock, Menu, X, ChevronRight, ChevronLeft, Headphones } from 'lucide-react';
+import { Play, CheckCircle, AlertCircle, Clock, Menu, X, ChevronRight, ChevronLeft, Headphones, Volume2 } from 'lucide-react';
 import LoadingSpinner from './LoadingSpinner';
 
 interface ExamSimulatorProps {
@@ -27,7 +28,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
       setLoading(true);
       setError(null);
       try {
-        const generated = await generateQuestions(12, true); 
+        const generated = await generateQuestions(20, true); 
         if (generated.length === 0) throw new Error("Failed to generate questions.");
         setQuestions(generated);
       } catch (err) {
@@ -59,25 +60,54 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
     if (isPlaying) return;
 
     setLoadingAudio(true);
+    setIsPlaying(true);
+
     try {
+      // 1. Try Gemini AI TTS first
       const buffer = await generateSpeech(currentQuestion.context);
+      
       if (buffer) {
+        // AI Audio Success
         const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
         if (ctx.state === 'suspended') await ctx.resume();
         const source = ctx.createBufferSource();
         source.buffer = buffer;
         source.connect(ctx.destination);
         source.start(0);
-        setIsPlaying(true);
-        source.onended = () => setIsPlaying(false);
+        source.onended = () => {
+          setIsPlaying(false);
+          setLoadingAudio(false);
+        };
       } else {
-        alert("Audio generation failed. Please try again.");
+        // 2. Fallback to Browser Native TTS (if API key missing or error)
+        console.log("Falling back to native TTS");
+        const utterance = new SpeechSynthesisUtterance(currentQuestion.context);
+        utterance.lang = 'ko-KR'; // Korean
+        utterance.rate = 0.9; // Slightly slower for exam clarity
+        
+        utterance.onend = () => {
+          setIsPlaying(false);
+          setLoadingAudio(false);
+        };
+        
+        utterance.onerror = (e) => {
+          console.error("TTS Error", e);
+          setIsPlaying(false);
+          setLoadingAudio(false);
+          alert("Audio could not be played.");
+        };
+
+        window.speechSynthesis.cancel(); // Stop any previous
+        window.speechSynthesis.speak(utterance);
       }
     } catch (e) {
       console.error(e);
+      setIsPlaying(false);
+      setLoadingAudio(false);
       alert("Error playing audio.");
     } finally {
-      setLoadingAudio(false);
+      // Note: Loading state is handled in callbacks above to sync with audio duration
+      if (!isPlaying) setLoadingAudio(false); 
     }
   };
 
@@ -189,14 +219,36 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
                 )}
 
                 {currentQ.type === QuestionType.LISTENING && (
-                    <div className="p-6 flex justify-center">
+                    <div className="p-8 flex flex-col items-center justify-center bg-gray-50">
+                        <div className="mb-4 text-center">
+                           <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Audio Track</span>
+                        </div>
                         <button
                         onClick={handlePlayAudio}
                         disabled={loadingAudio || isPlaying}
-                        className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition-all ${isPlaying ? 'bg-indigo-600 text-white animate-pulse scale-105' : 'bg-indigo-100 text-indigo-600 active:scale-95'}`}
+                        className={`
+                          relative group w-24 h-24 rounded-full flex items-center justify-center shadow-lg transition-all 
+                          ${isPlaying 
+                            ? 'bg-indigo-600 text-white scale-105 ring-4 ring-indigo-200' 
+                            : 'bg-white text-indigo-600 border-2 border-indigo-100 hover:border-indigo-300 hover:shadow-xl'}
+                        `}
                         >
-                        {loadingAudio ? <div className="w-8 h-8 border-3 border-current border-t-transparent rounded-full animate-spin"/> : <Play className="w-8 h-8 fill-current ml-1" />}
+                          {/* Ripple Effect Animation when playing */}
+                          {isPlaying && (
+                             <span className="absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-20 animate-ping"></span>
+                          )}
+                          
+                          {loadingAudio ? (
+                             <div className="w-8 h-8 border-3 border-current border-t-transparent rounded-full animate-spin"/> 
+                          ) : isPlaying ? (
+                             <Volume2 className="w-10 h-10 animate-pulse" />
+                          ) : (
+                             <Play className="w-10 h-10 fill-current ml-1" />
+                          )}
                         </button>
+                        <p className="mt-4 text-sm font-medium text-gray-500">
+                          {loadingAudio ? "Loading Audio..." : isPlaying ? "Playing..." : "Tap to Listen"}
+                        </p>
                     </div>
                 )}
             </div>
@@ -213,7 +265,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
                             w-full p-4 rounded-xl text-left transition-all duration-200 flex items-center gap-4 border shadow-sm active:scale-[0.98]
                             ${isSelected 
                             ? 'bg-indigo-600 text-white border-indigo-600 ring-2 ring-indigo-200' 
-                            : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'}
+                            : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300 hover:bg-gray-50'}
                         `}
                         >
                         <div className={`

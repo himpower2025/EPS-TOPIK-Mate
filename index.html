@@ -6,7 +6,7 @@
     <title>EPS-TOPIK Mate - Your Exam Partner</title>
     
     <!-- PWA Settings -->
-    <link rel="manifest" href="./manifest.json?v=103" />
+    <link rel="manifest" href="./manifest.json?v=105" />
     <meta name="theme-color" content="#4f46e5" />
     
     <!-- Android/Chrome Specific PWA Settings -->
@@ -24,21 +24,28 @@
     <div id="startup-error"></div>
     <script>
       window.onerror = function(msg, url, line, col, error) {
+        // Suppress benign resize observer loops or SW errors from showing in console excessively
+        if (msg.includes('ResizeObserver') || msg.includes('ServiceWorker')) return;
         console.error("Global Error:", msg);
       };
+      
+      // Default empty process for browser compatibility
       window.process = window.process || { env: { API_KEY: '' } };
 
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          // Register with relative path. The file must be in 'public/service-worker.js' in source,
-          // which becomes '/service-worker.js' or './service-worker.js' in build.
+          // Robust registration: Explicitly define scope as './' to match the relative path
           navigator.serviceWorker.register('./service-worker.js', { scope: './' })
             .then((registration) => {
-              console.log('SW Registered with scope:', registration.scope);
+              console.log('SW Registered');
               registration.update();
             })
             .catch((error) => {
-              console.error('SW Fail:', error);
+              // If scope error persists (often in dev environments with redirects), 
+              // try registering without explicit scope as a fallback
+              console.warn('SW explicit scope failed, retrying default:', error);
+              navigator.serviceWorker.register('./service-worker.js')
+                .catch(e => console.error('SW Final Fail:', e));
             });
         });
       }

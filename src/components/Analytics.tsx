@@ -1,9 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { ExamSession, AnalyticsFeedback } from '../types';
 import { analyzePerformance } from '../services/geminiService';
-import LoadingSpinner from './LoadingSpinner'; // Changed to default import
-import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Tooltip } from 'recharts';
-import { AlertTriangle, BookOpen, Trophy, ArrowRight, Brain, CheckSquare } from 'lucide-react';
+import LoadingSpinner from './LoadingSpinner';
+import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis } from 'recharts';
+import { AlertTriangle, BookOpen, Trophy, ArrowRight, Brain, CheckSquare, XCircle, CheckCircle } from 'lucide-react';
 
 interface AnalyticsProps {
   session: ExamSession;
@@ -33,106 +34,136 @@ export const Analytics: React.FC<AnalyticsProps> = ({ session, onBack }) => {
 
   const chartData = Object.keys(categoryData).map(cat => ({
     category: cat,
-    score: (categoryData[cat].correct / categoryData[cat].total) * 100,
+    score: Math.round((categoryData[cat].correct / categoryData[cat].total) * 100),
     fullMark: 100
   }));
 
-  if (loading) return <LoadingSpinner message="AI is analyzing your performance..." />;
+  if (loading) return <LoadingSpinner message="Generating your Score Report..." />;
 
-  const percentage = Math.round((session.score / session.questions.length) * 100);
+  const totalQuestions = session.questions.length;
+  const percentage = Math.round((session.score / totalQuestions) * 100);
+  const isPassed = percentage >= 60; // Assume 60% is passing for mock test
 
   return (
-    <div className="min-h-full bg-gray-50 p-4 md:p-8 overflow-y-auto">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900">Exam Results</h2>
-            <p className="text-gray-500 mt-1">Check your AI-powered feedback and improve your weak areas.</p>
-          </div>
-          <button 
-            onClick={onBack}
-            className="px-6 py-2 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 text-gray-700 font-medium"
-          >
-            Back to Dashboard
-          </button>
+    <div className="min-h-full bg-gray-100 p-4 md:p-8 overflow-y-auto pb-safe">
+      <div className="max-w-4xl mx-auto space-y-6">
+        
+        {/* 1. Header & Score Card */}
+        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-xl border border-gray-100 relative overflow-hidden">
+           {/* Background Decor */}
+           <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-20 -mr-16 -mt-16 pointer-events-none ${isPassed ? 'bg-green-400' : 'bg-red-400'}`}></div>
+           
+           <div className="relative z-10">
+             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+               <div>
+                 <h1 className="text-2xl font-bold text-gray-900">Exam Report</h1>
+                 <p className="text-gray-500 text-sm">{new Date(session.completedAt).toLocaleDateString()} • Mock Test</p>
+               </div>
+               <div className={`px-4 py-1.5 rounded-full text-sm font-bold border ${isPassed ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200'}`}>
+                 {isPassed ? "PASS" : "FAIL"}
+               </div>
+             </div>
+
+             <div className="flex flex-col items-center justify-center text-center">
+                <div className="relative mb-4">
+                  <svg className="w-40 h-40 transform -rotate-90">
+                    <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="10" fill="transparent" className="text-gray-100" />
+                    <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="10" fill="transparent" strokeDasharray={440} strokeDashoffset={440 - (440 * percentage) / 100} className={`${isPassed ? 'text-green-500' : 'text-red-500'} transition-all duration-1000 ease-out`} />
+                  </svg>
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+                    <span className="text-4xl font-black text-gray-900">{session.score}</span>
+                    <span className="text-gray-400 text-sm block">/ {totalQuestions}</span>
+                  </div>
+                </div>
+                <h2 className="text-xl font-bold text-gray-800">
+                  {isPassed ? "Excellent Job!" : "Keep Practicing!"}
+                </h2>
+                <p className="text-gray-500 max-w-md mx-auto mt-2">
+                  {feedback?.overallAssessment || "Analysis complete."}
+                </p>
+             </div>
+           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 flex flex-col items-center justify-center text-center">
-            <span className="text-gray-500 text-sm font-medium uppercase tracking-wider mb-2">Total Score</span>
-            <div className="relative">
-              <Trophy className={`w-12 h-12 mb-2 ${percentage >= 80 ? 'text-yellow-500' : 'text-gray-300'}`} />
-            </div>
-            <span className="text-5xl font-bold text-gray-900">{session.score} <span className="text-xl text-gray-400">/ {session.questions.length}</span></span>
-          </div>
-          <div className="md:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <Brain className="w-5 h-5 text-indigo-600" /> AI Feedback
+
+        {/* 2. Detailed Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          {/* Radar Chart */}
+          <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200">
+            <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <Brain className="w-5 h-5 text-indigo-500" />
+              Skill Analysis
             </h3>
-            <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-              {feedback?.overallAssessment || "Loading analysis..."}
-            </p>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <h3 className="text-lg font-bold text-gray-800 mb-6">Performance by Category</h3>
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
-                  <PolarGrid />
-                  <PolarAngleAxis dataKey="category" tick={{ fill: '#4B5563', fontSize: 12 }} />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                  <Radar name="My Score" dataKey="score" stroke="#4F46E5" fill="#4F46E5" fillOpacity={0.5} />
-                  <Tooltip />
+                <RadarChart cx="50%" cy="50%" outerRadius="75%" data={chartData}>
+                  <PolarGrid stroke="#e5e7eb" />
+                  <PolarAngleAxis dataKey="category" tick={{ fill: '#6b7280', fontSize: 11, fontWeight: 'bold' }} />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                  <Radar name="My Score" dataKey="score" stroke="#6366f1" strokeWidth={3} fill="#6366f1" fillOpacity={0.2} />
+                  <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
           </div>
-          <div className="space-y-6">
-            <div className="bg-green-50 rounded-xl p-6 border border-green-100">
-              <h3 className="text-lg font-bold text-green-800 mb-4 flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500" /> Strengths (Keep it up!)
-              </h3>
-              <ul className="space-y-2">
-                {feedback?.strengths.map((s, i) => (
-                  <li key={i} className="flex items-start gap-2 text-green-900">
-                    <CheckSquare className="w-5 h-5 shrink-0 text-green-600 mt-0.5" />
-                    <span>{s}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="bg-red-50 rounded-xl p-6 border border-red-100">
-              <h3 className="text-lg font-bold text-red-800 mb-4 flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-red-500" /> Weaknesses (Focus here!)
-              </h3>
-              <ul className="space-y-2">
-                {feedback?.weaknesses.map((w, i) => (
-                  <li key={i} className="flex items-start gap-2 text-red-900">
-                    <AlertTriangle className="w-5 h-5 shrink-0 text-red-500 mt-0.5" />
-                    <span>{w}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+
+          {/* Feedback Lists */}
+          <div className="space-y-4">
+             {/* Strengths */}
+             <div className="bg-white rounded-2xl p-5 shadow-sm border-l-4 border-green-500">
+               <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+                 <CheckCircle className="w-5 h-5 text-green-500" /> Strong Areas
+               </h3>
+               <ul className="space-y-2">
+                 {feedback?.strengths.map((s, i) => (
+                   <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
+                     <span className="w-1.5 h-1.5 rounded-full bg-green-400 mt-1.5 shrink-0"></span>
+                     {s}
+                   </li>
+                 ))}
+                 {(!feedback?.strengths || feedback.strengths.length === 0) && <li className="text-sm text-gray-400">No specific strengths detected yet.</li>}
+               </ul>
+             </div>
+
+             {/* Weaknesses */}
+             <div className="bg-white rounded-2xl p-5 shadow-sm border-l-4 border-red-500">
+               <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+                 <AlertTriangle className="w-5 h-5 text-red-500" /> Focus Needed
+               </h3>
+               <ul className="space-y-2">
+                 {feedback?.weaknesses.map((w, i) => (
+                   <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
+                     <span className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 shrink-0"></span>
+                     {w}
+                   </li>
+                 ))}
+                 {(!feedback?.weaknesses || feedback.weaknesses.length === 0) && <li className="text-sm text-gray-400">Great job! No major weaknesses.</li>}
+               </ul>
+             </div>
           </div>
         </div>
-        <div className="bg-indigo-900 rounded-xl p-8 shadow-lg text-white">
-          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+
+        {/* 3. Study Plan */}
+        <div className="bg-indigo-900 rounded-3xl p-8 shadow-xl text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full blur-3xl -mr-10 -mt-10"></div>
+          <h3 className="text-xl font-bold mb-4 flex items-center gap-2 relative z-10">
             <BookOpen className="w-6 h-6 text-indigo-300" />
-            Recommended Study Plan
+            AI Study Plan
           </h3>
-          <div className="prose prose-invert max-w-none">
-            <p className="leading-relaxed text-indigo-100 text-lg">
-              {feedback?.studyPlan}
-            </p>
-          </div>
-          <div className="mt-6 flex justify-end">
-            <button onClick={onBack} className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-400 px-6 py-3 rounded-lg font-semibold transition-colors">
-              Start New Exam <ArrowRight className="w-4 h-4" />
+          <p className="leading-relaxed text-indigo-100 text-base md:text-lg relative z-10 opacity-90">
+            {feedback?.studyPlan}
+          </p>
+          
+          <div className="mt-8 flex justify-end relative z-10">
+            <button 
+              onClick={onBack} 
+              className="bg-white text-indigo-900 hover:bg-indigo-50 px-8 py-3 rounded-xl font-bold transition-all shadow-lg active:scale-95 flex items-center gap-2"
+            >
+              Back to Dashboard <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
+
       </div>
     </div>
   );
