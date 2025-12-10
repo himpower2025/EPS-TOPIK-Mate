@@ -1,8 +1,10 @@
-const CACHE_NAME = 'eps-topik-mate-v2';
+const CACHE_NAME = 'eps-topik-mate-v3';
 const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json'
+  '/',
+  '/index.html',
+  '/manifest.json',
+  // Cache the icon so the app passes the PWA "offline capable" check even with an external image
+  'https://cdn-icons-png.flaticon.com/512/3407/3407023.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -29,8 +31,7 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
-  // [CRITICAL FIX] Claim clients immediately so the app is controlled by SW right away
-  // This is often required for the 'Add to Home Screen' to detect a valid PWA
+  // Claim clients immediately to control the page without reload
   return self.clients.claim();
 });
 
