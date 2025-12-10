@@ -7,7 +7,7 @@ import { LandingPage } from './components/LandingPage';
 import { LoginModal } from './components/LoginModal';
 import { ProfileModal } from './components/ProfileModal';
 import { FaviconManager } from './components/FaviconManager';
-import { InstallPwa } from './components/InstallPwa'; // Import Install Prompt
+import { InstallPwa } from './components/InstallPwa';
 import { ExamSession, User, PlanType } from './types';
 
 enum AppState {
@@ -18,21 +18,13 @@ enum AppState {
 }
 
 const App: React.FC = () => {
-  // Auth State
   const [user, setUser] = useState<User | null>(null);
-  
-  // App Flow State
   const [currentState, setCurrentState] = useState<AppState>(AppState.LANDING);
-  
-  // Modals
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-
-  // Data
   const [lastSession, setLastSession] = useState<ExamSession | null>(null);
   
-  // Initial check (simulating session restore)
   useEffect(() => {
     const savedUser = localStorage.getItem('eps_user');
     if (savedUser) {
@@ -42,7 +34,6 @@ const App: React.FC = () => {
           setUser(parsedUser);
           setCurrentState(AppState.DASHBOARD);
         } else {
-          // Invalid user data, clear it
           localStorage.removeItem('eps_user');
         }
       } catch (e) {
@@ -53,7 +44,6 @@ const App: React.FC = () => {
   }, []);
 
   const handleLogin = () => {
-    // Mock Login - In production, this would use Firebase/Supabase/NextAuth
     const mockUser: User = {
       id: 'user_123',
       name: 'Nepal Student',
@@ -63,7 +53,6 @@ const App: React.FC = () => {
       subscriptionExpiry: null,
       examsRemaining: 1
     };
-    
     setUser(mockUser);
     localStorage.setItem('eps_user', JSON.stringify(mockUser));
     setShowLoginModal(false);
@@ -79,7 +68,6 @@ const App: React.FC = () => {
 
   const startExam = () => {
     if (!user) return;
-
     if (user.plan === 'free' && user.examsRemaining <= 0) {
       setShowPaywall(true);
       return;
@@ -89,7 +77,6 @@ const App: React.FC = () => {
 
   const handleExamComplete = (session: ExamSession) => {
     if (user && user.plan === 'free') {
-       // Decrement free exams
        const updatedUser = { ...user, examsRemaining: Math.max(0, user.examsRemaining - 1) };
        setUser(updatedUser);
        localStorage.setItem('eps_user', JSON.stringify(updatedUser));
@@ -104,8 +91,6 @@ const App: React.FC = () => {
 
   const handleUpgrade = (plan: PlanType = '3m') => {
     if (!user) return;
-    
-    // Calculate expiry
     const now = new Date();
     if (plan === '1m') now.setMonth(now.getMonth() + 1);
     if (plan === '3m') now.setMonth(now.getMonth() + 3);
@@ -115,22 +100,21 @@ const App: React.FC = () => {
       ...user,
       plan: plan,
       subscriptionExpiry: now.toISOString(),
-      examsRemaining: 9999 // Unlimited
+      examsRemaining: 9999
     };
 
-    alert(`Successfully upgraded to ${plan === '6m' ? '6 Months' : plan === '3m' ? '3 Months' : '1 Month'} plan!`);
+    alert(`Upgraded to ${plan} plan!`);
     setUser(upgradedUser);
     localStorage.setItem('eps_user', JSON.stringify(upgradedUser));
     setShowPaywall(false);
     setShowProfile(false);
   };
 
-  // Main Render Logic
   if (!user && currentState === AppState.LANDING) {
     return (
-      <>
-        <FaviconManager /> {/* Generate Favicon */}
-        <InstallPwa />     {/* Prompt Install */}
+      <div className="h-[100dvh] w-full bg-white overflow-hidden flex flex-col">
+        <FaviconManager />
+        <InstallPwa />
         <LandingPage onLoginClick={() => setShowLoginModal(true)} />
         {showLoginModal && (
           <LoginModal 
@@ -138,14 +122,15 @@ const App: React.FC = () => {
             onLogin={handleLogin} 
           />
         )}
-      </>
+      </div>
     );
   }
 
   return (
-    <div className="h-full w-full bg-gray-100">
-      <FaviconManager /> {/* Generate Favicon */}
-      <InstallPwa />     {/* Prompt Install */}
+    <div className="h-[100dvh] w-full bg-gray-100 overflow-hidden flex flex-col relative">
+      <FaviconManager />
+      <InstallPwa />
+      
       {currentState === AppState.DASHBOARD && user && (
         <Dashboard 
           user={user}
@@ -172,7 +157,7 @@ const App: React.FC = () => {
       {showPaywall && (
         <PaywallModal 
           onClose={() => setShowPaywall(false)}
-          onUpgrade={() => handleUpgrade('3m')} // Default to popular
+          onUpgrade={() => handleUpgrade('3m')}
         />
       )}
 

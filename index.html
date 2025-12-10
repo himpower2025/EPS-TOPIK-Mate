@@ -6,7 +6,6 @@
     <title>EPS-TOPIK Mate - Your Exam Partner</title>
     
     <!-- PWA Settings -->
-    <!-- Force refresh with high version number -->
     <link rel="manifest" href="manifest.json?v=99" />
     <meta name="theme-color" content="#4f46e5" />
     
@@ -19,32 +18,24 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="EPS-TOPIK" />
 
-    <!-- Error Reporting -->
     <style>
       #startup-error { display: none; }
     </style>
     <div id="startup-error"></div>
     <script>
-      // Global error handler
       window.onerror = function(msg, url, line, col, error) {
         console.error("Global Error:", msg);
       };
-      
-      // Inject API Key placeholder if needed
       window.process = window.process || { env: { API_KEY: '' } };
 
-      // Service Worker Registration
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/service-worker.js')
             .then((registration) => {
-              console.log('SW Registered with scope:', registration.scope);
-              // Force update check
+              console.log('SW Registered');
               registration.update();
             })
-            .catch((error) => {
-              console.error('SW Registration failed:', error);
-            });
+            .catch((error) => console.error('SW Fail:', error));
         });
       }
     </script>
@@ -53,75 +44,60 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <style>
+      :root {
+        --sat: env(safe-area-inset-top);
+        --sab: env(safe-area-inset-bottom);
+        --sal: env(safe-area-inset-left);
+        --sar: env(safe-area-inset-right);
+      }
+
       body {
         font-family: 'Noto Sans KR', sans-serif;
-        overscroll-behavior-y: none;
+        overscroll-behavior-y: none; /* Prevent pull-to-refresh effect */
+        -webkit-tap-highlight-color: transparent; /* Remove tap highlight on iOS */
+        -webkit-touch-callout: none; /* Disable long press menu on iOS */
+        user-select: none; /* Disable text selection for app-like feel */
       }
+
+      /* Allow text selection in specific areas if needed */
+      .selectable {
+        user-select: text;
+      }
+
+      /* Safe Area Utilities */
+      .pt-safe { padding-top: var(--sat); }
+      .pb-safe { padding-bottom: var(--sab); }
+      .pl-safe { padding-left: var(--sal); }
+      .pr-safe { padding-right: var(--sar); }
       
+      .mt-safe { margin-top: var(--sat); }
+      .mb-safe { margin-bottom: var(--sab); }
+
+      /* Animation Classes */
       @keyframes slide-in-right {
         from { transform: translateX(100%); opacity: 0; }
         to { transform: translateX(0); opacity: 1; }
       }
-      
-      @keyframes slide-in-left {
-        from { transform: translateX(-100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-      }
-      
       @keyframes slide-up {
         from { transform: translateY(100%); opacity: 0; }
         to { transform: translateY(0); opacity: 1; }
       }
-
       @keyframes fade-in {
         from { opacity: 0; }
         to { opacity: 1; }
       }
 
-      @keyframes fade-in-up {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
+      .animate-slide-in-right { animation: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      .animate-slide-up { animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      .animate-fade-in { animation: fade-in 0.2s ease-out forwards; }
 
-      .animate-slide-in-right {
-        animation: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      }
-      
-      .animate-slide-in-left {
-        animation: slide-in-left 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      }
-
-      .animate-slide-up {
-        animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      }
-      
-      .animate-fade-in {
-        animation: fade-in 0.2s ease-out forwards;
-      }
-      
-      .animate-fade-in-up {
-        animation: fade-in-up 0.4s ease-out forwards;
-      }
-
-      .hide-scrollbar::-webkit-scrollbar {
-        display: none;
-      }
-      .hide-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-      }
-      
-      .safe-area-pt {
-        padding-top: env(safe-area-inset-top);
-      }
-      .safe-area-pb {
-        padding-bottom: env(safe-area-inset-bottom);
-      }
+      .hide-scrollbar::-webkit-scrollbar { display: none; }
+      .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 
 </head>
-  <body class="bg-gray-50 text-gray-900 h-screen overflow-hidden select-none">
-    <div id="root" class="h-full flex flex-col"></div>
+  <body class="bg-gray-100 text-gray-900 h-[100dvh] w-screen overflow-hidden">
+    <div id="root" class="h-full w-full flex flex-col"></div>
     <script type="module" src="/src/index.tsx"></script>
   </body>
 </html>
