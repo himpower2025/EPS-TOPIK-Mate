@@ -1,10 +1,8 @@
-const CACHE_NAME = 'eps-topik-mate-v3';
+const CACHE_NAME = 'eps-topik-mate-v4';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/manifest.json',
-  // Cache the icon so the app passes the PWA "offline capable" check even with an external image
-  'https://cdn-icons-png.flaticon.com/512/3407/3407023.png'
+  '/manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
