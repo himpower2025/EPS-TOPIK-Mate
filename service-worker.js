@@ -1,8 +1,8 @@
-const CACHE_NAME = 'eps-topik-mate-v1';
+const CACHE_NAME = 'eps-topik-mate-v2';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json'
+  './',
+  './index.html',
+  './manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
@@ -29,7 +29,9 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
-  self.clients.claim();
+  // [CRITICAL FIX] Claim clients immediately so the app is controlled by SW right away
+  // This is often required for the 'Add to Home Screen' to detect a valid PWA
+  return self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
