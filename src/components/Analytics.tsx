@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { ExamSession, AnalyticsFeedback } from '../types';
 import { analyzePerformance } from '../services/geminiService';
 import LoadingSpinner from './LoadingSpinner';
-import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis } from 'recharts';
-import { AlertTriangle, BookOpen, Trophy, ArrowRight, Brain, CheckSquare, XCircle, CheckCircle } from 'lucide-react';
+import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Tooltip } from 'recharts';
+import { AlertTriangle, BookOpen, ArrowRight, Brain, CheckCircle } from 'lucide-react';
 
 interface AnalyticsProps {
   session: ExamSession;
