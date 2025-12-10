@@ -1,4 +1,4 @@
-const CACHE_NAME = 'eps-topik-mate-v103';
+const CACHE_NAME = 'eps-topik-mate-v104';
 // Cache relative paths to support sub-directory deployments
 const urlsToCache = [
   './',

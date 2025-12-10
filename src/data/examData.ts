@@ -1,6 +1,9 @@
 import { Question, QuestionType } from '../types';
 
 export const STATIC_EXAM_DATA: Question[] = [
+  // --- [READING SET] ---
+  
+  // Q1 (Image: Sofa)
   {
     id: "read_sample_1",
     type: QuestionType.READING,
@@ -12,17 +15,21 @@ export const STATIC_EXAM_DATA: Question[] = [
     explanation: "The image shows a sofa. In Korean, 'Sofa' is '소파'.",
     sourceRef: "Sample Q1"
   },
+  
+  // Q2 (Image: Student reading)
   {
     id: "read_sample_2",
     type: QuestionType.READING,
     category: "Action Verbs",
     questionText: "다음 그림을 보고 맞는 단어나 문장을 고르십시오.",
-    context: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=800&q=80", 
+    context: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80", // Updated to show reading clearly
     options: ["밥을 먹고 있습니다.", "책을 읽고 있습니다.", "물을 마시고 있습니다.", "신문을 보고 있습니다."],
     correctAnswer: 1, 
-    explanation: "The student is reading a book. 'Reading a book' is '책을 읽고 있습니다'.",
+    explanation: "The person is reading a book. 'Reading a book' is '책을 읽고 있습니다'.",
     sourceRef: "Sample Q2"
   },
+
+  // Q3 (Fill in blank: Used Goods)
   {
     id: "read_sample_3",
     type: QuestionType.READING,
@@ -34,6 +41,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     explanation: "Buying and selling items you don't use is called 'Second-hand trading' (중고 거래).",
     sourceRef: "Sample Q3"
   },
+
+  // Q4 (Fill in blank: Real Estate)
   {
     id: "read_sample_4",
     type: QuestionType.READING,
@@ -45,6 +54,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     explanation: "To find a house to move into, you go to a 'Real Estate Agency' (부동산).",
     sourceRef: "Sample Q4"
   },
+
+  // Q5 (Fill in blank: Bus Operation)
   {
     id: "read_sample_5",
     type: QuestionType.READING,
@@ -56,6 +67,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     explanation: "Buses running on a route is expressed as 'Operating' (운행합니다).",
     sourceRef: "Sample Q5"
   },
+
+  // Q6 (Fill in blank: Adverb)
   {
     id: "read_sample_6",
     type: QuestionType.READING,
@@ -67,6 +80,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     explanation: "The number of people is increasing 'gradually' (점차).",
     sourceRef: "Sample Q6"
   },
+
+  // Q7 (Reading Comprehension: Apartment Etiquette)
   {
     id: "read_sample_7",
     type: QuestionType.READING,
@@ -83,6 +98,10 @@ export const STATIC_EXAM_DATA: Question[] = [
     explanation: "The text says 'Do not use washing machines late at night or early morning'.",
     sourceRef: "Sample Q7"
   },
+
+  // --- [LISTENING SET] ---
+
+  // Q8 (Listening: Word Recognition - Chair)
   {
     id: "listen_sample_1",
     type: QuestionType.LISTENING,
@@ -94,6 +113,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     explanation: "The audio says 'Uija' (Chair).",
     sourceRef: "Sample Q8"
   },
+
+  // Q9 (Listening: Word Recognition - Walk)
   {
     id: "listen_sample_2",
     type: QuestionType.LISTENING,
@@ -105,6 +126,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     explanation: "The audio says 'San-chaek' (Stroll/Walk).",
     sourceRef: "Sample Q9"
   },
+
+  // Q10 (Listening: Conversation Response)
   {
     id: "listen_sample_3",
     type: QuestionType.LISTENING,
@@ -121,12 +144,17 @@ export const STATIC_EXAM_DATA: Question[] = [
     explanation: "The woman asks where the ATM is. The correct response gives a location: 'It is next to the staff lounge.'",
     sourceRef: "Sample Q10"
   },
+
+  // Q11 (Listening: Reason for Call)
   {
     id: "listen_sample_4",
     type: QuestionType.LISTENING,
     category: "Reasoning",
     questionText: "남자가 전화한 이유는 무엇입니까?",
-    context: "여자: 여보세요 외국인력상담센터입니다 무엇을 도와드릴까요?\n남자: 통역 서비스를 신청하고 싶은데 어떻게 해야 돼요?\n여자: 무슨 일 때문에 통역이 필요하신 거예요?\n남자: 공장장님과 상의해서 근무 시간을 바꾸고 싶은데 한국어를 잘 못해서요.",
+    context: `여자: 여보세요 외국인력상담센터입니다 무엇을 도와드릴까요?
+남자: 통역 서비스를 신청하고 싶은데 어떻게 해야 돼요?
+여자: 무슨 일 때문에 통역이 필요하신 거예요?
+남자: 공장장님과 상의해서 근무 시간을 바꾸고 싶은데 한국어를 잘 못해서요.`,
     options: [
       "한국어를 배우고 싶어서",
       "통역 서비스를 이용하려고",
@@ -137,12 +165,15 @@ export const STATIC_EXAM_DATA: Question[] = [
     explanation: "The man clearly states: 'I want to apply for translation services' (통역 서비스를 신청하고 싶은데).",
     sourceRef: "Sample Q11"
   },
+
+  // Q12 (Listening: Topic)
   {
     id: "listen_sample_5",
     type: QuestionType.LISTENING,
     category: "Topic Inference",
     questionText: "두 사람은 무엇에 대해 말하고 있습니까?",
-    context: "여자: 아궁 씨 여기에서는 담배를 피울 수 없어요. 공원이나 버스 정류장처럼 사람이 많은 곳에서는 담배를 피우면 안 돼요.\n남자: 몰랐어요. 그럼 담배는 어디에서 피울 수 있어요?",
+    context: `여자: 아궁 씨 여기에서는 담배를 피울 수 없어요. 공원이나 버스 정류장처럼 사람이 많은 곳에서는 담배를 피우면 안 돼요.
+남자: 몰랐어요. 그럼 담배는 어디에서 피울 수 있어요?`,
     options: [
       "흡연 구역",
       "주차 구역",

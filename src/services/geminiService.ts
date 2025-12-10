@@ -2,21 +2,20 @@ import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Question, QuestionType, AnalyticsFeedback, ExamSession } from '../types';
 import { STATIC_EXAM_DATA } from '../data/examData';
 
-// [CRITICAL FIX] Declare process to satisfy TypeScript compiler (TS2580)
-// This enables 'process.env.API_KEY' usage without errors, even in browser environment
-// where Vite will replace it with the string value at build time.
-declare const process: any;
+// [FIX] Vite replaces 'process.env.API_KEY' with the actual string at build time.
+// We declare process variable to satisfy TypeScript, but we do not check its existence 
+// at runtime because Vite inlines the value.
+declare const process: { env: { API_KEY: string } };
 
-// --- Helper Functions ---
-
-// [CRITICAL FIX] Do not initialize 'ai' globally. Initialize inside functions.
-// This prevents the app from crashing on startup if API_KEY is missing.
 const getAiClient = () => {
-  const apiKey = (typeof process !== 'undefined' && process.env && process.env.API_KEY) 
-    ? process.env.API_KEY 
-    : '';
+  // Directly access process.env.API_KEY so Vite can replace it.
+  // Do NOT check 'typeof process' because it will fail in the browser.
+  const apiKey = process.env.API_KEY;
 
-  if (!apiKey || apiKey.trim() === '') return null;
+  if (!apiKey || apiKey.trim() === '') {
+    console.warn("Gemini API Key is missing. Features relying on AI will utilize static data or fail gracefully.");
+    return null;
+  }
   
   try {
     return new GoogleGenAI({ apiKey });
@@ -137,7 +136,11 @@ export const generateQuestions = async (count: number = 10, useStatic: boolean =
 
 export const generateSpeech = async (text: string): Promise<AudioBuffer | null> => {
   const ai = getAiClient();
-  if (!ai) return null;
+  
+  if (!ai) {
+    console.warn("TTS Skipped: API Key not found.");
+    return null;
+  }
 
   try {
     const response = await ai.models.generateContent({
@@ -158,6 +161,8 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       const bytes = base64ToBytes(base64Audio);
       return pcmToAudioBuffer(bytes, audioContext);
+    } else {
+      console.warn("TTS Response did not contain audio data.", response);
     }
     return null;
   } catch (error) {
