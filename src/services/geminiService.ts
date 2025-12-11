@@ -143,16 +143,51 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
   }
 
   try {
+    // Detect if the text is a dialogue (contains "Man" or "Woman" markers in Korean)
+    const isDialogue = text.includes('남자:') || text.includes('여자:') || text.includes('남:') || text.includes('여:');
+
+    let speechConfig;
+
+    if (isDialogue) {
+      // Multi-speaker configuration for conversations
+      // 'Fenrir' is typically a deeper/male voice. 'Kore' is a standard female voice.
+      speechConfig = {
+        multiSpeakerVoiceConfig: {
+          speakerVoiceConfigs: [
+            { 
+              speaker: '남자', 
+              voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Fenrir' } } 
+            },
+            { 
+              speaker: '남', 
+              voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Fenrir' } } 
+            },
+            { 
+              speaker: '여자', 
+              voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } 
+            },
+            { 
+              speaker: '여', 
+              voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } 
+            }
+          ]
+        }
+      };
+    } else {
+      // Single speaker for words/sentences
+      speechConfig = {
+        voiceConfig: {
+          prebuiltVoiceConfig: { voiceName: 'Kore' }, 
+        },
+      };
+    }
+
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
       contents: [{ parts: [{ text }] }],
       config: {
         responseModalities: [Modality.AUDIO],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: 'Kore' }, 
-          },
-        },
+        speechConfig: speechConfig,
       },
     });
 
