@@ -1,24 +1,21 @@
+
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Question, QuestionType, AnalyticsFeedback, ExamSession } from '../types';
 import { STATIC_EXAM_DATA } from '../data/examData';
 
 // [FIX] Vite replaces 'process.env.API_KEY' with the actual string at build time.
-// We declare process variable to satisfy TypeScript, but we do not check its existence 
-// at runtime because Vite inlines the value.
 declare const process: { env: { API_KEY: string } };
 
 const getAiClient = () => {
-  // Directly access process.env.API_KEY so Vite can replace it.
-  // Do NOT check 'typeof process' because it will fail in the browser.
-  const apiKey = process.env.API_KEY;
-
-  if (!apiKey || apiKey.trim() === '') {
+  // Directly use process.env.API_KEY string for initialization as per guidelines
+  if (!process.env.API_KEY || process.env.API_KEY.trim() === '') {
     console.warn("Gemini API Key is missing. Features relying on AI will utilize static data or fail gracefully.");
     return null;
   }
   
   try {
-    return new GoogleGenAI({ apiKey });
+    // Initializing with the recommended named parameter format
+    return new GoogleGenAI({ apiKey: process.env.API_KEY });
   } catch (error) {
     console.error("Error initializing GoogleGenAI client:", error);
     return null;
@@ -93,7 +90,8 @@ export const generateQuestions = async (count: number = 10, useStatic: boolean =
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      // Updated to recommended model for basic/complex text tasks
+      model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -149,8 +147,7 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
     let speechConfig;
 
     if (isDialogue) {
-      // Multi-speaker configuration for conversations
-      // 'Fenrir' is typically a deeper/male voice. 'Kore' is a standard female voice.
+      // Multi-speaker configuration using Gemini TTS
       speechConfig = {
         multiSpeakerVoiceConfig: {
           speakerVoiceConfigs: [
@@ -174,7 +171,7 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
         }
       };
     } else {
-      // Single speaker for words/sentences
+      // Single speaker configuration
       speechConfig = {
         voiceConfig: {
           prebuiltVoiceConfig: { voiceName: 'Kore' }, 
@@ -193,11 +190,9 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
 
     const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
     if (base64Audio) {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({sampleRate: 24000});
       const bytes = base64ToBytes(base64Audio);
       return pcmToAudioBuffer(bytes, audioContext);
-    } else {
-      console.warn("TTS Response did not contain audio data.", response);
     }
     return null;
   } catch (error) {
@@ -227,7 +222,8 @@ export const analyzePerformance = async (session: ExamSession): Promise<Analytic
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      // Using recommended model for complex reasoning and analysis
+      model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",

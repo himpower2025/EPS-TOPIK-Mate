@@ -1,9 +1,11 @@
+
 import React, { useState } from 'react';
 import { Check, Crown, X, QrCode, Smartphone, Copy } from 'lucide-react';
 
+// Adjusted props to accept the selected plan in the onUpgrade callback
 interface PaywallModalProps {
   onClose: () => void;
-  onUpgrade: () => void;
+  onUpgrade: (plan: '1m' | '3m' | '6m') => void;
 }
 
 export const PaywallModal: React.FC<PaywallModalProps> = ({ onClose, onUpgrade }) => {
@@ -11,17 +13,20 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ onClose, onUpgrade }
   const [selectedPlan, setSelectedPlan] = useState<'1m' | '3m' | '6m'>('3m');
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Updated Pricing Strategy
   const plans = {
-    '1m': { price: 'Rs. 250', period: '1 Month', label: 'Starter' },
-    '3m': { price: 'Rs. 500', period: '3 Months', label: 'Best Value' },
-    '6m': { price: 'Rs. 800', period: '6 Months', label: 'Master' }
+    '1m': { price: 'Rs. 290', period: '1 Month', label: 'Starter' },
+    '3m': { price: 'Rs. 690', period: '3 Months', label: 'Best Value' },
+    '6m': { price: 'Rs. 1190', period: '6 Months', label: 'Master' }
   };
 
   const handlePaid = () => {
     setIsProcessing(true);
+    // In a real manual flow, this might send a message to the admin or just unlock locally for trust-based MVP
     setTimeout(() => {
       setIsProcessing(false);
-      onUpgrade();
+      // Pass the selected plan to the upgrade handler to fix the argument count mismatch
+      onUpgrade(selectedPlan);
     }, 2000);
   };
 
@@ -29,10 +34,14 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ onClose, onUpgrade }
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fade-in">
+      
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+        
+        {/* Header */}
         <div className="relative bg-indigo-900 p-6 text-white text-center overflow-hidden">
           <div className="absolute top-0 right-0 -mr-10 -mt-10 w-40 h-40 bg-indigo-700 rounded-full opacity-50 blur-2xl"></div>
           <button onClick={onClose} className="absolute top-4 right-4 text-white/70 hover:text-white"><X className="w-6 h-6"/></button>
+          
           <div className="relative z-10">
             <div className="inline-block p-3 bg-white/10 rounded-full mb-3 backdrop-blur-sm">
               <Crown className="w-8 h-8 text-yellow-400 fill-yellow-400" />
@@ -41,10 +50,14 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ onClose, onUpgrade }
             <p className="text-indigo-200 text-sm mt-1">Unlimited AI Exams & Listening Practice</p>
           </div>
         </div>
+
+        {/* Content */}
         <div className="p-6 overflow-y-auto bg-gray-50 flex-1">
+          
           {step === 'PLANS' ? (
             <div className="space-y-4">
                <p className="text-center text-gray-600 text-sm font-medium mb-4">Select a plan to start preparing</p>
+               
                {(Object.keys(plans) as Array<keyof typeof plans>).map((key) => {
                  const plan = plans[key];
                  const isSelected = selectedPlan === key;
@@ -65,6 +78,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ onClose, onUpgrade }
                    </div>
                  );
                })}
+
                <button 
                 onClick={() => setStep('QR')}
                 className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-200 transition-all flex items-center justify-center gap-2"
@@ -76,6 +90,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ onClose, onUpgrade }
           ) : (
             <div className="flex flex-col items-center text-center">
               <div className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-200 w-full max-w-[240px]">
+                 {/* Placeholder for Fonepay QR */}
                  <div className="aspect-square bg-gray-900 rounded-lg flex items-center justify-center relative overflow-hidden group">
                     <img 
                       src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://example.com/fonepay" 
@@ -94,11 +109,13 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ onClose, onUpgrade }
                     <button className="text-gray-400 hover:text-gray-600"><Copy className="w-4 h-4" /></button>
                  </div>
               </div>
+
               <div className="space-y-2 mb-6 w-full">
                 <p className="text-sm text-gray-800 font-bold">1. Scan QR with your Bank App / eSewa</p>
                 <p className="text-sm text-gray-800 font-bold">2. Pay exactly <span className="text-indigo-600">{currentPlan.price}</span></p>
                 <p className="text-xs text-gray-500">Upon payment, click the button below to activate.</p>
               </div>
+
               <button 
                 onClick={handlePaid}
                 disabled={isProcessing}
@@ -113,11 +130,13 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ onClose, onUpgrade }
                   </>
                 )}
               </button>
+              
               <button onClick={() => setStep('PLANS')} className="mt-3 text-sm text-gray-400 underline decoration-gray-300">
                 Cancel / Change Plan
               </button>
             </div>
           )}
+
         </div>
       </div>
     </div>

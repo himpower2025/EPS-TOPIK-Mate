@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dashboard } from './components/Dashboard';
 import { ExamSimulator } from './components/ExamSimulator';
@@ -9,6 +10,11 @@ import { ProfileModal } from './components/ProfileModal';
 import { FaviconManager } from './components/FaviconManager';
 import { InstallPwa } from './components/InstallPwa';
 import { ExamSession, User, PlanType } from './types';
+
+// Firebase 도구
+import { auth, db } from './firebase';
+import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'firebase/auth';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 enum AppState {
   LANDING = 'LANDING',
@@ -24,154 +30,129 @@ const App: React.FC = () => {
   const [showPaywall, setShowPaywall] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [lastSession, setLastSession] = useState<ExamSession | null>(null);
-  
+  const [isLoading, setIsLoading] = useState(true);
+
+  // 로그인 상태 변화 감지
   useEffect(() => {
-    const savedUser = localStorage.getItem('eps_user');
-    if (savedUser) {
-      try {
-        const parsedUser = JSON.parse(savedUser);
-        if (parsedUser && parsedUser.id) {
-          setUser(parsedUser);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const userRef = doc(db, 'users', firebaseUser.uid);
+          const userDoc = await getDoc(userRef);
+          
+          if (userDoc.exists()) {
+            setUser(userDoc.data() as User);
+          } else {
+            const newUser: User = {
+              id: firebaseUser.uid,
+              name: firebaseUser.displayName || 'Student',
+              email: firebaseUser.email || '',
+              avatarUrl: firebaseUser.photoURL || '',
+              plan: 'free',
+              subscriptionExpiry: null,
+              examsRemaining: 1
+            };
+            await setDoc(userRef, newUser);
+            setUser(newUser);
+          }
           setCurrentState(AppState.DASHBOARD);
-        } else {
-          localStorage.removeItem('eps_user');
+        } catch (error) {
+          console.error("Firebase Error:", error);
         }
-      } catch (e) {
-        console.error("Failed to restore user session:", e);
-        localStorage.removeItem('eps_user');
+      } else {
+        setUser(null);
+        setCurrentState(AppState.LANDING);
       }
-    }
+      setIsLoading(false);
+    });
+    return () => unsubscribe();
   }, []);
 
-  const handleLogin = () => {
-    const mockUser: User = {
-      id: 'user_123',
-      name: 'Nepal Student',
-      email: 'student@example.com',
-      avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix',
-      plan: 'free',
-      subscriptionExpiry: null,
-      examsRemaining: 1
-    };
-    setUser(mockUser);
-    localStorage.setItem('eps_user', JSON.stringify(mockUser));
-    setShowLoginModal(false);
-    setCurrentState(AppState.DASHBOARD);
+  const handleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      setShowLoginModal(false);
+    } catch (error) {
+      console.error("Login Error:", error);
+      alert("로그인에 실패했습니다.");
+    }
   };
 
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('eps_user');
-    setCurrentState(AppState.LANDING);
+  const handleLogout = async () => {
+    await signOut(auth);
     setShowProfile(false);
   };
 
-  const startExam = () => {
+  const handleExamComplete = async (session: ExamSession) => {
     if (!user) return;
-    if (user.plan === 'free' && user.examsRemaining <= 0) {
-      setShowPaywall(true);
-      return;
+    
+    try {
+       const userRef = doc(db, 'users', user.id);
+       const updatedExams = user.plan === 'free' ? Math.max(0, user.examsRemaining - 1) : 9999;
+       await setDoc(userRef, { examsRemaining: updatedExams }, { merge: true });
+       setUser({ ...user, examsRemaining: updatedExams });
+       
+       const examRef = doc(db, 'exams', session.id);
+       await setDoc(examRef, { ...session, userId: user.id, createdAt: serverTimestamp() });
+    } catch (error) {
+       console.error("Save Error:", error);
     }
-    setCurrentState(AppState.EXAM);
-  };
-
-  const handleExamComplete = (session: ExamSession) => {
-    if (user && user.plan === 'free') {
-       const updatedUser = { ...user, examsRemaining: Math.max(0, user.examsRemaining - 1) };
-       setUser(updatedUser);
-       localStorage.setItem('eps_user', JSON.stringify(updatedUser));
-    }
+    
     setLastSession(session);
     setCurrentState(AppState.ANALYTICS);
   };
 
-  const handleBackToDashboard = () => {
-    setCurrentState(AppState.DASHBOARD);
-  };
-
-  const handleUpgrade = (plan: PlanType = '3m') => {
+  const handleUpgrade = async (plan: PlanType) => {
     if (!user) return;
     const now = new Date();
     if (plan === '1m') now.setMonth(now.getMonth() + 1);
-    if (plan === '3m') now.setMonth(now.getMonth() + 3);
-    if (plan === '6m') now.setMonth(now.getMonth() + 6);
+    else if (plan === '3m') now.setMonth(now.getMonth() + 3);
+    else if (plan === '6m') now.setMonth(now.getMonth() + 6);
 
-    const upgradedUser: User = {
-      ...user,
-      plan: plan,
-      subscriptionExpiry: now.toISOString(),
-      examsRemaining: 9999
-    };
-
-    alert(`Upgraded to ${plan} plan!`);
-    setUser(upgradedUser);
-    localStorage.setItem('eps_user', JSON.stringify(upgradedUser));
+    const updateData = { plan, subscriptionExpiry: now.toISOString(), examsRemaining: 9999 };
+    await setDoc(doc(db, 'users', user.id), updateData, { merge: true });
+    setUser({ ...user, ...updateData });
     setShowPaywall(false);
-    setShowProfile(false);
   };
 
-  if (!user && currentState === AppState.LANDING) {
-    return (
-      <div className="h-[100dvh] w-full bg-white overflow-hidden flex flex-col">
-        <FaviconManager />
-        <InstallPwa />
-        <LandingPage onLoginClick={() => setShowLoginModal(true)} />
-        {showLoginModal && (
-          <LoginModal 
-            onClose={() => setShowLoginModal(false)} 
-            onLogin={handleLogin} 
-          />
-        )}
-      </div>
-    );
-  }
+  if (isLoading) return <div className="h-screen flex items-center justify-center bg-indigo-900 text-white font-bold">Connecting to Server...</div>;
 
   return (
     <div className="h-[100dvh] w-full bg-gray-100 overflow-hidden flex flex-col relative">
       <FaviconManager />
       <InstallPwa />
       
+      {!user && currentState === AppState.LANDING && (
+        <LandingPage onLoginClick={() => setShowLoginModal(true)} />
+      )}
+
+      {showLoginModal && (
+        <LoginModal 
+          onClose={() => setShowLoginModal(false)} 
+          onLogin={handleLogin} 
+        />
+      )}
+      
       {currentState === AppState.DASHBOARD && user && (
         <Dashboard 
           user={user}
-          onStartExam={startExam} 
+          onStartExam={() => (user.plan === 'free' && user.examsRemaining <= 0) ? setShowPaywall(true) : setCurrentState(AppState.EXAM)} 
           onUpgrade={() => setShowPaywall(true)}
           onProfileClick={() => setShowProfile(true)}
         />
       )}
       
       {currentState === AppState.EXAM && (
-        <ExamSimulator 
-          onComplete={handleExamComplete} 
-          onExit={handleBackToDashboard} 
-        />
+        <ExamSimulator onComplete={handleExamComplete} onExit={() => setCurrentState(AppState.DASHBOARD)} />
       )}
       
       {currentState === AppState.ANALYTICS && lastSession && (
-        <Analytics 
-          session={lastSession} 
-          onBack={handleBackToDashboard} 
-        />
+        <Analytics session={lastSession} onBack={() => setCurrentState(AppState.DASHBOARD)} />
       )}
 
-      {showPaywall && (
-        <PaywallModal 
-          onClose={() => setShowPaywall(false)}
-          onUpgrade={() => handleUpgrade('3m')}
-        />
-      )}
-
-      {showProfile && user && (
-        <ProfileModal 
-          user={user}
-          onClose={() => setShowProfile(false)}
-          onLogout={handleLogout}
-          onRenew={() => {
-            setShowProfile(false);
-            setShowPaywall(true);
-          }}
-        />
-      )}
+      {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} onUpgrade={handleUpgrade} />}
+      {showProfile && user && <ProfileModal user={user} onClose={() => setShowProfile(false)} onLogout={handleLogout} onRenew={() => setShowPaywall(true)} />}
     </div>
   );
 };
