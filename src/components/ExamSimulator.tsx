@@ -54,13 +54,17 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
   }, [isPremium, mode]);
 
   const initAudio = async () => {
-    if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({sampleRate: 24000});
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({sampleRate: 24000});
+      }
+      if (audioContextRef.current.state === 'suspended') {
+        await audioContextRef.current.resume();
+      }
+      setAudioContextReady(true);
+    } catch (e) {
+      console.error("Audio Context Init Error", e);
     }
-    if (audioContextRef.current.state === 'suspended') {
-      await audioContextRef.current.resume();
-    }
-    setAudioContextReady(true);
   };
 
   useEffect(() => {
@@ -68,7 +72,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
     const currentQ = questions[currentIndex];
     setCurrentAiImage(null);
 
-    // AI 이미지 생성 (Nano Banana): 읽기 문제에서 이미지가 없는 경우 호출
+    // AI 이미지 생성: 읽기 문제 중 이미지가 없는 경우 자동 sketch
     if (currentQ.type === QuestionType.READING && currentQ.context && !currentQ.context.startsWith('http')) {
       setIsGeneratingImage(true);
       generateImageForQuestion(currentQ.context).then(img => {
@@ -114,8 +118,11 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
           setIsPlaying(false);
           setLoadingAudio(false);
         };
+      } else {
+        setLoadingAudio(false);
       }
     } catch (e) {
+      console.error("Audio Playback Error", e);
       setIsPlaying(false);
       setLoadingAudio(false);
     }
@@ -149,7 +156,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
     return (
       <div className="flex flex-col items-center justify-center h-full bg-indigo-900 text-white p-8 text-center pt-safe">
         <Headphones className="w-20 h-20 mb-6 text-indigo-300 animate-bounce" />
-        <h2 className="text-2xl font-black mb-4 uppercase tracking-tighter">Ready to Start?</h2>
+        <h2 className="text-2xl font-black mb-4 uppercase tracking-tighter">Ready for Listening?</h2>
         <p className="mb-10 opacity-70 font-medium tracking-tight">Activating professional dual-speaker audio engine.</p>
         <button onClick={initAudio} className="bg-white text-indigo-900 px-12 py-5 rounded-2xl font-black text-xl shadow-2xl active:scale-95 flex items-center gap-3">
           <Play className="w-6 h-6 fill-current" /> START NOW
@@ -163,14 +170,13 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
 
   return (
     <div className="flex flex-col h-full bg-gray-100 font-sans">
-      {/* 순차적 문제 번호 헤더 (Question 1, 2, 3...) */}
       <div className="bg-white border-b border-gray-200 pt-safe shrink-0 shadow-sm z-30">
         <div className="px-4 py-3 flex justify-between items-center">
             <div className="flex items-center gap-3">
               <button onClick={() => setIsDrawerOpen(true)} className="p-2 -ml-2 text-gray-600"><Menu className="w-6 h-6" /></button>
               <div className="flex flex-col">
                   <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{mode} PRACTICE</span>
-                  {/* 여기서 currentIndex + 1을 사용하여 무조건 1부터 순차적으로 표시합니다 */}
+                  {/* 무조건 1번부터 표시 */}
                   <span className="text-sm font-bold uppercase">Question {currentIndex + 1} <span className="text-gray-400 font-normal">/ {questions.length}</span></span>
               </div>
             </div>
@@ -193,12 +199,11 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
                 <h2 className="text-xl font-bold text-gray-900 leading-relaxed selectable">{currentQ.questionText}</h2>
             </div>
 
-            {/* AI 이미지 또는 텍스트 컨텍스트 영역 */}
             <div className="bg-white rounded-[2rem] border-2 border-dashed border-gray-200 overflow-hidden min-h-[280px] flex items-center justify-center relative bg-gray-50/50 shadow-inner">
                 {isGeneratingImage ? (
                   <div className="flex flex-col items-center gap-2">
                     <Sparkles className="w-10 h-10 text-indigo-400 animate-pulse" />
-                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">AI is sketching...</span>
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">AI Illustrator Sketching...</span>
                   </div>
                 ) : currentAiImage ? (
                   <img src={currentAiImage} className="max-h-[350px] object-contain w-full p-6 animate-fade-in" />
@@ -209,11 +214,11 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
                       <div className={`w-24 h-24 rounded-full flex items-center justify-center shadow-xl transition-all ${isPlaying ? 'bg-indigo-600 text-white scale-110' : 'bg-white text-indigo-600 border'}`}>
                         {loadingAudio ? <div className="w-8 h-8 border-4 border-current border-t-transparent rounded-full animate-spin"/> : <Volume2 className="w-12 h-12" />}
                       </div>
-                      <span className="font-bold text-indigo-900 uppercase text-xs tracking-widest">{isPlaying ? "Listening..." : "Play Audio"}</span>
+                      <span className="font-bold text-indigo-900 uppercase text-xs tracking-widest">{isPlaying ? "Listening Now..." : "Play Audio"}</span>
                    </button>
                 ) : currentQ.context ? (
                    <div className="p-10 text-xl font-serif leading-loose text-gray-800 bg-white w-full border border-gray-100 rounded-xl selectable whitespace-pre-wrap">{currentQ.context}</div>
-                ) : <span className="text-gray-300 font-black uppercase tracking-widest text-[10px]">Reference Required</span>}
+                ) : <span className="text-gray-300 font-black uppercase tracking-widest text-[10px]">No Reference Image</span>}
             </div>
 
             <div className="space-y-3">
@@ -231,7 +236,6 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
          </div>
       </div>
 
-      {/* 하단 내비게이션 바 */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-100 p-6 pb-safe flex gap-4 max-w-2xl mx-auto z-20">
           <button 
             onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))} 
@@ -247,7 +251,6 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
           )}
       </div>
 
-      {/* 메뉴 드로어 */}
       {isDrawerOpen && (
         <div className="fixed inset-0 z-50 flex">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsDrawerOpen(false)}></div>

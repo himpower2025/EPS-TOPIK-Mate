@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { User } from '../types';
-import { X, User as UserIcon, Calendar, Crown, LogOut, ChevronDown, Download } from 'lucide-react';
+import { X, User as UserIcon, Calendar, Crown, LogOut, ChevronDown } from 'lucide-react';
 
 interface ProfileModalProps {
   user: User;
@@ -21,45 +22,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLog
   };
 
   const daysRemaining = getDaysRemaining();
-
-  const generateAndDownloadLogo = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 512;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.clearRect(0, 0, 512, 512);
-
-    const boxSize = 280;
-    const radius = 60;
-
-    const drawRoundedRect = (x: number, y: number, color: string, text: string) => {
-      ctx.beginPath();
-      ctx.fillStyle = color;
-      ctx.roundRect(x, y, boxSize, boxSize, radius);
-      ctx.fill();
-      
-      // Text
-      ctx.fillStyle = "white";
-      ctx.font = "bold 180px sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(text, x + boxSize/2, y + boxSize/2 + 10);
-      
-      // Border
-      ctx.lineWidth = 8;
-      ctx.strokeStyle = "white";
-      ctx.stroke();
-    };
-
-    drawRoundedRect(190, 190, "#a855f7", "A");
-    drawRoundedRect(40, 40, "#4f46e5", "가");
-
-    const link = document.createElement('a');
-    link.download = 'eps-topik-mate-icon.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-stretch md:justify-end">
@@ -116,11 +78,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose, onLog
 
           <button onClick={onRenew} className="w-full py-3.5 bg-indigo-50 text-indigo-700 font-bold rounded-xl border border-indigo-100 mb-4 active:scale-95 transition-transform">
             {isPremium ? 'Extend Subscription' : 'Upgrade to Premium'}
-          </button>
-
-          <button onClick={generateAndDownloadLogo} className="w-full flex items-center justify-center gap-2 text-gray-600 hover:bg-gray-50 p-4 rounded-xl border border-gray-100 mb-2">
-            <Download className="w-5 h-5" />
-            <span className="font-medium text-sm">Save Icon</span>
           </button>
         </div>
 

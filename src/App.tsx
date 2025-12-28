@@ -31,6 +31,8 @@ const App: React.FC = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
+        // [수정] 로그인 상태가 확인되면 즉각 모달 상태 해제
+        setShowLoginModal(false);
         onSnapshot(doc(db, 'users', firebaseUser.uid), (snap) => {
           if (snap.exists()) setUser(snap.data() as User);
           else {
@@ -47,7 +49,7 @@ const App: React.FC = () => {
       setIsLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [currentState]);
 
   const handleStartExam = async (mode: 'FULL' | 'LISTENING' | 'READING' = 'FULL') => {
     if (user?.plan === 'free' && user.examsRemaining <= 0) {
@@ -57,7 +59,6 @@ const App: React.FC = () => {
     
     setExamMode(mode);
     
-    // For Drills, try to fetch last saved progress
     if (mode !== 'FULL' && user) {
       const userRef = doc(db, 'users', user.id);
       const snap = await getDoc(userRef);
@@ -83,7 +84,6 @@ const App: React.FC = () => {
 
   const handleProgressUpdate = (index: number) => {
     if (!user || user.plan === 'free' || examMode === 'FULL') return;
-    // Persist progress asynchronously
     setDoc(doc(db, 'users', user.id), {
       [`last_${examMode.toLowerCase()}_index`]: index
     }, { merge: true });

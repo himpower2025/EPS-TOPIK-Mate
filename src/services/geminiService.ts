@@ -3,12 +3,28 @@ import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Question, QuestionType, AnalyticsFeedback, ExamSession } from '../types';
 import { STATIC_EXAM_DATA } from '../data/examData';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+// API Key initialization
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
+// Helper to clean JSON string from Markdown code blocks
 function cleanJsonString(text: string): string {
   return text.replace(/```json/g, '').replace(/```/g, '').trim();
 }
 
+/**
+ * [핵심] 문제 텍스트 정제 함수
+ * 1. 문항 앞의 번호 제거 (예: "1. ", "21. ")
+ * 2. 대괄호 속 정답 제거 (예: "[아예]", "[스키]")
+ */
+function sanitizeQuestionText(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/^\d+[\.\s]*/, '') // 시작하는 숫자와 점 제거
+    .replace(/\[.*?\]/g, '')     // 대괄호와 그 안의 내용(정답) 제거
+    .trim();
+}
+
+// PCM decoding helpers
 function decodeBase64(base64: string) {
   const binaryString = atob(base64);
   const len = binaryString.length;
@@ -39,15 +55,15 @@ async function decodeAudioData(
 }
 
 /**
- * AI Image Generation for Exam Context (Nano Banana)
+ * AI 이미지 생성 (Nano Banana)
  */
 export const generateImageForQuestion = async (description: string): Promise<string | null> => {
   if (!description || description.length > 200) return null;
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image', // 나노 바나나 모델 사용
+      model: 'gemini-2.5-flash-image',
       contents: {
-        parts: [{ text: `Professional EPS-TOPIK exam illustration: ${description}. Style: Clear black-and-white high-quality line art, minimalistic, educational, official workbook style. Pure white background. No text labels inside the image.` }]
+        parts: [{ text: `Professional educational line art for EPS-TOPIK exam: ${description}. Official workbook style, clear black and white, pure white background, no text.` }]
       },
       config: { imageConfig: { aspectRatio: "1:1" } }
     });
@@ -65,7 +81,7 @@ export const generateImageForQuestion = async (description: string): Promise<str
 };
 
 /**
- * AI Question Generator based on official seed data
+ * AI 문제 생성 및 데이터 정제
  */
 export const generateQuestions = async (count: number = 40, isPremium: boolean = false, mode: 'FULL' | 'LISTENING' | 'READING' = 'FULL'): Promise<Question[]> => {
   let dbPool = [...STATIC_EXAM_DATA];
@@ -73,19 +89,27 @@ export const generateQuestions = async (count: number = 40, isPremium: boolean =
   if (mode === 'READING') dbPool = dbPool.filter(q => q.type === QuestionType.READING);
   
   const shuffledDb = dbPool.sort(() => 0.5 - Math.random());
-  const selectedFromDb = shuffledDb.slice(0, count);
+  
+  // 정적 데이터 정제 적용
+  const cleanedDb = shuffledDb.map(q => ({
+    ...q,
+    questionText: sanitizeQuestionText(q.questionText)
+  }));
+
+  const selectedFromDb = cleanedDb.slice(0, count);
 
   if (!isPremium) return selectedFromDb;
 
   try {
-    const seedSamples = shuffledDb.slice(0, 5);
-    const prompt = `You are an expert EPS-TOPIK examiner. Create ${count} new questions mirroring these official samples: ${JSON.stringify(seedSamples)}.
+    const seedSamples = cleanedDb.slice(0, 5);
+    const prompt = `You are an expert EPS-TOPIK examiner. Create ${count} new unique questions.
+    Reference samples: ${JSON.stringify(seedSamples)}.
     Mode: ${mode}.
-    Requirement: 
-    1. If mode is FULL, generate 1-20 Reading, 21-40 Listening.
-    2. Listening context MUST be a dialogue (Man: ..., Woman: ...).
-    3. Reading context for images should be a description for an illustrator.
-    Return JSON Question array. English explanations. natural Korean text.`;
+    IMPORTANT: 
+    - Do NOT include question numbers like "1. " in 'questionText'.
+    - Do NOT include answers in brackets like "[word]" in 'questionText'.
+    - 'context' for listening must be a dialogue.
+    Return JSON array.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
@@ -114,16 +138,19 @@ export const generateQuestions = async (count: number = 40, isPremium: boolean =
 
     const aiQuestions = JSON.parse(cleanJsonString(response.text || '[]'));
     if (aiQuestions && aiQuestions.length > 0) {
-      return aiQuestions.slice(0, count);
+      return aiQuestions.map((q: any) => ({ 
+        ...q, 
+        questionText: sanitizeQuestionText(q.questionText) 
+      })).slice(0, count);
     }
   } catch (error) {
-    console.warn("AI Question Generation fallback.");
+    console.warn("AI Question Generation fallback triggered.");
   }
   return selectedFromDb;
 };
 
 /**
- * Dual-Speaker Natural TTS
+ * 듣기 오디오 생성 (TTS)
  */
 export const generateSpeech = async (text: string): Promise<AudioBuffer | null> => {
   try {
@@ -139,9 +166,7 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
         multiSpeakerVoiceConfig: {
           speakerVoiceConfigs: [
             { speaker: 'Man', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Puck' } } },
-            { speaker: 'Nam', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Puck' } } },
-            { speaker: 'Woman', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } },
-            { speaker: 'Yeo', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } }
+            { speaker: 'Woman', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } }
           ]
         }
       };
@@ -153,7 +178,7 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text: `잘 듣고 질문에 답하십시오. ${text}` }] }],
+      contents: [{ parts: [{ text: `다음 내용을 잘 듣고 질문에 답하십시오. ${text}` }] }],
       config: config,
     });
 
@@ -165,15 +190,23 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
     }
     return null;
   } catch (error) {
+    console.error("Speech Generation failed:", error);
     return null;
   }
 };
 
+/**
+ * 성과 분석 보고서 생성
+ */
 export const analyzePerformance = async (session: ExamSession): Promise<AnalyticsFeedback | null> => {
   try {
+    const prompt = `Analyze this EPS-TOPIK result: Score ${session.score}/${session.questions.length}. 
+    Provide encouraging feedback in English. 
+    Strengths, weaknesses, and a study plan based on categories: ${JSON.stringify(session.questions.map(q => q.category))}.`;
+
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: `Analyze result: ${session.score}/${session.questions.length}. Provide English feedback.`,
+      contents: prompt,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -188,8 +221,13 @@ export const analyzePerformance = async (session: ExamSession): Promise<Analytic
         }
       }
     });
-    return response.text ? JSON.parse(cleanJsonString(response.text)) : null;
+
+    if (response.text) {
+      return JSON.parse(cleanJsonString(response.text));
+    }
+    return null;
   } catch (error) {
+    console.error("Performance analysis failed:", error);
     return null;
   }
 };
