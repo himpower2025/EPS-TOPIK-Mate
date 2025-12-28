@@ -9,12 +9,12 @@ import { LoginModal } from './components/LoginModal';
 import { ProfileModal } from './components/ProfileModal';
 import { FaviconManager } from './components/FaviconManager';
 import { InstallPwa } from './components/InstallPwa';
-import { ExamSession, User, PlanType } from './types';
+import { ExamSession, User } from './types';
 
 // Firebase 도구
 import { auth, db } from './firebase';
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 
 enum AppState {
   LANDING = 'LANDING',
@@ -32,24 +32,15 @@ const App: React.FC = () => {
   const [lastSession, setLastSession] = useState<ExamSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 실시간 사용자 상태 감시 (이것이 자동 승인의 핵심입니다)
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // Firestore의 해당 사용자 문서를 실시간으로 지켜봅니다.
-        // 나중에 API나 관리자가 여기서 plan을 바꾸면 사용자의 앱이 즉시 반응합니다.
         const userRef = doc(db, 'users', firebaseUser.uid);
         const unsubscribeDoc = onSnapshot(userRef, (docSnap) => {
           if (docSnap.exists()) {
             const userData = docSnap.data() as User;
             setUser(userData);
-            
-            // 만약 대기중이던 결제가 성공했다면 모달을 닫아주거나 알림을 줄 수 있음
-            if (userData.plan !== 'free' && showPaywall) {
-              // 축하 메시지나 자동 닫기 처리 가능
-            }
           } else {
-            // 새 유저 초기 생성
             const newUser: User = {
               id: firebaseUser.uid,
               name: firebaseUser.displayName || 'Student',
@@ -73,7 +64,7 @@ const App: React.FC = () => {
       setIsLoading(false);
     });
     return () => unsubscribeAuth();
-  }, [currentState, showPaywall]);
+  }, [currentState]);
 
   const handleLogin = async () => {
     const provider = new GoogleAuthProvider();

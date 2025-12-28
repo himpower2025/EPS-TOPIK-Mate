@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Check, Crown, X, QrCode, Smartphone, Copy, Landmark, Info, Clock, ShieldCheck, Zap, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Crown, X, Smartphone, Info, ShieldCheck, Zap, CheckCircle2, ArrowRight } from 'lucide-react';
 import { db } from '../firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { User } from '../types';
@@ -14,26 +14,18 @@ interface PaywallModalProps {
 export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => {
   const [step, setStep] = useState<'PLANS' | 'PAYMENT' | 'VERIFYING' | 'SUCCESS'>('PLANS');
   const [selectedPlan, setSelectedPlan] = useState<'1m' | '3m' | '6m'>('3m');
-  const [copied, setCopied] = useState(false);
 
   const plans = {
-    '1m': { price: 'Rs. 290', period: '1 Month', label: 'Starter', features: ['All 2,000+ Questions', 'AI Performance Analysis'] },
-    '3m': { price: 'Rs. 690', period: '3 Months', label: 'Best Value', features: ['Infinite AI Mock Exams', 'Advanced Listening Practice', 'Priority Support'] },
-    '6m': { price: 'Rs. 1190', period: '6 Months', label: 'Master', features: ['Full Access for 180 Days', 'Offline Study Materials', 'Pass Guarantee Support'] }
+    '1m': { price: 'Rs. 290', period: '1 Month', label: 'Starter' },
+    '3m': { price: 'Rs. 690', period: '3 Months', label: 'Best Value' },
+    '6m': { price: 'Rs. 1190', period: '6 Months', label: 'Master' }
   };
 
   const currentPlan = plans[selectedPlan];
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const handleStartVerifying = async () => {
     setStep('VERIFYING');
     
-    // 1. 서버에 결제 시도 기록
     const requestId = `PAY_${user.id}_${Date.now()}`;
     await setDoc(doc(db, 'paymentAttempts', requestId), {
       userId: user.id,
@@ -44,7 +36,6 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
       createdAt: serverTimestamp()
     });
 
-    // 2. 실제 API 검증 호출 (paymentService.ts에서 정의된 함수)
     const isSuccess = await verifyPaymentWithServer(requestId);
     
     if (isSuccess) {
@@ -59,7 +50,6 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
     <div className="fixed inset-0 bg-black/95 backdrop-blur-xl flex items-center justify-center z-[100] p-4 animate-fade-in">
       <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[92vh] border border-white/20">
         
-        {/* Header Section */}
         <div className="relative bg-gradient-to-br from-indigo-600 via-indigo-900 to-black p-8 text-white text-center shrink-0">
           {step !== 'VERIFYING' && step !== 'SUCCESS' && (
             <button onClick={onClose} className="absolute top-6 right-6 text-white/50 hover:text-white p-2 z-20 transition-colors">
@@ -75,7 +65,6 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
           </div>
         </div>
 
-        {/* Content Area */}
         <div className="p-6 overflow-y-auto bg-gray-50 flex-1 hide-scrollbar">
           
           {step === 'PLANS' && (
@@ -181,7 +170,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
                <h3 className="text-2xl font-black text-gray-900 mb-2 tracking-tight">Success! Welcome to Premium</h3>
                <p className="text-gray-500 text-sm mb-8 leading-relaxed">
                  Your payment has been verified. <br/>
-                 <span className="font-bold text-indigo-600">Your {currentPlan.period} access is now active!</span>
+                 <span className="font-bold text-indigo-600">Your {currentPlan.price} access is now active!</span>
                </p>
                
                <button onClick={onClose} className="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl shadow-indigo-100 hover:scale-[1.02] active:scale-95 transition-all text-lg">Start Practicing Now</button>
