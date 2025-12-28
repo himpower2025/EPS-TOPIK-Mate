@@ -34,78 +34,66 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const currentAudioSource = useRef<AudioBufferSourceNode | null>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fetchQuestions = async () => {
+    const load = async () => {
       setLoading(true);
       try {
-        const generated = await generateQuestionsBySet(mode, setNumber, isPremium); 
-        if (!generated || generated.length === 0) throw new Error("Questions not loaded");
-        setQuestions(generated);
+        const data = await generateQuestionsBySet(mode, setNumber, isPremium);
+        setQuestions(data);
       } catch (err) {
-        console.error("Fetch questions failed", err);
+        alert("Exam setup failed. Please try another round.");
         onExit();
       } finally {
         setLoading(false);
       }
     };
-    fetchQuestions();
-  }, [mode, setNumber, isPremium]);
+    load();
+  }, [mode, setNumber, isPremium, onExit]);
 
   const initAudio = async () => {
-    try {
-      if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({sampleRate: 24000});
-      }
-      if (audioContextRef.current.state === 'suspended') {
-        await audioContextRef.current.resume();
-      }
-      setAudioContextReady(true);
-    } catch (e) {
-      console.error("Audio Init Error", e);
-      setAudioContextReady(true);
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({sampleRate: 24000});
     }
+    if (audioContextRef.current.state === 'suspended') {
+      await audioContextRef.current.resume();
+    }
+    setAudioContextReady(true);
   };
 
   useEffect(() => {
     if (questions.length === 0 || loading) return;
-    
-    const currentQ = questions[currentIndex];
+    const q = questions[currentIndex];
     setCurrentAiImage(null);
-    if (scrollContainerRef.current) scrollContainerRef.current.scrollTop = 0;
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
 
-    // AI Image generation for Reading questions that describe a visual
-    if (currentQ.type === QuestionType.READING && currentQ.context && !currentQ.context.startsWith('http')) {
+    if (q.type === QuestionType.READING && q.context && q.context.length > 5 && !q.context.startsWith('http')) {
       setIsGeneratingImage(true);
-      generateImageForQuestion(currentQ.context).then(img => {
+      generateImageForQuestion(q.context).then(img => {
         setCurrentAiImage(img);
         setIsGeneratingImage(false);
       });
     }
 
-    if (currentQ.type === QuestionType.LISTENING && audioContextReady) {
+    if (q.type === QuestionType.LISTENING && audioContextReady) {
       handlePlayAudio();
     }
   }, [currentIndex, questions, audioContextReady, loading]);
 
   useEffect(() => {
     if (loading || timeLeft <= 0) return;
-    const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+    const timer = setInterval(() => setTimeLeft(p => p - 1), 1000);
     return () => clearInterval(timer);
   }, [loading, timeLeft]);
 
   const handlePlayAudio = async () => {
-    const currentQuestion = questions[currentIndex];
-    if (!currentQuestion?.context || isPlaying) return;
-
-    if (currentAudioSource.current) {
-      try { currentAudioSource.current.stop(); } catch(e) {}
-    }
-
+    const q = questions[currentIndex];
+    if (!q?.context || isPlaying) return;
+    if (currentAudioSource.current) try { currentAudioSource.current.stop(); } catch {}
     setLoadingAudio(true);
     try {
-      const buffer = await generateSpeech(currentQuestion.context);
+      const buffer = await generateSpeech(q.context);
       if (buffer && audioContextRef.current) {
         const source = audioContextRef.current.createBufferSource();
         source.buffer = buffer;
@@ -113,57 +101,31 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
         source.start(0);
         currentAudioSource.current = source;
         setIsPlaying(true);
-        source.onended = () => {
-          setIsPlaying(false);
-          setLoadingAudio(false);
-        };
-      } else {
-        setLoadingAudio(false);
+        source.onended = () => { setIsPlaying(false); setLoadingAudio(false); };
       }
-    } catch (e) {
-      console.error("Audio Playback Error", e);
-      setIsPlaying(false);
-      setLoadingAudio(false);
-    }
+    } catch { setIsPlaying(false); setLoadingAudio(false); }
   };
 
   const handleAnswer = (idx: number) => {
     setAnswers(prev => ({ ...prev, [questions[currentIndex].id]: idx }));
   };
 
-  const handleNext = () => {
-    if (currentIndex < questions.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-    }
-  };
-
   const handleSubmit = () => {
-    let correctCount = 0;
-    questions.forEach(q => { if (answers[q.id] === q.correctAnswer) correctCount++; });
-    onComplete({
-      id: Date.now().toString(),
-      mode,
-      setNumber,
-      questions,
-      userAnswers: answers,
-      score: correctCount,
-      completedAt: new Date().toISOString()
-    });
+    let score = 0;
+    questions.forEach(q => { if(answers[q.id] === q.correctAnswer) score++; });
+    onComplete({ id: Date.now().toString(), mode, setNumber, questions, userAnswers: answers, score, completedAt: new Date().toISOString() });
   };
 
-  if (loading) return <LoadingSpinner message={`Preparing Round ${setNumber} Exam...`} />;
+  if (loading) return <div className="h-full flex items-center justify-center p-12 text-center bg-white"><LoadingSpinner message={`AI is synthesizing unique questions for Round ${setNumber}...`} /></div>;
 
-  if (!audioContextReady && (mode === 'LISTENING' || mode === 'FULL')) {
+  if (!audioContextReady && mode !== 'READING') {
     return (
       <div className="flex flex-col items-center justify-center h-full bg-indigo-900 text-white p-8 text-center pt-safe">
         <Headphones className="w-20 h-20 mb-6 text-indigo-300 animate-bounce" />
-        <h2 className="text-3xl font-black mb-4 uppercase tracking-tighter">Round {setNumber} Ready</h2>
-        <p className="mb-10 opacity-70 font-medium tracking-tight leading-relaxed">
-          The exam contains native Korean audio. <br/>
-          Click below to synchronize your device.
-        </p>
-        <button onClick={initAudio} className="bg-white text-indigo-900 px-12 py-5 rounded-2xl font-black text-xl shadow-2xl active:scale-95 flex items-center gap-3">
-          <Play className="w-6 h-6 fill-current" /> ENTER EXAM
+        <h2 className="text-3xl font-black mb-4 tracking-tighter uppercase">Exam Session {setNumber}</h2>
+        <p className="mb-10 opacity-70 font-bold max-w-xs">Tap below to activate the Korean listening engine and start the exam.</p>
+        <button onClick={initAudio} className="bg-white text-indigo-900 px-12 py-5 rounded-[2rem] font-black text-xl shadow-2xl active:scale-95 flex items-center gap-3 transition-transform">
+          <Play className="w-6 h-6 fill-current" /> ENTER EXAM ROOM
         </button>
       </div>
     );
@@ -171,89 +133,73 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
 
   const currentQ = questions[currentIndex];
   const isLast = currentIndex === questions.length - 1;
-  const hasImage = currentAiImage || (currentQ.context && currentQ.context.startsWith('http'));
+  const hasVisual = currentAiImage || (currentQ.context && (currentQ.context.startsWith('http') || currentQ.type === QuestionType.READING));
 
   return (
     <div className="flex flex-col h-full bg-gray-50 font-sans">
-      {/* Header */}
       <div className="bg-white border-b border-gray-200 pt-safe shrink-0 shadow-sm z-30">
         <div className="px-4 py-3 flex justify-between items-center">
             <div className="flex items-center gap-3">
               <button onClick={() => setIsDrawerOpen(true)} className="p-2 -ml-2 text-gray-600"><Menu className="w-6 h-6" /></button>
               <div className="flex flex-col">
-                  <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">ROUND {setNumber} • {mode}</span>
+                  <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">SET {setNumber}</span>
                   <span className="text-sm font-bold uppercase">Question {currentIndex + 1} <span className="text-gray-400 font-normal">/ {questions.length}</span></span>
               </div>
             </div>
-            <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
-              <Clock className={`w-4 h-4 ${timeLeft < 300 ? 'text-red-500 animate-pulse' : 'text-gray-400'}`} />
-              <span className={`font-mono font-bold ${timeLeft < 300 ? 'text-red-600' : 'text-gray-700'}`}>{Math.floor(timeLeft/60)}:{(timeLeft%60).toString().padStart(2,'0')}</span>
+            <div className="flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-100">
+              <Clock className="w-4 h-4 text-indigo-400" />
+              <span className="font-mono font-bold text-indigo-700">{Math.floor(timeLeft/60)}:{(timeLeft%60).toString().padStart(2,'0')}</span>
             </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 md:p-8 pb-40">
-         <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
-            {/* Question Card */}
-            <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-8 pb-40 selectable">
+         <div className="max-w-2xl mx-auto space-y-6">
+            <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100">
                 <div className="mb-4">
                     <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${currentQ.type === QuestionType.LISTENING ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
                         {currentQ.type === QuestionType.LISTENING ? <Headphones className="w-3 h-3"/> : "Aa"}
                         {currentQ.type}
                     </span>
                 </div>
-                <h2 className="text-xl md:text-2xl font-bold text-gray-900 leading-snug selectable">
-                  <span className="text-indigo-600 mr-2">Q{currentIndex + 1}.</span>
+                <h2 className="text-xl md:text-2xl font-bold text-gray-900 leading-snug">
+                  <span className="text-indigo-600 mr-2">{currentIndex + 1}.</span>
                   {currentQ.questionText}
                 </h2>
             </div>
 
-            {/* Visual/Script Area (Only shows if relevant) */}
-            {(hasImage || (currentQ.type === QuestionType.READING && currentQ.context) || currentQ.type === QuestionType.LISTENING) && (
-              <div className="bg-white rounded-[2rem] border-2 border-dashed border-gray-200 overflow-hidden relative shadow-sm min-h-[200px] flex flex-col">
+            {(hasVisual || currentQ.type === QuestionType.LISTENING) && (
+              <div className="bg-white rounded-[2.5rem] border-2 border-dashed border-gray-200 overflow-hidden relative shadow-sm min-h-[150px] flex flex-col items-center justify-center">
                   {isGeneratingImage ? (
-                    <div className="flex-1 flex flex-col items-center justify-center gap-3 py-12">
-                      <Sparkles className="w-12 h-12 text-indigo-400 animate-pulse" />
-                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">AI Sketching Illustration...</span>
+                    <div className="flex flex-col items-center gap-2 py-8">
+                      <Sparkles className="w-10 h-10 text-indigo-400 animate-pulse" />
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">AI Drawing Context...</span>
                     </div>
                   ) : currentAiImage ? (
-                    <div className="p-4 flex items-center justify-center">
-                      <img src={currentAiImage} className="max-h-[350px] object-contain w-full rounded-xl" alt="AI Context" />
-                    </div>
+                    <img src={currentAiImage} className="max-h-[350px] object-contain w-full p-6 animate-fade-in" />
                   ) : currentQ.context && currentQ.context.startsWith('http') ? (
-                    <div className="p-4 flex items-center justify-center">
-                      <img src={currentQ.context} className="max-h-[350px] object-contain w-full rounded-xl" alt="Context" />
-                    </div>
+                    <img src={currentQ.context} className="max-h-[350px] object-contain w-full p-6" />
                   ) : currentQ.type === QuestionType.LISTENING ? (
-                    <div className="flex-1 flex flex-col items-center justify-center py-12 bg-indigo-50/30">
-                       <button onClick={handlePlayAudio} className="group relative">
-                          <div className={`w-24 h-24 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 ${isPlaying ? 'bg-indigo-600 text-white scale-110 shadow-indigo-200' : 'bg-white text-indigo-600 border border-indigo-100 hover:border-indigo-400 hover:scale-105'}`}>
-                            {loadingAudio ? <div className="w-8 h-8 border-4 border-current border-t-transparent rounded-full animate-spin"/> : <Volume2 className="w-12 h-12" />}
-                          </div>
-                          {isPlaying && <div className="absolute -inset-2 border-2 border-indigo-600 rounded-full animate-ping opacity-20"></div>}
-                       </button>
-                       <span className="font-black text-indigo-900 uppercase text-[10px] tracking-[0.2em] mt-6">{isPlaying ? "Audio playing..." : "Tap to play audio"}</span>
+                    <div className="flex flex-col items-center justify-center gap-4 py-12">
+                      <button onClick={handlePlayAudio} className={`w-24 h-24 rounded-full flex items-center justify-center shadow-xl transition-all ${isPlaying ? 'bg-indigo-600 text-white scale-110 shadow-indigo-200' : 'bg-white text-indigo-600 border border-indigo-100'}`}>
+                        {loadingAudio ? <div className="w-8 h-8 border-4 border-current border-t-transparent rounded-full animate-spin"/> : <Volume2 className="w-12 h-12" />}
+                      </button>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-indigo-900">{isPlaying ? "Listening Now" : "Tap to Play"}</span>
                     </div>
                   ) : currentQ.context ? (
-                    <div className="p-8 md:p-10 text-xl font-serif leading-relaxed text-gray-800 bg-orange-50/20 w-full selectable whitespace-pre-wrap">{currentQ.context}</div>
+                    <div className="p-8 md:p-10 text-lg md:text-xl font-serif leading-loose text-gray-800 bg-white w-full whitespace-pre-wrap">{currentQ.context}</div>
                   ) : null}
               </div>
             )}
 
-            {/* Answer Grid */}
-            <div className="grid grid-cols-1 gap-3">
+            <div className="space-y-3">
                 {currentQ.options.map((option, idx) => {
                     const isSelected = answers[currentQ.id] === idx;
                     return (
-                        <button 
-                          key={idx} 
-                          onClick={() => handleAnswer(idx)} 
-                          className={`w-full p-6 rounded-2xl text-left transition-all flex items-center gap-4 border-2 shadow-sm group active:scale-[0.98] ${isSelected ? 'border-indigo-600 bg-indigo-600 text-white shadow-xl shadow-indigo-100' : 'border-gray-100 bg-white text-gray-700 hover:border-indigo-200'}`}
-                        >
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-black shrink-0 transition-colors ${isSelected ? 'bg-white text-indigo-600' : 'bg-gray-100 text-gray-400 group-hover:bg-indigo-50 group-hover:text-indigo-600'}`}>{idx + 1}</div>
-                          <span className="text-base md:text-lg font-bold flex-1">{option}</span>
-                          {isSelected && <CheckCircle className="w-6 h-6 text-indigo-200" />}
+                        <button key={idx} onClick={() => handleAnswer(idx)} className={`w-full p-5 md:p-6 rounded-[1.5rem] text-left transition-all flex items-center gap-4 border-2 shadow-sm active:scale-[0.98] ${isSelected ? 'border-indigo-600 bg-indigo-600 text-white shadow-xl shadow-indigo-100' : 'border-gray-100 bg-white text-gray-700 hover:border-indigo-200'}`}>
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-black shrink-0 ${isSelected ? 'bg-white text-indigo-600' : 'bg-gray-100 text-gray-400'}`}>{idx + 1}</div>
+                          <span className="text-base md:text-lg font-bold">{option}</span>
+                          {isSelected && <CheckCircle className="ml-auto w-6 h-6 text-indigo-200" />}
                         </button>
                     );
                 })}
@@ -261,40 +207,26 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
          </div>
       </div>
 
-      {/* Navigation Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 p-6 pb-safe flex gap-4 max-w-2xl mx-auto z-40">
-          <button 
-            onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))} 
-            disabled={currentIndex === 0} 
-            className="px-6 py-5 rounded-2xl bg-gray-100 text-gray-500 disabled:opacity-30 font-bold active:bg-gray-200 transition-colors"
-          >
-            <ChevronLeft className="w-7 h-7" />
-          </button>
+          <button onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))} disabled={currentIndex === 0} className="px-6 py-5 rounded-2xl bg-gray-100 text-gray-700 disabled:opacity-30 font-bold active:bg-gray-200"><ChevronLeft className="w-7 h-7" /></button>
           {isLast ? (
-             <button onClick={handleSubmit} className="flex-1 bg-green-600 text-white font-black rounded-2xl shadow-xl shadow-green-100 active:scale-95 text-lg uppercase tracking-tight flex items-center justify-center gap-2">
-               Submit Round <CheckCircle className="w-5 h-5" />
-             </button>
+             <button onClick={handleSubmit} className="flex-1 bg-green-600 text-white font-black rounded-2xl shadow-xl active:scale-95 text-lg uppercase tracking-tight">Finish Session</button>
           ) : (
-             <button onClick={handleNext} className="flex-1 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 active:scale-95 text-lg uppercase tracking-tight flex items-center justify-center gap-2">
-               Next Question <ChevronRight className="w-5 h-5" />
-             </button>
+             <button onClick={() => setCurrentIndex(p => p + 1)} className="flex-1 bg-indigo-600 text-white font-black rounded-2xl shadow-xl active:scale-95 text-lg uppercase tracking-tight flex items-center justify-center gap-2">Next <ChevronRight className="w-5 h-5"/></button>
           )}
       </div>
 
-      {/* Drawer Overlay */}
       {isDrawerOpen && (
-        <div className="fixed inset-0 z-50 flex">
+        <div className="fixed inset-0 z-[60] flex">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsDrawerOpen(false)}></div>
           <div className="relative w-80 bg-white h-full shadow-2xl flex flex-col pt-safe animate-slide-in-right">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center"><span className="font-black text-lg uppercase tracking-tight">Question Map</span><button onClick={() => setIsDrawerOpen(false)}><X className="w-6 h-6" /></button></div>
-            <div className="flex-1 overflow-y-auto p-4 grid grid-cols-4 gap-3 content-start">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center font-black text-lg uppercase tracking-widest">Questions Map<button onClick={() => setIsDrawerOpen(false)}><X className="w-6 h-6" /></button></div>
+            <div className="flex-1 overflow-y-auto p-4 grid grid-cols-4 gap-3">
                {questions.map((q, idx) => (
                   <button key={q.id} onClick={() => { setCurrentIndex(idx); setIsDrawerOpen(false); }} className={`aspect-square rounded-xl font-black text-xs border-2 flex items-center justify-center transition-all ${idx === currentIndex ? 'bg-indigo-600 border-indigo-600 text-white' : answers[q.id] !== undefined ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-gray-100 text-gray-300'}`}>{idx + 1}</button>
                ))}
             </div>
-            <div className="p-6 border-t border-gray-100 text-center">
-              <button onClick={onExit} className="w-full py-4 text-red-500 font-bold border border-red-100 rounded-2xl uppercase tracking-widest text-xs">Exit Session</button>
-            </div>
+            <div className="p-6 border-t border-gray-100 text-center"><button onClick={onExit} className="w-full py-4 text-red-500 font-bold border border-red-100 rounded-2xl uppercase tracking-widest text-[10px]">Abandon Session</button></div>
           </div>
         </div>
       )}

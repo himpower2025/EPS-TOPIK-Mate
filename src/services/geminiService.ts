@@ -5,7 +5,7 @@ import { STATIC_EXAM_DATA } from '../data/examData';
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-// --- Audio Decoding Helpers (Based on Gemini Native Audio Requirements) ---
+// --- Audio Decoding Helpers ---
 function decode(base64: string): Uint8Array {
   const binaryString = atob(base64);
   const len = binaryString.length;
@@ -39,14 +39,6 @@ function cleanJsonString(text: string): string {
   return text.replace(/```json/g, '').replace(/```/g, '').trim();
 }
 
-function sanitizeQuestionText(text: string): string {
-  if (!text) return '';
-  return text
-    .replace(/^(\d+|Q\d+|[A-Z]\d+)[\.\s\-\:]*/i, '') 
-    .replace(/\[.*?\]/g, '')                        
-    .trim();
-}
-
 export const generateQuestionsBySet = async (
   mode: ExamMode, 
   setNumber: number, 
@@ -56,25 +48,34 @@ export const generateQuestionsBySet = async (
   const listeningCount = mode === 'READING' ? 0 : 20;
   const totalCount = readingCount + listeningCount;
 
-  if (!isPremium && setNumber > 1) {
-    throw new Error("Premium access required for this set.");
-  }
+  // 회차별 테마 배정 (중복 방지를 위한 시드)
+  const themes = [
+    "Workplace Safety & Protective Gear",
+    "Agricultural Tools & Harvesting",
+    "Construction Site Communication",
+    "Manufacturing Machine Operation",
+    "Employment Contracts & Labor Laws",
+    "Korean Traditional Culture & Holidays",
+    "Daily Life & Public Transportation",
+    "Office Manners & Teamwork",
+    "Industrial Accident Prevention",
+    "Shopping & Financial Transactions"
+  ];
+  const currentTheme = themes[(setNumber - 1) % themes.length];
 
   try {
-    const prompt = `You are an expert EPS-TOPIK (Employment Permit System - Test of Proficiency in Korean) examiner. 
-    Create Exam Set #${setNumber} for mode: ${mode}.
+    const prompt = `You are a professional EPS-TOPIK examiner. Create Exam Set #${setNumber}.
+    THEME FOR THIS SET: ${currentTheme}.
     
-    Layout Rules:
-    - READING: Use short passages, workplace scenarios, or sign descriptions.
-    - LISTENING: Provide scripts for short conversations or single statements.
+    CRITICAL INSTRUCTIONS:
+    1. NEVER REUSE existing question patterns. 
+    2. SYNTHESIZE 100% original scenarios, dialogues, and reading passages.
+    3. Ensure variety in vocabulary related to ${currentTheme}.
+    4. For READING: Create clear situational passages (50-100 chars).
+    5. For LISTENING: Provide a natural dialogue script in 'context' for TTS.
     
-    Content:
-    - ${readingCount > 0 ? `Include ${readingCount} READING questions.` : ''}
-    - ${listeningCount > 0 ? `Include ${listeningCount} LISTENING questions.` : ''}
-    - Do not include question numbers in 'questionText'.
-    - Use natural workplace Korean.
-    
-    Return a JSON array of ${totalCount} Question objects.`;
+    Structure: ${readingCount} Reading, ${listeningCount} Listening.
+    Return as JSON array of Question objects.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
@@ -102,30 +103,20 @@ export const generateQuestionsBySet = async (
     });
 
     const aiQuestions = JSON.parse(cleanJsonString(response.text || '[]'));
-    if (aiQuestions && aiQuestions.length > 0) {
-      return aiQuestions.map((q: any) => ({
-        ...q,
-        questionText: sanitizeQuestionText(q.questionText)
-      }));
-    }
+    if (aiQuestions.length > 0) return aiQuestions;
   } catch (error) {
-    console.warn("AI Generation fallback to static data.");
+    console.warn("AI Generation fallback due to duplication control.");
   }
 
-  // Fallback to static DB
-  const shuffled = [...STATIC_EXAM_DATA].sort(() => Math.random() - 0.5);
-  const result: Question[] = [];
-  if (readingCount > 0) result.push(...shuffled.filter(q => q.type === QuestionType.READING).slice(0, readingCount));
-  if (listeningCount > 0) result.push(...shuffled.filter(q => q.type === QuestionType.LISTENING).slice(0, listeningCount));
-  
-  return result.map(q => ({...q, questionText: sanitizeQuestionText(q.questionText)}));
+  // Fallback with strong shuffle
+  return [...STATIC_EXAM_DATA].sort(() => Math.random() - 0.5).slice(0, totalCount);
 };
 
 export const generateSpeech = async (text: string): Promise<AudioBuffer | null> => {
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text: `다음 내용을 잘 듣고 질문에 답하십시오. ${text}` }] }],
+      contents: [{ parts: [{ text: `잘 듣고 대답하십시오. ${text}` }] }],
       config: {
         responseModalities: [Modality.AUDIO],
         speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } },
@@ -135,55 +126,32 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
     const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
     if (base64Audio) {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({sampleRate: 24000});
-      const bytes = decode(base64Audio);
-      return await decodeAudioData(bytes, audioContext, 24000, 1);
+      return await decodeAudioData(decode(base64Audio), audioContext, 24000, 1);
     }
     return null;
-  } catch (error) {
-    console.error("Speech generation failed:", error);
-    return null;
-  }
+  } catch { return null; }
 };
 
 export const generateImageForQuestion = async (description: string): Promise<string | null> => {
-  if (!description || description.length > 300) return null;
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
-      contents: { 
-        parts: [{ 
-          text: `Professional educational line art for Korean Language Exam (EPS-TOPIK). Style: Black and white official workbook illustration, clean lines, high contrast, white background, no text inside the image. Subject: ${description}` 
-        }] 
-      },
+      contents: { parts: [{ text: `Professional EPS-TOPIK exam line-art. Simple black and white illustration of: ${description}` }] },
       config: { imageConfig: { aspectRatio: "1:1" } }
     });
-    const parts = response?.candidates?.[0]?.content?.parts;
-    if (parts) {
-      for (const part of parts) if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
-    }
+    const parts = response.candidates?.[0]?.content?.parts;
+    for (const part of parts!) if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
     return null;
   } catch { return null; }
 };
 
 export const analyzePerformance = async (session: ExamSession): Promise<AnalyticsFeedback | null> => {
   try {
-    const prompt = `Analyze EPS-TOPIK Session. Score: ${session.score}/${session.questions.length}. Mode: ${session.mode}. Provide English feedback.`;
+    const prompt = `Analyze EPS-TOPIK Result. Score: ${session.score}/${session.questions.length}. Provide JSON analysis.`;
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            overallAssessment: { type: Type.STRING },
-            strengths: { type: Type.ARRAY, items: { type: Type.STRING } },
-            weaknesses: { type: Type.ARRAY, items: { type: Type.STRING } },
-            studyPlan: { type: Type.STRING }
-          },
-          required: ["overallAssessment", "strengths", "weaknesses", "studyPlan"]
-        }
-      }
+      config: { responseMimeType: "application/json" }
     });
     return JSON.parse(cleanJsonString(response.text || '{}'));
   } catch { return null; }

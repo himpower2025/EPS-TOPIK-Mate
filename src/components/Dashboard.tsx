@@ -25,14 +25,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgr
                 </div>
                 <div className="font-black text-xl tracking-tighter uppercase">EPS Mate</div>
             </div>
-            <button onClick={onProfileClick} className="w-10 h-10 rounded-full border-2 border-indigo-400 overflow-hidden shadow-sm">
-                {user.avatarUrl ? <img src={user.avatarUrl} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-indigo-500 flex items-center justify-center"><UserIcon className="w-6 h-6" /></div>}
+            <button onClick={onProfileClick} className="w-10 h-10 rounded-full border-2 border-indigo-400 overflow-hidden shadow-sm active:scale-90 transition-transform">
+                {user.avatarUrl ? <img src={user.avatarUrl} alt="User" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-indigo-500 flex items-center justify-center"><UserIcon className="w-6 h-6" /></div>}
             </button>
          </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto pb-20">
-        <div className="bg-indigo-900 text-white rounded-b-[3rem] px-5 pb-16 pt-4 relative overflow-hidden">
+      <div className="flex-1 overflow-y-auto pb-24">
+        <div className="bg-indigo-900 text-white rounded-b-[3rem] px-5 pb-16 pt-4 relative overflow-hidden shadow-xl">
            <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
            <div className="relative z-10 max-w-2xl mx-auto text-center flex flex-col items-center">
               <h1 className="text-4xl font-black mb-2 tracking-tight">Hi, {user.name.split(' ')[0]}!</h1>
@@ -47,7 +47,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgr
               <div className="w-full max-w-sm space-y-4">
                 <button onClick={() => onModeSelect('FULL')} className="bg-white text-indigo-900 w-full py-5 rounded-[1.5rem] font-black shadow-2xl flex items-center justify-center gap-4 transition-transform active:scale-95 group">
                   <PlayCircle className="w-7 h-7 text-indigo-600 group-hover:scale-110 transition-transform" />
-                  <span className="text-xl font-black uppercase">Take Mock Exam</span>
+                  <span className="text-xl font-black uppercase">Start Mock Exam</span>
                 </button>
                 {!isPremium && (
                   <button onClick={onUpgrade} className="bg-indigo-800/50 backdrop-blur-md border border-indigo-400/30 text-white w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95">
@@ -68,9 +68,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgr
                </div>
                <div className="flex-1">
                   <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">Reading Drills</h4>
-                  <p className="text-xs text-gray-400 font-bold mt-1">30 Rounds of Reading Intensive Training</p>
+                  <p className="text-xs text-gray-400 font-bold mt-1">Intensive training for reading comprehension</p>
                </div>
-               <ArrowRight className="w-5 h-5 text-gray-200" />
+               <ArrowRight className="w-5 h-5 text-gray-200 group-hover:text-indigo-600 transition-colors" />
             </button>
 
             <button onClick={() => onModeSelect('LISTENING')} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-6 hover:border-indigo-200 active:scale-[0.98] transition-all text-left group">
@@ -79,9 +79,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgr
                </div>
                <div className="flex-1">
                   <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">Listening Drills</h4>
-                  <p className="text-xs text-gray-400 font-bold mt-1">30 Rounds of Audio Comprehension</p>
+                  <p className="text-xs text-gray-400 font-bold mt-1">Master native audio with AI voice engine</p>
                </div>
-               <ArrowRight className="w-5 h-5 text-gray-200" />
+               <ArrowRight className="w-5 h-5 text-gray-200 group-hover:text-orange-600 transition-colors" />
             </button>
 
             <button onClick={onViewAnalysis} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-6 hover:border-indigo-200 active:scale-[0.98] transition-all text-left group">
@@ -89,13 +89,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgr
                   <Target className="w-8 h-8 text-green-600 group-hover:text-white" />
                </div>
                <div className="flex-1">
-                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">Performance Analytics</h4>
-                  <p className="text-xs text-gray-400 font-bold mt-1">Review your AI-generated score reports</p>
+                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">Skill Analytics</h4>
+                  <p className="text-xs text-gray-400 font-bold mt-1">Review AI score reports and weak areas</p>
                </div>
-               <ArrowRight className="w-5 h-5 text-gray-200" />
+               <ArrowRight className="w-5 h-5 text-gray-200 group-hover:text-green-600 transition-colors" />
             </button>
           </div>
         </div>
+      </div>
+      <div className="text-center py-6 text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] border-t border-gray-50 shrink-0">
+        © EPS Mate • Powered by Gemini AI
       </div>
     </div>
   );

@@ -1,10 +1,8 @@
 
-export const QuestionType = {
-  READING: 'READING',
-  LISTENING: 'LISTENING'
-} as const;
-
-export type QuestionType = typeof QuestionType[keyof typeof QuestionType];
+export enum QuestionType {
+  READING = 'READING',
+  LISTENING = 'LISTENING'
+}
 
 export type ExamMode = 'FULL' | 'LISTENING' | 'READING';
 

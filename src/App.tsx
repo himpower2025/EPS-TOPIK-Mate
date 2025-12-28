@@ -14,7 +14,7 @@ import { ExamSession, User, ExamMode } from './types';
 
 import { auth, db } from './firebase';
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, setDoc, onSnapshot, collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 
 enum AppState { LANDING, DASHBOARD, SET_SELECTION, EXAM, ANALYTICS }
 
@@ -66,23 +66,28 @@ const App: React.FC = () => {
   };
 
   const handleSetSelect = (setNum: number) => {
+    if (user?.plan === 'free' && setNum > 1) {
+      setShowPaywall(true);
+      return;
+    }
     setSelectedSet(setNum);
     setCurrentState(AppState.EXAM);
   };
 
-  const handleViewAnalysis = async () => {
+  const handleExamComplete = (session: ExamSession) => {
     if (!user) return;
-    const q = query(collection(db, 'exams'), where('userId', '==', user.id), orderBy('completedAt', 'desc'), limit(1));
-    const snap = await getDocs(q);
-    if (!snap.empty) {
-      setLastSession(snap.docs[0].data() as ExamSession);
-      setCurrentState(AppState.ANALYTICS);
-    } else {
-      alert("No results found. Complete an exam first!");
+    setDoc(doc(db, 'exams', session.id), { ...session, userId: user.id });
+    
+    // 무료 사용자의 경우 남은 시험 횟수 차감
+    if (user.plan === 'free') {
+      setDoc(doc(db, 'users', user.id), { examsRemaining: Math.max(0, user.examsRemaining - 1) }, { merge: true });
     }
+    
+    setLastSession(session); 
+    setCurrentState(AppState.ANALYTICS); 
   };
 
-  if (isLoading) return <div className="h-screen flex items-center justify-center bg-indigo-900 text-white font-black animate-pulse uppercase tracking-widest">EPS Mate Loading...</div>;
+  if (isLoading) return <div className="h-screen flex items-center justify-center bg-indigo-900 text-white font-black animate-pulse uppercase tracking-widest text-center px-6">Preparing Your Success...</div>;
 
   return (
     <div className="h-[100dvh] w-full bg-gray-100 overflow-hidden flex flex-col relative">
@@ -90,7 +95,13 @@ const App: React.FC = () => {
       <InstallPwa />
       
       {!user && <LandingPage onLoginClick={() => setShowLoginModal(true)} />}
-      {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} onLogin={() => signInWithPopup(auth, new GoogleAuthProvider())} />}
+      
+      {showLoginModal && (
+        <LoginModal 
+          onClose={() => setShowLoginModal(false)} 
+          onLogin={() => signInWithPopup(auth, new GoogleAuthProvider())} 
+        />
+      )}
       
       {currentState === AppState.DASHBOARD && user && (
         <Dashboard 
@@ -98,7 +109,11 @@ const App: React.FC = () => {
           onModeSelect={handleModeSelect} 
           onUpgrade={() => setShowPaywall(true)} 
           onProfileClick={() => setShowProfile(true)} 
-          onViewAnalysis={handleViewAnalysis} 
+          // Fix: Replaced boolean comparison with a functional state transition.
+          // This resolves the TypeScript error caused by narrowing 'currentState' to 'AppState.DASHBOARD' in this scope.
+          onViewAnalysis={() => {
+            if (lastSession) setCurrentState(AppState.ANALYTICS);
+          }} 
         />
       )}
 
@@ -115,12 +130,7 @@ const App: React.FC = () => {
         <ExamSimulator 
           mode={examMode}
           setNumber={selectedSet}
-          onComplete={(s) => { 
-            setDoc(doc(db, 'exams', s.id), { ...s, userId: user.id });
-            setDoc(doc(db, 'users', user.id), { examsRemaining: user.plan === 'free' ? 0 : 9999 }, { merge: true });
-            setLastSession(s); 
-            setCurrentState(AppState.ANALYTICS); 
-          }} 
+          onComplete={handleExamComplete} 
           onExit={() => setCurrentState(AppState.SET_SELECTION)} 
           isPremium={user.plan !== 'free'} 
         />
@@ -131,7 +141,15 @@ const App: React.FC = () => {
       )}
 
       {showPaywall && user && <PaywallModal user={user} onClose={() => setShowPaywall(false)} />}
-      {showProfile && user && <ProfileModal user={user} onClose={() => setShowProfile(false)} onLogout={() => signOut(auth)} onRenew={() => setShowPaywall(true)} />}
+      
+      {showProfile && user && (
+        <ProfileModal 
+          user={user} 
+          onClose={() => setShowProfile(false)} 
+          onLogout={() => signOut(auth)} 
+          onRenew={() => { setShowProfile(false); setShowPaywall(true); }} 
+        />
+      )}
     </div>
   );
 };
