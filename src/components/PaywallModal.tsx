@@ -1,30 +1,28 @@
 
 import React, { useState } from 'react';
-import { Check, Crown, X, QrCode, Smartphone, Copy, Landmark } from 'lucide-react';
+import { Check, Crown, X, QrCode, Smartphone, Copy, Landmark, Info, Clock, ShieldCheck, Zap, CheckCircle2, ArrowRight } from 'lucide-react';
+import { db } from '../firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { User } from '../types';
+import { verifyPaymentWithServer } from '../services/paymentService';
 
 interface PaywallModalProps {
+  user: User;
   onClose: () => void;
-  onUpgrade: (plan: '1m' | '3m' | '6m') => void;
 }
 
-export const PaywallModal: React.FC<PaywallModalProps> = ({ onClose, onUpgrade }) => {
-  const [step, setStep] = useState<'PLANS' | 'QR'>('PLANS');
+export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => {
+  const [step, setStep] = useState<'PLANS' | 'PAYMENT' | 'VERIFYING' | 'SUCCESS'>('PLANS');
   const [selectedPlan, setSelectedPlan] = useState<'1m' | '3m' | '6m'>('3m');
-  const [isProcessing, setIsProcessing] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const plans = {
-    '1m': { price: 'Rs. 290', period: '1 Month', label: 'Starter' },
-    '3m': { price: 'Rs. 690', period: '3 Months', label: 'Best Value' },
-    '6m': { price: 'Rs. 1190', period: '6 Months', label: 'Master' }
+    '1m': { price: 'Rs. 290', period: '1 Month', label: 'Starter', features: ['All 2,000+ Questions', 'AI Performance Analysis'] },
+    '3m': { price: 'Rs. 690', period: '3 Months', label: 'Best Value', features: ['Infinite AI Mock Exams', 'Advanced Listening Practice', 'Priority Support'] },
+    '6m': { price: 'Rs. 1190', period: '6 Months', label: 'Master', features: ['Full Access for 180 Days', 'Offline Study Materials', 'Pass Guarantee Support'] }
   };
 
-  // 은행 정보 (실제 본인 계좌 정보로 수정하세요)
-  const bankDetails = {
-    bankName: "Sanima Bank",
-    accountName: "Himpower Priavte Limited",
-    accountNumber: "028010010001433"
-  };
+  const currentPlan = plans[selectedPlan];
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -32,41 +30,59 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ onClose, onUpgrade }
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handlePaid = () => {
-    setIsProcessing(true);
-    // 실제 서비스에서는 관리자가 입금을 확인한 후 수동으로 승인해주는 것이 안전합니다.
-    // 여기서는 테스트를 위해 2초 후 성공으로 시뮬레이션합니다.
-    setTimeout(() => {
-      setIsProcessing(false);
-      onUpgrade(selectedPlan);
-    }, 2500);
+  const handleStartVerifying = async () => {
+    setStep('VERIFYING');
+    
+    // 1. 서버에 결제 시도 기록
+    const requestId = `PAY_${user.id}_${Date.now()}`;
+    await setDoc(doc(db, 'paymentAttempts', requestId), {
+      userId: user.id,
+      userName: user.name,
+      plan: selectedPlan,
+      status: 'waiting_for_api',
+      amount: currentPlan.price,
+      createdAt: serverTimestamp()
+    });
+
+    // 2. 실제 API 검증 호출 (paymentService.ts에서 정의된 함수)
+    const isSuccess = await verifyPaymentWithServer(requestId);
+    
+    if (isSuccess) {
+      setStep('SUCCESS');
+    } else {
+      alert("Payment verification failed. Please contact support.");
+      setStep('PAYMENT');
+    }
   };
 
-  const currentPlan = plans[selectedPlan];
-
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[95vh]">
+    <div className="fixed inset-0 bg-black/95 backdrop-blur-xl flex items-center justify-center z-[100] p-4 animate-fade-in">
+      <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[92vh] border border-white/20">
         
-        {/* Header */}
-        <div className="relative bg-indigo-900 p-6 text-white text-center shrink-0">
-          <button onClick={onClose} className="absolute top-4 right-4 text-white/70 hover:text-white p-2">
-            <X className="w-6 h-6"/>
-          </button>
-          <div className="relative z-10">
-            <div className="inline-block p-3 bg-white/10 rounded-full mb-3">
+        {/* Header Section */}
+        <div className="relative bg-gradient-to-br from-indigo-600 via-indigo-900 to-black p-8 text-white text-center shrink-0">
+          {step !== 'VERIFYING' && step !== 'SUCCESS' && (
+            <button onClick={onClose} className="absolute top-6 right-6 text-white/50 hover:text-white p-2 z-20 transition-colors">
+              <X className="w-6 h-6"/>
+            </button>
+          )}
+          <div className="relative z-10 flex flex-col items-center">
+            <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mb-3 backdrop-blur-md border border-white/20">
               <Crown className="w-8 h-8 text-yellow-400 fill-yellow-400" />
             </div>
-            <h2 className="text-2xl font-bold">Premium Pass</h2>
-            <p className="text-indigo-200 text-sm mt-1">Unlock Unlimited AI Practice</p>
+            <h2 className="text-xl font-black tracking-tight uppercase tracking-widest">Premium Pass</h2>
+            <p className="text-indigo-300 text-[10px] font-bold mt-1 opacity-80">Unlimited EPS-TOPIK Success</p>
           </div>
         </div>
 
-        {/* Content */}
+        {/* Content Area */}
         <div className="p-6 overflow-y-auto bg-gray-50 flex-1 hide-scrollbar">
-          {step === 'PLANS' ? (
-            <div className="space-y-4">
-               <p className="text-center text-gray-600 text-sm font-medium mb-4">Choose your preparation period</p>
+          
+          {step === 'PLANS' && (
+            <div className="space-y-4 animate-slide-up">
+               <div className="flex items-center gap-2 text-indigo-900 font-black text-[10px] uppercase tracking-wider mb-2 px-1">
+                 <Zap className="w-3 h-3 fill-current" /> Select your success plan
+               </div>
                
                {(Object.keys(plans) as Array<keyof typeof plans>).map((key) => {
                  const plan = plans[key];
@@ -75,113 +91,102 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ onClose, onUpgrade }
                    <div 
                     key={key}
                     onClick={() => setSelectedPlan(key)}
-                    className={`relative p-4 rounded-xl border-2 transition-all cursor-pointer flex justify-between items-center ${isSelected ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                    className={`relative p-5 rounded-2xl border-2 transition-all cursor-pointer flex justify-between items-center ${isSelected ? 'border-indigo-600 bg-white shadow-xl ring-4 ring-indigo-600/5' : 'border-gray-200 bg-white/50 hover:border-indigo-200'}`}
                    >
-                     {key === '3m' && <div className="absolute -top-2.5 left-4 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Most Popular</div>}
-                     <div>
-                       <h3 className="font-bold text-gray-900">{plan.period}</h3>
-                       <span className="text-xs text-gray-500">{plan.label}</span>
+                     {key === '3m' && <div className="absolute -top-3 left-6 bg-indigo-600 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase shadow-lg">Most Popular</div>}
+                     <div className="flex flex-col">
+                       <h3 className={`font-black text-lg ${isSelected ? 'text-indigo-900' : 'text-gray-900'}`}>{plan.period}</h3>
+                       <span className="text-[10px] text-gray-500 font-bold uppercase">{plan.label}</span>
                      </div>
                      <div className="text-right">
-                       <span className={`block font-bold text-lg ${isSelected ? 'text-indigo-700' : 'text-gray-900'}`}>{plan.price}</span>
+                        <div className="font-black text-xl text-indigo-700 tracking-tighter">{plan.price}</div>
+                        <div className="text-[9px] text-gray-400 font-bold">Automatic Setup</div>
                      </div>
                    </div>
                  );
                })}
 
-               <button 
-                onClick={() => setStep('QR')}
-                className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-200 transition-all flex items-center justify-center gap-2 active:scale-95"
-               >
-                 <span>Proceed to Payment</span>
-                 <QrCode className="w-5 h-5" />
-               </button>
+               <div className="pt-4">
+                  <button 
+                    onClick={() => setStep('PAYMENT')}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-5 rounded-2xl shadow-xl shadow-indigo-200 transition-all text-lg flex items-center justify-center gap-3 active:scale-[0.98]"
+                  >
+                    <span>Proceed to Pay {currentPlan.price}</span>
+                    <ArrowRight className="w-6 h-6" />
+                  </button>
+               </div>
             </div>
-          ) : (
-            <div className="flex flex-col items-center">
-              {/* 실제 QR 이미지 섹션 */}
-              <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-200 mb-6 w-full max-w-[260px] mx-auto">
-                 <div className="aspect-square bg-white rounded-lg overflow-hidden flex items-center justify-center relative border border-gray-100">
-                    {/* [중요] public 폴더에 fonepay-qr.png 라는 이름으로 이미지를 넣어주세요 */}
-                    <img 
-                      src="./fonepay-qr.png" 
-                      alt="Fonepay QR" 
-                      className="w-full h-full object-contain"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=Please_Upload_Your_QR_Image';
-                      }}
-                    />
+          )}
+
+          {step === 'PAYMENT' && (
+            <div className="flex flex-col items-center animate-fade-in">
+              <div className="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100 mb-6 w-full max-w-[280px] text-center">
+                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Scan QR with Bank App</p>
+                 <div className="aspect-square bg-white rounded-2xl overflow-hidden flex items-center justify-center relative border-4 border-gray-50 p-2 mb-4">
+                    <img src="./fonepay-qr.png" alt="Merchant QR" className="w-full h-full object-contain" onError={(e) => (e.target as any).src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=fonepay-merchant-${selectedPlan}`} />
                  </div>
-                 <div className="mt-3 flex justify-between items-center bg-indigo-50 p-3 rounded-xl border border-indigo-100">
+                 <div className="bg-indigo-900 p-4 rounded-2xl text-white shadow-lg flex justify-between items-center w-full">
                     <div className="text-left">
-                       <div className="text-[10px] text-indigo-500 uppercase font-bold">Total Payable</div>
-                       <div className="text-xl font-bold text-indigo-700">{currentPlan.price}</div>
+                       <div className="text-[9px] opacity-60 font-black uppercase tracking-widest">Pay Amount</div>
+                       <div className="text-2xl font-black tracking-tighter">{currentPlan.price}</div>
                     </div>
-                    <div className="bg-indigo-600 text-white p-2 rounded-lg">
-                       <Smartphone className="w-5 h-5" />
-                    </div>
+                    <div className="flex flex-col items-end"><Smartphone className="w-6 h-6 mb-1" /><span className="text-[8px] font-bold opacity-60 uppercase">Fonepay API</span></div>
                  </div>
               </div>
 
-              {/* 은행 계좌 정보 섹션 (QR이 안될 때 대비) */}
-              <div className="w-full bg-white border border-gray-200 rounded-2xl p-4 mb-6 text-left space-y-3">
-                 <div className="flex items-center gap-2 text-gray-400 text-[10px] font-bold uppercase tracking-widest border-b pb-2 mb-2">
-                    <Landmark className="w-3 h-3" /> Bank Transfer Details
-                 </div>
-                 <div>
-                    <div className="text-[10px] text-gray-500">Bank Name</div>
-                    <div className="text-sm font-bold text-gray-900">{bankDetails.bankName}</div>
-                 </div>
-                 <div className="flex justify-between items-end">
-                    <div>
-                        <div className="text-[10px] text-gray-500">A/C Number</div>
-                        <div className="text-sm font-bold text-gray-900">{bankDetails.accountNumber}</div>
-                    </div>
-                    <button 
-                      onClick={() => copyToClipboard(bankDetails.accountNumber)}
-                      className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2 py-1 rounded-md"
-                    >
-                       <Copy className="w-3 h-3" /> {copied ? 'Copied' : 'Copy'}
-                    </button>
-                 </div>
-              </div>
-
-              <div className="bg-orange-50 p-4 rounded-xl mb-6 text-left border border-orange-100">
-                 <h4 className="text-orange-800 font-bold text-xs mb-1">Instruction:</h4>
-                 <ol className="text-[11px] text-orange-700 space-y-1 list-decimal ml-4">
-                    <li>Scan the QR or transfer manually to the account.</li>
-                    <li>Pay exactly <span className="font-bold underline">{currentPlan.price}</span>.</li>
-                    <li>Wait 1-2 mins after payment and click the button below.</li>
-                 </ol>
+              <div className="w-full bg-amber-50 border border-amber-100 p-5 rounded-2xl mb-6">
+                 <div className="flex items-center gap-2 text-amber-800 font-black text-[10px] uppercase mb-2"><Info className="w-4 h-4"/> Notice</div>
+                 <p className="text-[11px] text-amber-700 leading-relaxed font-medium">
+                   1. Scan and pay exactly <strong>{currentPlan.price}</strong>.<br/>
+                   2. After payment, click <strong>"Verify Payment"</strong>.<br/>
+                   3. Your premium access will be activated <strong>automatically</strong>.
+                 </p>
               </div>
 
               <button 
-                onClick={handlePaid}
-                disabled={isProcessing}
-                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-green-200 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                onClick={handleStartVerifying}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-5 rounded-2xl shadow-xl shadow-indigo-200 transition-all text-lg flex items-center justify-center gap-3 active:scale-[0.98]"
               >
-                {isProcessing ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Verifying Transfer...</span>
-                  </>
-                ) : (
-                  <>
-                    <Check className="w-6 h-6" />
-                    <span className="text-lg">I Have Paid</span>
-                  </>
-                )}
+                <CheckCircle2 className="w-6 h-6" /> 
+                <span>Verify Payment</span>
               </button>
               
-              <button onClick={() => setStep('PLANS')} className="mt-4 text-sm text-gray-400 font-medium">
-                Change Plan
-              </button>
+              <button onClick={() => setStep('PLANS')} className="mt-4 text-xs text-gray-400 font-bold uppercase tracking-widest hover:text-indigo-600">Change My Plan</button>
             </div>
           )}
-        </div>
-        
-        <div className="p-4 bg-white border-t border-gray-100 text-[10px] text-center text-gray-400">
-           Secure Bank Transfer Payment • Manual Verification
+
+          {step === 'VERIFYING' && (
+            <div className="flex flex-col items-center text-center py-12 animate-fade-in">
+               <div className="relative w-24 h-24 mb-8">
+                  <div className="absolute inset-0 border-4 border-indigo-100 rounded-full"></div>
+                  <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                     <ShieldCheck className="w-10 h-10 text-indigo-600" />
+                  </div>
+               </div>
+               <h3 className="text-2xl font-black text-gray-900 mb-3 tracking-tight">Verifying with Fonepay</h3>
+               <p className="text-gray-500 text-sm leading-relaxed max-w-[240px] font-medium">
+                 Our system is checking the transaction status with the bank API.
+                 <br/><br/>
+                 <span className="text-indigo-600 font-black text-[10px] bg-indigo-50 px-3 py-1 rounded-full uppercase animate-pulse">Waiting for Webhook Response</span>
+               </p>
+            </div>
+          )}
+
+          {step === 'SUCCESS' && (
+            <div className="flex flex-col items-center text-center py-10 animate-slide-up">
+               <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-green-100">
+                  <CheckCircle2 className="w-14 h-14 text-green-600" />
+               </div>
+               <h3 className="text-2xl font-black text-gray-900 mb-2 tracking-tight">Success! Welcome to Premium</h3>
+               <p className="text-gray-500 text-sm mb-8 leading-relaxed">
+                 Your payment has been verified. <br/>
+                 <span className="font-bold text-indigo-600">Your {currentPlan.period} access is now active!</span>
+               </p>
+               
+               <button onClick={onClose} className="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl shadow-indigo-100 hover:scale-[1.02] active:scale-95 transition-all text-lg">Start Practicing Now</button>
+            </div>
+          )}
         </div>
       </div>
     </div>

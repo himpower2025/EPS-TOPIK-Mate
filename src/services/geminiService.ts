@@ -3,30 +3,17 @@ import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Question, QuestionType, AnalyticsFeedback, ExamSession } from '../types';
 import { STATIC_EXAM_DATA } from '../data/examData';
 
-// [FIX] Vite replaces 'process.env.API_KEY' with the actual string at build time.
-declare const process: { env: { API_KEY: string } };
-
-const getAiClient = () => {
-  // Directly use process.env.API_KEY string for initialization as per guidelines
-  if (!process.env.API_KEY || process.env.API_KEY.trim() === '') {
-    console.warn("Gemini API Key is missing. Features relying on AI will utilize static data or fail gracefully.");
-    return null;
-  }
-  
-  try {
-    // Initializing with the recommended named parameter format
-    return new GoogleGenAI({ apiKey: process.env.API_KEY });
-  } catch (error) {
-    console.error("Error initializing GoogleGenAI client:", error);
-    return null;
-  }
-};
+// [가이드라인] process.env.API_KEY를 사용하여 인스턴스 생성
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 function cleanJsonString(text: string): string {
   return text.replace(/```json/g, '').replace(/```/g, '').trim();
 }
 
-function base64ToBytes(base64: string): Uint8Array {
+/**
+ * PCM 데이터 디코딩 (가이드라인 예제 준수)
+ */
+function decode(base64: string) {
   const binaryString = atob(base64);
   const len = binaryString.length;
   const bytes = new Uint8Array(len);
@@ -36,12 +23,12 @@ function base64ToBytes(base64: string): Uint8Array {
   return bytes;
 }
 
-function pcmToAudioBuffer(
+async function decodeAudioData(
   data: Uint8Array,
   ctx: AudioContext,
-  sampleRate: number = 24000, 
-  numChannels: number = 1
-): AudioBuffer {
+  sampleRate: number,
+  numChannels: number,
+): Promise<AudioBuffer> {
   const dataInt16 = new Int16Array(data.buffer);
   const frameCount = dataInt16.length / numChannels;
   const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
@@ -55,45 +42,26 @@ function pcmToAudioBuffer(
   return buffer;
 }
 
-// --- Main Service Functions ---
-
-export const generateQuestions = async (count: number = 10, useStatic: boolean = false): Promise<Question[]> => {
-  const ai = getAiClient();
-
-  if (useStatic || !ai) {
-    if (!ai && !useStatic) {
-      console.warn("Gemini API Key is missing. Falling back to static data.");
-    }
-    return Array.from({ length: count }, (_, i) => {
-      const q = STATIC_EXAM_DATA[i % STATIC_EXAM_DATA.length];
-      return { ...q, id: `static_${Date.now()}_${i}` };
-    });
+/**
+ * 400문항의 정적 데이터베이스를 활용하거나 프리미엄 유저를 위해 새로운 문제를 생성합니다.
+ */
+export const generateQuestions = async (count: number = 40, isPremium: boolean = false): Promise<Question[]> => {
+  if (!isPremium) {
+    // 400문항 중 랜덤하게 셔플하여 반환
+    const shuffled = [...STATIC_EXAM_DATA].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count).map((q, i) => ({
+      ...q,
+      id: `${q.id}_${Date.now()}_${i}`
+    }));
   }
 
-  const prompt = `
-    You are an expert EPS-TOPIK exam creator.
-    Generate ${count} practice questions similar to the official HRD Korea exams.
-    
-    Structure:
-    - Mix of READING and LISTENING types.
-    - Difficulty: Beginner to Intermediate (Topic Level 1-2).
-    - Themes: Manufacturing, Construction, Agriculture, Daily Life in Korea, Workplace Safety.
-
-    Format requirements:
-    1. 'questionText', 'options', 'context' MUST be in natural Korean.
-    2. 'context' for listening is the script. For reading, it's the passage/scenario.
-    3. 'explanation' MUST be in English.
-    4. 'sourceRef' should cite a similar question type.
-
-    Return strictly valid JSON array.
-  `;
-
+  // 프리미엄: AI를 통해 완전히 새로운 문제를 생성 (시스템 인스트럭션 포함)
   try {
     const response = await ai.models.generateContent({
-      // Updated to recommended model for basic/complex text tasks
       model: "gemini-3-flash-preview",
-      contents: prompt,
+      contents: `Generate ${count} ORIGINAL EPS-TOPIK questions. Mixed Reading/Listening.`,
       config: {
+        systemInstruction: "You are an expert EPS-TOPIK examiner. Create realistic questions based on HRD Korea standards.",
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.ARRAY,
@@ -105,12 +73,7 @@ export const generateQuestions = async (count: number = 10, useStatic: boolean =
               category: { type: Type.STRING },
               questionText: { type: Type.STRING },
               context: { type: Type.STRING, nullable: true },
-              options: { 
-                type: Type.ARRAY, 
-                items: { type: Type.STRING },
-                minItems: 4,
-                maxItems: 4
-              },
+              options: { type: Type.ARRAY, items: { type: Type.STRING }, minItems: 4, maxItems: 4 },
               correctAnswer: { type: Type.INTEGER },
               explanation: { type: Type.STRING },
               sourceRef: { type: Type.STRING }
@@ -122,66 +85,44 @@ export const generateQuestions = async (count: number = 10, useStatic: boolean =
     });
 
     if (response.text) {
-      const cleanedText = cleanJsonString(response.text);
-      return JSON.parse(cleanedText) as Question[];
+      return JSON.parse(cleanJsonString(response.text));
     }
-    return [];
+    return STATIC_EXAM_DATA.slice(0, count);
   } catch (error) {
-    console.error("Failed to generate questions:", error);
-    return STATIC_EXAM_DATA;
+    console.error("AI Question Generation Error:", error);
+    return STATIC_EXAM_DATA.slice(0, count);
   }
 };
 
+/**
+ * 음성 생성 (TTS)
+ */
 export const generateSpeech = async (text: string): Promise<AudioBuffer | null> => {
-  const ai = getAiClient();
-  
-  if (!ai) {
-    console.warn("TTS Skipped: API Key not found.");
-    return null;
-  }
-
   try {
-    // Detect if the text is a dialogue (contains "Man" or "Woman" markers in Korean)
-    const isDialogue = text.includes('남자:') || text.includes('여자:') || text.includes('남:') || text.includes('여:');
+    const hasMale = /남자:|남:/.test(text);
+    const hasFemale = /여자:|여:/.test(text);
+    const normalizedText = text.replace(/남:/g, '남자:').replace(/여:/g, '여자:');
 
     let speechConfig;
-
-    if (isDialogue) {
-      // Multi-speaker configuration using Gemini TTS
+    if (hasMale && hasFemale) {
+      // 다중 화자 (2명)
       speechConfig = {
         multiSpeakerVoiceConfig: {
           speakerVoiceConfigs: [
-            { 
-              speaker: '남자', 
-              voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Fenrir' } } 
-            },
-            { 
-              speaker: '남', 
-              voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Fenrir' } } 
-            },
-            { 
-              speaker: '여자', 
-              voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } 
-            },
-            { 
-              speaker: '여', 
-              voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } 
-            }
+            { speaker: '남자', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Fenrir' } } },
+            { speaker: '여자', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } }
           ]
         }
       };
     } else {
-      // Single speaker configuration
       speechConfig = {
-        voiceConfig: {
-          prebuiltVoiceConfig: { voiceName: 'Kore' }, 
-        },
+        voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } },
       };
     }
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text }] }],
+      contents: [{ parts: [{ text: normalizedText }] }],
       config: {
         responseModalities: [Modality.AUDIO],
         speechConfig: speechConfig,
@@ -191,38 +132,23 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
     const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
     if (base64Audio) {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({sampleRate: 24000});
-      const bytes = base64ToBytes(base64Audio);
-      return pcmToAudioBuffer(bytes, audioContext);
+      const bytes = decode(base64Audio);
+      return await decodeAudioData(bytes, audioContext, 24000, 1);
     }
     return null;
   } catch (error) {
-    console.error("TTS generation failed:", error);
+    console.error("TTS Error:", error);
     return null;
   }
 };
 
+/**
+ * 성적 분석
+ */
 export const analyzePerformance = async (session: ExamSession): Promise<AnalyticsFeedback | null> => {
-  const ai = getAiClient();
-  if (!ai) {
-    return {
-      overallAssessment: "Could not connect to AI. Please check internet.",
-      strengths: ["Completing the exam"],
-      weaknesses: ["N/A"],
-      studyPlan: "Practice with static questions."
-    };
-  }
-
-  const prompt = `
-    Analyze this EPS-TOPIK exam result.
-    Score: ${session.score} / ${session.questions.length}.
-    User Answers: ${JSON.stringify(session.userAnswers)}.
-    Categories: ${JSON.stringify(session.questions.map(q => q.category))}.
-    Provide encouraging feedback in English.
-  `;
-
+  const prompt = `Analyze EPS-TOPIK Score: ${session.score}/${session.questions.length}. Provide a 7-day plan.`;
   try {
     const response = await ai.models.generateContent({
-      // Using recommended model for complex reasoning and analysis
       model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
@@ -234,18 +160,18 @@ export const analyzePerformance = async (session: ExamSession): Promise<Analytic
             strengths: { type: Type.ARRAY, items: { type: Type.STRING } },
             weaknesses: { type: Type.ARRAY, items: { type: Type.STRING } },
             studyPlan: { type: Type.STRING }
-          }
+          },
+          required: ["overallAssessment", "strengths", "weaknesses", "studyPlan"]
         }
       }
     });
 
     if (response.text) {
-      const cleanedText = cleanJsonString(response.text);
-      return JSON.parse(cleanedText) as AnalyticsFeedback;
+      return JSON.parse(cleanJsonString(response.text));
     }
     return null;
   } catch (error) {
-    console.error("Analysis failed", error);
+    console.error("Analysis Error:", error);
     return null;
   }
 };

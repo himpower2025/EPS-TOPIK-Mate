@@ -14,7 +14,7 @@ import { ExamSession, User, PlanType } from './types';
 // Firebase 도구
 import { auth, db } from './firebase';
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 
 enum AppState {
   LANDING = 'LANDING',
@@ -32,17 +32,24 @@ const App: React.FC = () => {
   const [lastSession, setLastSession] = useState<ExamSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 로그인 상태 변화 감지
+  // 실시간 사용자 상태 감시 (이것이 자동 승인의 핵심입니다)
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        try {
-          const userRef = doc(db, 'users', firebaseUser.uid);
-          const userDoc = await getDoc(userRef);
-          
-          if (userDoc.exists()) {
-            setUser(userDoc.data() as User);
+        // Firestore의 해당 사용자 문서를 실시간으로 지켜봅니다.
+        // 나중에 API나 관리자가 여기서 plan을 바꾸면 사용자의 앱이 즉시 반응합니다.
+        const userRef = doc(db, 'users', firebaseUser.uid);
+        const unsubscribeDoc = onSnapshot(userRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const userData = docSnap.data() as User;
+            setUser(userData);
+            
+            // 만약 대기중이던 결제가 성공했다면 모달을 닫아주거나 알림을 줄 수 있음
+            if (userData.plan !== 'free' && showPaywall) {
+              // 축하 메시지나 자동 닫기 처리 가능
+            }
           } else {
+            // 새 유저 초기 생성
             const newUser: User = {
               id: firebaseUser.uid,
               name: firebaseUser.displayName || 'Student',
@@ -52,21 +59,21 @@ const App: React.FC = () => {
               subscriptionExpiry: null,
               examsRemaining: 1
             };
-            await setDoc(userRef, newUser);
+            setDoc(userRef, newUser);
             setUser(newUser);
           }
-          setCurrentState(AppState.DASHBOARD);
-        } catch (error) {
-          console.error("Firebase Error:", error);
-        }
+          if (currentState === AppState.LANDING) setCurrentState(AppState.DASHBOARD);
+        });
+        
+        return () => unsubscribeDoc();
       } else {
         setUser(null);
         setCurrentState(AppState.LANDING);
       }
       setIsLoading(false);
     });
-    return () => unsubscribe();
-  }, []);
+    return () => unsubscribeAuth();
+  }, [currentState, showPaywall]);
 
   const handleLogin = async () => {
     const provider = new GoogleAuthProvider();
@@ -82,6 +89,7 @@ const App: React.FC = () => {
   const handleLogout = async () => {
     await signOut(auth);
     setShowProfile(false);
+    setCurrentState(AppState.LANDING);
   };
 
   const handleExamComplete = async (session: ExamSession) => {
@@ -91,7 +99,6 @@ const App: React.FC = () => {
        const userRef = doc(db, 'users', user.id);
        const updatedExams = user.plan === 'free' ? Math.max(0, user.examsRemaining - 1) : 9999;
        await setDoc(userRef, { examsRemaining: updatedExams }, { merge: true });
-       setUser({ ...user, examsRemaining: updatedExams });
        
        const examRef = doc(db, 'exams', session.id);
        await setDoc(examRef, { ...session, userId: user.id, createdAt: serverTimestamp() });
@@ -103,20 +110,7 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS);
   };
 
-  const handleUpgrade = async (plan: PlanType) => {
-    if (!user) return;
-    const now = new Date();
-    if (plan === '1m') now.setMonth(now.getMonth() + 1);
-    else if (plan === '3m') now.setMonth(now.getMonth() + 3);
-    else if (plan === '6m') now.setMonth(now.getMonth() + 6);
-
-    const updateData = { plan, subscriptionExpiry: now.toISOString(), examsRemaining: 9999 };
-    await setDoc(doc(db, 'users', user.id), updateData, { merge: true });
-    setUser({ ...user, ...updateData });
-    setShowPaywall(false);
-  };
-
-  if (isLoading) return <div className="h-screen flex items-center justify-center bg-indigo-900 text-white font-bold">Connecting to Server...</div>;
+  if (isLoading) return <div className="h-screen flex items-center justify-center bg-indigo-900 text-white font-black animate-pulse uppercase tracking-widest">EPS Mate Loading...</div>;
 
   return (
     <div className="h-[100dvh] w-full bg-gray-100 overflow-hidden flex flex-col relative">
@@ -143,16 +137,33 @@ const App: React.FC = () => {
         />
       )}
       
-      {currentState === AppState.EXAM && (
-        <ExamSimulator onComplete={handleExamComplete} onExit={() => setCurrentState(AppState.DASHBOARD)} />
+      {currentState === AppState.EXAM && user && (
+        <ExamSimulator 
+          onComplete={handleExamComplete} 
+          onExit={() => setCurrentState(AppState.DASHBOARD)} 
+          isPremium={user.plan !== 'free'}
+        />
       )}
       
       {currentState === AppState.ANALYTICS && lastSession && (
         <Analytics session={lastSession} onBack={() => setCurrentState(AppState.DASHBOARD)} />
       )}
 
-      {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} onUpgrade={handleUpgrade} />}
-      {showProfile && user && <ProfileModal user={user} onClose={() => setShowProfile(false)} onLogout={handleLogout} onRenew={() => setShowPaywall(true)} />}
+      {showPaywall && user && (
+        <PaywallModal 
+          user={user} 
+          onClose={() => setShowPaywall(false)} 
+        />
+      )}
+      
+      {showProfile && user && (
+        <ProfileModal 
+          user={user} 
+          onClose={() => setShowProfile(false)} 
+          onLogout={handleLogout} 
+          onRenew={() => setShowPaywall(true)} 
+        />
+      )}
     </div>
   );
 };
