@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { Question, QuestionType, AnalyticsFeedback, ExamSession, ExamMode } from '../types';
+import { Question, AnalyticsFeedback, ExamSession, ExamMode } from '../types';
 import { STATIC_EXAM_DATA } from '../data/examData';
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -66,6 +66,7 @@ export const generateQuestionsBySet = async (
   try {
     const prompt = `You are a professional EPS-TOPIK examiner. Create Exam Set #${setNumber}.
     THEME FOR THIS SET: ${currentTheme}.
+    USER_STATUS: ${isPremium ? 'PREMIUM (Provide advanced workplace scenarios)' : 'FREE'}.
     
     CRITICAL INSTRUCTIONS:
     1. NEVER REUSE existing question patterns. 
@@ -140,7 +141,11 @@ export const generateImageForQuestion = async (description: string): Promise<str
       config: { imageConfig: { aspectRatio: "1:1" } }
     });
     const parts = response.candidates?.[0]?.content?.parts;
-    for (const part of parts!) if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
+    if (parts) {
+      for (const part of parts) {
+        if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
+      }
+    }
     return null;
   } catch { return null; }
 };
