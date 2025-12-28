@@ -24,22 +24,21 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [currentAiImage, setCurrentAiImage] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-  const [audioStarted, setAudioStarted] = useState(false); // 오디오 시작 제스처 확인
+  const [audioContextReady, setAudioContextReady] = useState(false);
   
-  const contentRef = useRef<HTMLDivElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const currentAudioSource = useRef<AudioBufferSourceNode | null>(null);
 
+  // 문제 로드
   useEffect(() => {
     const fetchQuestions = async () => {
       setLoading(true);
-      setError(null);
       try {
         const count = mode === 'FULL' ? 40 : 20;
         const generated = await generateQuestions(count, isPremium, mode); 
-        if (generated.length === 0) throw new Error("문제를 불러오지 못했습니다.");
         setQuestions(generated);
       } catch (err) {
-        setError("시험 문제를 로드할 수 없습니다.");
+        setError("문제를 불러오는 중 오류가 발생했습니다.");
       } finally {
         setLoading(false);
       }
@@ -47,12 +46,25 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
     fetchQuestions();
   }, [isPremium, mode]);
 
+  // 오디오 컨텍스트 초기화 (사용자 상호작용 필수)
+  const initAudio = async () => {
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({sampleRate: 24000});
+    }
+    if (audioContextRef.current.state === 'suspended') {
+      await audioContextRef.current.resume();
+    }
+    setAudioContextReady(true);
+  };
+
+  // 문제 변경 시 이미지/오디오 처리
   useEffect(() => {
     if (questions.length === 0) return;
     const currentQ = questions[currentIndex];
     setCurrentAiImage(null);
 
-    if (currentQ.context && !currentQ.context.startsWith('http') && currentQ.context.length < 150) {
+    // AI 이미지 생성 (단순 텍스트 설명인 경우)
+    if (currentQ.context && !currentQ.context.startsWith('http') && currentQ.context.length < 120) {
       setIsGeneratingImage(true);
       generateImageForQuestion(currentQ.context).then(img => {
         setCurrentAiImage(img);
@@ -60,11 +72,11 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
       });
     }
 
-    // 듣기 문제일 때 오디오 컨텍스트가 활성화되어 있으면 자동 재생 시도
-    if (currentQ.type === QuestionType.LISTENING && audioStarted) {
+    // 듣기 문제 자동 재생 (오디오 컨텍스트가 준비된 경우에만)
+    if (currentQ.type === QuestionType.LISTENING && audioContextReady) {
       handlePlayAudio();
     }
-  }, [currentIndex, questions, audioStarted]);
+  }, [currentIndex, questions, audioContextReady]);
 
   useEffect(() => {
     if (loading || timeLeft <= 0 || error) return;
@@ -74,48 +86,41 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
 
   const handlePlayAudio = async () => {
     const currentQuestion = questions[currentIndex];
-    if (!currentQuestion || !currentQuestion.context) return;
-    if (isPlaying) return;
+    if (!currentQuestion?.context || isPlaying) return;
+
+    // 이전 재생 중지
+    if (currentAudioSource.current) {
+      try { currentAudioSource.current.stop(); } catch(e) {}
+    }
 
     setLoadingAudio(true);
     try {
-      if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({sampleRate: 24000});
-      }
-      if (audioContextRef.current.state === 'suspended') {
-        await audioContextRef.current.resume();
-      }
-
       const buffer = await generateSpeech(currentQuestion.context);
-      if (buffer) {
+      if (buffer && audioContextRef.current) {
         const source = audioContextRef.current.createBufferSource();
         source.buffer = buffer;
         source.connect(audioContextRef.current.destination);
         source.start(0);
+        currentAudioSource.current = source;
         setIsPlaying(true);
         source.onended = () => {
           setIsPlaying(false);
           setLoadingAudio(false);
         };
-      } else {
-        throw new Error("Buffer is null");
       }
     } catch (e) {
-      console.error("Audio Playback Error:", e);
       setIsPlaying(false);
       setLoadingAudio(false);
     }
   };
 
-  const handleAnswer = (optionIndex: number) => {
-    setAnswers(prev => ({ ...prev, [questions[currentIndex].id]: optionIndex }));
+  const handleAnswer = (idx: number) => {
+    setAnswers(prev => ({ ...prev, [questions[currentIndex].id]: idx }));
   };
 
   const handleSubmit = () => {
     let correctCount = 0;
-    questions.forEach(q => {
-      if (answers[q.id] === q.correctAnswer) correctCount++;
-    });
+    questions.forEach(q => { if (answers[q.id] === q.correctAnswer) correctCount++; });
     onComplete({
       id: Date.now().toString(),
       questions,
@@ -125,19 +130,16 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
     });
   };
 
-  if (loading) return <LoadingSpinner message="시험지를 생성하고 있습니다..." />;
+  if (loading) return <LoadingSpinner message="시험지를 준비 중입니다..." />;
 
-  // 오디오 시작 버튼 (브라우저 정책 준수)
-  if (!audioStarted && mode !== 'READING') {
+  // 오디오 활성화 전 스크린
+  if (!audioContextReady && mode !== 'READING') {
     return (
       <div className="flex flex-col items-center justify-center h-full bg-indigo-900 text-white p-8 text-center">
         <Headphones className="w-20 h-20 mb-6 text-indigo-300 animate-bounce" />
-        <h2 className="text-2xl font-black mb-4">듣기 시험 준비 완료</h2>
-        <p className="mb-8 opacity-80 font-medium">오디오 재생을 위해 아래 버튼을 눌러주세요.</p>
-        <button 
-          onClick={() => setAudioStarted(true)} 
-          className="bg-white text-indigo-900 px-10 py-5 rounded-2xl font-black text-xl shadow-2xl flex items-center gap-3 active:scale-95"
-        >
+        <h2 className="text-2xl font-black mb-4 uppercase tracking-tighter">준비 되셨나요?</h2>
+        <p className="mb-10 opacity-70 font-medium">듣기 평가 오디오 시스템을 활성화합니다.</p>
+        <button onClick={initAudio} className="bg-white text-indigo-900 px-12 py-5 rounded-2xl font-black text-xl shadow-2xl active:scale-95 flex items-center gap-3">
           <Play className="w-6 h-6 fill-current" /> 시험 시작하기
         </button>
       </div>
@@ -155,17 +157,17 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
               <button onClick={() => setIsDrawerOpen(true)} className="p-2 -ml-2 text-gray-600"><Menu className="w-6 h-6" /></button>
               <div className="flex flex-col">
                   <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{mode} MODE</span>
-                  <span className="text-sm font-bold">문제 {currentIndex + 1} / {questions.length}</span>
+                  <span className="text-sm font-bold">문제 {currentIndex + 1} <span className="text-gray-400 font-normal">/ {questions.length}</span></span>
               </div>
             </div>
             <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
-              <Clock className={`w-4 h-4 ${timeLeft < 300 ? 'text-red-500 animate-pulse' : 'text-gray-500'}`} />
-              <span className={`font-mono font-bold text-sm ${timeLeft < 300 ? 'text-red-600' : 'text-gray-700'}`}>{Math.floor(timeLeft/60)}:{(timeLeft%60).toString().padStart(2,'0')}</span>
+              <Clock className="w-4 h-4 text-gray-400" />
+              <span className="font-mono font-bold text-gray-700">{Math.floor(timeLeft/60)}:{(timeLeft%60).toString().padStart(2,'0')}</span>
             </div>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 pb-28" ref={contentRef}>
+      <div className="flex-1 overflow-y-auto p-4 pb-32">
          <div className="max-w-2xl mx-auto space-y-6">
             <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100">
                 <div className="mb-4">
@@ -174,10 +176,10 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
                         {currentQ.type}
                     </span>
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 leading-relaxed">{currentQ.questionText}</h2>
+                <h2 className="text-xl font-bold text-gray-900 leading-relaxed selectable">{currentQ.questionText}</h2>
             </div>
 
-            <div className="bg-white rounded-[2rem] border-2 border-dashed border-gray-200 overflow-hidden min-h-[260px] flex items-center justify-center relative bg-gray-50/50">
+            <div className="bg-white rounded-[2rem] border-2 border-dashed border-gray-200 overflow-hidden min-h-[280px] flex items-center justify-center relative bg-gray-50/50">
                 {isGeneratingImage ? (
                   <div className="flex flex-col items-center gap-2">
                     <Sparkles className="w-8 h-8 text-indigo-400 animate-pulse" />
@@ -195,7 +197,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
                       <span className="font-bold text-indigo-900 uppercase text-xs tracking-widest">{isPlaying ? "듣는 중..." : "다시 듣기 (Tap to Play)"}</span>
                    </button>
                 ) : currentQ.context ? (
-                   <div className="p-8 text-lg font-serif leading-loose text-gray-800 bg-white w-full border border-gray-100 rounded-xl">{currentQ.context}</div>
+                   <div className="p-8 text-lg font-serif leading-loose text-gray-800 bg-white w-full border border-gray-100 rounded-xl selectable">{currentQ.context}</div>
                 ) : <span className="text-gray-300 font-bold uppercase tracking-widest text-[10px]">No visual data</span>}
             </div>
 
@@ -227,13 +229,13 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
         <div className="fixed inset-0 z-50 flex">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsDrawerOpen(false)}></div>
           <div className="relative w-80 bg-white h-full shadow-2xl flex flex-col pt-safe animate-slide-in-right">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center"><span className="font-black text-lg uppercase tracking-tight">Exam Map</span><button onClick={() => setIsDrawerOpen(false)}><X className="w-6 h-6" /></button></div>
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center"><span className="font-black text-lg uppercase tracking-tight">Question Map</span><button onClick={() => setIsDrawerOpen(false)}><X className="w-6 h-6" /></button></div>
             <div className="flex-1 overflow-y-auto p-4 grid grid-cols-4 gap-3 content-start">
                {questions.map((q, idx) => (
-                  <button key={q.id} onClick={() => { setCurrentIndex(idx); setIsDrawerOpen(false); }} className={`aspect-square rounded-xl font-black text-xs border-2 flex items-center justify-center transition-all ${idx === currentIndex ? 'bg-indigo-600 border-indigo-600 text-white' : answers[q.id] !== undefined ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-gray-100 text-gray-300'}`}>{idx + 1}</button>
+                  <button key={q.id} onClick={() => { setCurrentIndex(idx); setIsDrawerOpen(false); }} className={`aspect-square rounded-xl font-black text-xs border-2 flex items-center justify-center transition-all ${idx === currentIndex ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' : answers[q.id] !== undefined ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-gray-100 text-gray-300'}`}>{idx + 1}</button>
                ))}
             </div>
-            <div className="p-6 border-t border-gray-100 text-center"><button onClick={onExit} className="w-full py-4 text-red-500 font-bold border border-red-100 rounded-2xl">시험 종료 (포기)</button></div>
+            <div className="p-6 border-t border-gray-100 text-center"><button onClick={onExit} className="w-full py-4 text-red-500 font-bold border border-red-100 rounded-2xl active:bg-red-50">시험 종료 (포기)</button></div>
           </div>
         </div>
       )}

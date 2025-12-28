@@ -39,7 +39,7 @@ async function decodeAudioData(
 }
 
 /**
- * AI 이미지 생성 (설명을 바탕으로 시험용 그림 제작)
+ * AI 이미지 생성 (그림 문제 대응)
  */
 export const generateImageForQuestion = async (description: string): Promise<string | null> => {
   if (!description || description.length > 200) return null;
@@ -47,11 +47,10 @@ export const generateImageForQuestion = async (description: string): Promise<str
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: {
-        parts: [{ text: `EPS-TOPIK exam style illustration: ${description}. Clear black lines, white background, no text in image.` }]
+        parts: [{ text: `Professional EPS-TOPIK exam illustration. Style: Simple black and white line art, professional, clear. Subject: ${description}. White background only.` }]
       },
       config: { imageConfig: { aspectRatio: "1:1" } }
     });
-
     const parts = response?.candidates?.[0]?.content?.parts;
     if (parts) {
       for (const part of parts) {
@@ -65,36 +64,41 @@ export const generateImageForQuestion = async (description: string): Promise<str
 };
 
 /**
- * AI 무한 문제 생성 로직
- * STATIC_EXAM_DATA(400문항)를 예시로 사용하여 새로운 문제를 생성합니다.
+ * [핵심] DB 기반 무한 문제 생성 엔진
  */
 export const generateQuestions = async (count: number = 40, isPremium: boolean = false, mode: 'FULL' | 'LISTENING' | 'READING' = 'FULL'): Promise<Question[]> => {
-  if (!isPremium) {
-    // 무료 사용자는 기존 400문항 중 랜덤 셔플
-    let filtered = [...STATIC_EXAM_DATA];
-    if (mode === 'LISTENING') filtered = filtered.filter(q => q.type === QuestionType.LISTENING);
-    if (mode === 'READING') filtered = filtered.filter(q => q.type === QuestionType.READING);
-    return filtered.sort(() => 0.5 - Math.random()).slice(0, count);
-  }
+  // 1. 기본적으로 400문항 DB에서 무작위 추출 (기본 풀 구성)
+  let dbPool = [...STATIC_EXAM_DATA];
+  if (mode === 'LISTENING') dbPool = dbPool.filter(q => q.type === QuestionType.LISTENING);
+  if (mode === 'READING') dbPool = dbPool.filter(q => q.type === QuestionType.READING);
+  
+  const shuffledDb = dbPool.sort(() => 0.5 - Math.random());
+  
+  // 무료 사용자이거나 AI 생성이 실패할 경우를 대비해 DB 기반으로 먼저 섞음
+  const selectedFromDb = shuffledDb.slice(0, count);
 
-  // 프리미엄: AI를 통한 무한 생성
+  if (!isPremium) return selectedFromDb;
+
+  // 2. 프리미엄 사용자: DB 문항을 Seed로 하여 유사 문형 AI 생성
   try {
-    const samples = STATIC_EXAM_DATA.sort(() => 0.5 - Math.random()).slice(0, 5);
-    const prompt = `You are a professional EPS-TOPIK examiner. 
-    Based on these samples: ${JSON.stringify(samples)}, 
-    generate ${count} completely NEW questions for ${mode} mode.
+    // DB에서 학습용 샘플 10개를 뽑아 AI에게 전달
+    const seedSamples = shuffledDb.slice(0, 10);
+    const prompt = `You are an official EPS-TOPIK examiner. 
+    Use the following database questions as your strict standard for vocabulary, grammar level, and style:
+    ${JSON.stringify(seedSamples)}
+
+    TASK:
+    Generate ${count} completely new questions that follow the EXACT same logic, difficulty, and format as the samples. 
+    - Mode: ${mode}
+    - If FULL mode: Questions 1-20 must be READING, 21-40 must be LISTENING.
+    - All text must be in natural Korean. Explanations in English.
+    - For LISTENING questions, put the script in the 'context' field.
+    - For READING questions with images, put a short description in 'context'.
     
-    Rules:
-    1. If mode is READING, generate reading questions (vocabulary, grammar, passages).
-    2. If mode is LISTENING, generate listening questions (scripts in 'context' field).
-    3. If mode is FULL, generate 1-20 Reading, 21-40 Listening.
-    4. Questions and options must be in Korean. Explanation in English.
-    5. 'context' for images should be a short description like 'A person riding a bicycle'.
-    
-    Return as a JSON array of Questions.`;
+    Return a JSON array of Question objects.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3-pro-preview",
+      model: "gemini-3-pro-preview", // 복잡한 추론을 위해 Pro 모델 사용
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -118,17 +122,22 @@ export const generateQuestions = async (count: number = 40, isPremium: boolean =
       }
     });
 
-    const text = response.text;
-    if (text) return JSON.parse(cleanJsonString(text));
-    throw new Error("Empty response");
+    const aiQuestions = JSON.parse(cleanJsonString(response.text || '[]'));
+    
+    // DB 문제와 AI 생성 문제를 적절히 섞어 최상의 경험 제공 (50:50 비율 등)
+    if (aiQuestions && aiQuestions.length > 0) {
+      const half = Math.floor(count / 2);
+      return [...selectedFromDb.slice(0, half), ...aiQuestions.slice(0, count - half)].sort(() => 0.5 - Math.random());
+    }
   } catch (error) {
-    console.error("AI Generation failed, falling back to static data", error);
-    return STATIC_EXAM_DATA.sort(() => 0.5 - Math.random()).slice(0, count);
+    console.warn("AI Generation failed, using full DB shuffle instead.");
   }
+
+  return selectedFromDb;
 };
 
 /**
- * AI 음성 생성 (TTS)
+ * TTS 음성 생성
  */
 export const generateSpeech = async (text: string): Promise<AudioBuffer | null> => {
   try {
@@ -151,17 +160,15 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
     }
     return null;
   } catch (error) {
-    console.error("TTS Error:", error);
     return null;
   }
 };
 
 export const analyzePerformance = async (session: ExamSession): Promise<AnalyticsFeedback | null> => {
   try {
-    const prompt = `Analyze EPS-TOPIK result: ${session.score}/${session.questions.length}. Provide JSON feedback.`;
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: prompt,
+      contents: `Analyze EPS-TOPIK results: ${JSON.stringify(session.score)}/${session.questions.length}. Provide JSON study plan.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
