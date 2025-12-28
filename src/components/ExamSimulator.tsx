@@ -10,17 +10,25 @@ interface ExamSimulatorProps {
   onExit: () => void;
   isPremium?: boolean;
   mode?: 'FULL' | 'LISTENING' | 'READING';
+  startFromIndex?: number;
+  onProgressUpdate?: (index: number) => void;
 }
 
-export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit, isPremium = false, mode = 'FULL' }) => {
+export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ 
+  onComplete, 
+  onExit, 
+  isPremium = false, 
+  mode = 'FULL',
+  startFromIndex = 0,
+  onProgressUpdate
+}) => {
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(startFromIndex);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [timeLeft, setTimeLeft] = useState(mode === 'FULL' ? 50 * 60 : 25 * 60); 
   const [loadingAudio, setLoadingAudio] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [currentAiImage, setCurrentAiImage] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
@@ -29,16 +37,15 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
   const audioContextRef = useRef<AudioContext | null>(null);
   const currentAudioSource = useRef<AudioBufferSourceNode | null>(null);
 
-  // 문제 로드
   useEffect(() => {
     const fetchQuestions = async () => {
       setLoading(true);
       try {
-        const count = mode === 'FULL' ? 40 : 20;
+        const count = mode === 'FULL' ? 40 : 100; // Drills are longer
         const generated = await generateQuestions(count, isPremium, mode); 
         setQuestions(generated);
       } catch (err) {
-        setError("문제를 불러오는 중 오류가 발생했습니다.");
+        console.error("Failed to fetch questions");
       } finally {
         setLoading(false);
       }
@@ -46,7 +53,6 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
     fetchQuestions();
   }, [isPremium, mode]);
 
-  // 오디오 컨텍스트 초기화 (사용자 상호작용 필수)
   const initAudio = async () => {
     if (!audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({sampleRate: 24000});
@@ -57,13 +63,11 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
     setAudioContextReady(true);
   };
 
-  // 문제 변경 시 이미지/오디오 처리
   useEffect(() => {
     if (questions.length === 0) return;
     const currentQ = questions[currentIndex];
     setCurrentAiImage(null);
 
-    // AI 이미지 생성 (단순 텍스트 설명인 경우)
     if (currentQ.context && !currentQ.context.startsWith('http') && currentQ.context.length < 120) {
       setIsGeneratingImage(true);
       generateImageForQuestion(currentQ.context).then(img => {
@@ -72,23 +76,23 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
       });
     }
 
-    // 듣기 문제 자동 재생 (오디오 컨텍스트가 준비된 경우에만)
     if (currentQ.type === QuestionType.LISTENING && audioContextReady) {
       handlePlayAudio();
     }
+
+    if (onProgressUpdate) onProgressUpdate(currentIndex);
   }, [currentIndex, questions, audioContextReady]);
 
   useEffect(() => {
-    if (loading || timeLeft <= 0 || error) return;
+    if (loading || timeLeft <= 0) return;
     const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
     return () => clearInterval(timer);
-  }, [loading, timeLeft, error]);
+  }, [loading, timeLeft]);
 
   const handlePlayAudio = async () => {
     const currentQuestion = questions[currentIndex];
     if (!currentQuestion?.context || isPlaying) return;
 
-    // 이전 재생 중지
     if (currentAudioSource.current) {
       try { currentAudioSource.current.stop(); } catch(e) {}
     }
@@ -130,17 +134,16 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
     });
   };
 
-  if (loading) return <LoadingSpinner message="시험지를 준비 중입니다..." />;
+  if (loading) return <LoadingSpinner message="Generating Session..." />;
 
-  // 오디오 활성화 전 스크린
   if (!audioContextReady && mode !== 'READING') {
     return (
       <div className="flex flex-col items-center justify-center h-full bg-indigo-900 text-white p-8 text-center">
         <Headphones className="w-20 h-20 mb-6 text-indigo-300 animate-bounce" />
-        <h2 className="text-2xl font-black mb-4 uppercase tracking-tighter">준비 되셨나요?</h2>
-        <p className="mb-10 opacity-70 font-medium">듣기 평가 오디오 시스템을 활성화합니다.</p>
+        <h2 className="text-2xl font-black mb-4 uppercase">System Ready</h2>
+        <p className="mb-10 opacity-70 font-medium tracking-tight">Activating high-fidelity audio engine for listening section.</p>
         <button onClick={initAudio} className="bg-white text-indigo-900 px-12 py-5 rounded-2xl font-black text-xl shadow-2xl active:scale-95 flex items-center gap-3">
-          <Play className="w-6 h-6 fill-current" /> 시험 시작하기
+          <Play className="w-6 h-6 fill-current" /> START SESSION
         </button>
       </div>
     );
@@ -157,7 +160,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
               <button onClick={() => setIsDrawerOpen(true)} className="p-2 -ml-2 text-gray-600"><Menu className="w-6 h-6" /></button>
               <div className="flex flex-col">
                   <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{mode} MODE</span>
-                  <span className="text-sm font-bold">문제 {currentIndex + 1} <span className="text-gray-400 font-normal">/ {questions.length}</span></span>
+                  <span className="text-sm font-bold">QUESTION {currentIndex + 1} <span className="text-gray-400 font-normal">/ {questions.length}</span></span>
               </div>
             </div>
             <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
@@ -183,7 +186,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
                 {isGeneratingImage ? (
                   <div className="flex flex-col items-center gap-2">
                     <Sparkles className="w-8 h-8 text-indigo-400 animate-pulse" />
-                    <span className="text-xs font-bold text-gray-400">AI가 그림을 그리고 있습니다...</span>
+                    <span className="text-xs font-bold text-gray-400 uppercase">AI Illustrator Working...</span>
                   </div>
                 ) : currentAiImage ? (
                   <img src={currentAiImage} className="max-h-[350px] object-contain w-full p-4 animate-fade-in" />
@@ -194,11 +197,11 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
                       <div className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition-all ${isPlaying ? 'bg-indigo-600 text-white scale-110 shadow-indigo-200' : 'bg-white text-indigo-600 border'}`}>
                         {loadingAudio ? <div className="w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin"/> : <Volume2 className="w-10 h-10" />}
                       </div>
-                      <span className="font-bold text-indigo-900 uppercase text-xs tracking-widest">{isPlaying ? "듣는 중..." : "다시 듣기 (Tap to Play)"}</span>
+                      <span className="font-bold text-indigo-900 uppercase text-xs tracking-widest">{isPlaying ? "Now Playing..." : "Tap to Play Audio"}</span>
                    </button>
                 ) : currentQ.context ? (
-                   <div className="p-8 text-lg font-serif leading-loose text-gray-800 bg-white w-full border border-gray-100 rounded-xl selectable">{currentQ.context}</div>
-                ) : <span className="text-gray-300 font-bold uppercase tracking-widest text-[10px]">No visual data</span>}
+                   <div className="p-8 text-lg font-serif leading-loose text-gray-800 bg-white w-full border border-gray-100 rounded-xl selectable whitespace-pre-wrap">{currentQ.context}</div>
+                ) : <span className="text-gray-300 font-black uppercase tracking-widest text-[10px]">Reference Required</span>}
             </div>
 
             <div className="space-y-3">
@@ -219,9 +222,9 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
       <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-100 p-4 pb-safe flex gap-3 max-w-2xl mx-auto z-20">
           <button onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))} disabled={currentIndex === 0} className="px-5 py-4 rounded-2xl bg-gray-100 text-gray-700 disabled:opacity-30 font-bold active:bg-gray-200 transition-colors"><ChevronLeft className="w-6 h-6" /></button>
           {isLast ? (
-             <button onClick={handleSubmit} className="flex-1 bg-green-600 text-white font-black rounded-2xl shadow-xl shadow-green-100 active:scale-95 text-lg">결과 제출하기</button>
+             <button onClick={handleSubmit} className="flex-1 bg-green-600 text-white font-black rounded-2xl shadow-xl shadow-green-100 active:scale-95 text-lg uppercase">Submit Exam</button>
           ) : (
-             <button onClick={() => setCurrentIndex(prev => prev + 1)} className="flex-1 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 active:scale-95 text-lg">다음 문제로</button>
+             <button onClick={() => setCurrentIndex(prev => prev + 1)} className="flex-1 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 active:scale-95 text-lg uppercase">Next Question</button>
           )}
       </div>
 
@@ -235,7 +238,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
                   <button key={q.id} onClick={() => { setCurrentIndex(idx); setIsDrawerOpen(false); }} className={`aspect-square rounded-xl font-black text-xs border-2 flex items-center justify-center transition-all ${idx === currentIndex ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' : answers[q.id] !== undefined ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-gray-100 text-gray-300'}`}>{idx + 1}</button>
                ))}
             </div>
-            <div className="p-6 border-t border-gray-100 text-center"><button onClick={onExit} className="w-full py-4 text-red-500 font-bold border border-red-100 rounded-2xl active:bg-red-50">시험 종료 (포기)</button></div>
+            <div className="p-6 border-t border-gray-100 text-center"><button onClick={onExit} className="w-full py-4 text-red-500 font-bold border border-red-100 rounded-2xl active:bg-red-50 uppercase">Quit Session</button></div>
           </div>
         </div>
       )}

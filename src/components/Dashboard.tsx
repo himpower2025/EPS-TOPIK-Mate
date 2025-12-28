@@ -41,13 +41,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onStartExam, onUpgra
                   <Star className="w-3 h-3 fill-current" /> Premium Member
                 </span>
               ) : (
-                <p className="text-indigo-200 mb-10 text-sm font-bold opacity-80 uppercase tracking-widest">Let's pass the EPS-TOPIK together</p>
+                <p className="text-indigo-200 mb-10 text-sm font-bold opacity-80 uppercase tracking-widest">Join the ranks of successful students</p>
               )}
               
               <div className="w-full max-w-sm space-y-4">
                 <button onClick={() => onStartExam('FULL')} className="bg-white text-indigo-900 w-full py-5 rounded-[1.5rem] font-black shadow-2xl flex items-center justify-center gap-4 transition-transform active:scale-95 group">
                   <PlayCircle className="w-7 h-7 text-indigo-600 group-hover:scale-110 transition-transform" />
-                  <span className="text-xl font-black">FULL MOCK EXAM</span>
+                  <span className="text-xl font-black uppercase">Start Mock Exam</span>
                 </button>
                 {!isPremium && (
                   <button onClick={onUpgrade} className="bg-indigo-800/50 backdrop-blur-md border border-indigo-400/30 text-white w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95">
@@ -67,8 +67,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onStartExam, onUpgra
                   <Globe className="w-8 h-8 text-blue-600 group-hover:text-white" />
                </div>
                <div className="flex-1">
-                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">New Reading Questions</h4>
-                  <p className="text-xs text-gray-400 font-bold mt-1">Focus on Reading Section (1-20)</p>
+                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">Reading Practice</h4>
+                  <p className="text-xs text-gray-400 font-bold mt-1">Focus on Reading Sections (1-20)</p>
                </div>
                <ArrowRight className="w-5 h-5 text-gray-200" />
             </button>
@@ -79,7 +79,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onStartExam, onUpgra
                </div>
                <div className="flex-1">
                   <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">Listening Drills</h4>
-                  <p className="text-xs text-gray-400 font-bold mt-1">AI Powered Listening Section (21-40)</p>
+                  <p className="text-xs text-gray-400 font-bold mt-1">AI-Powered Conversation Practice (21-40)</p>
                </div>
                <ArrowRight className="w-5 h-5 text-gray-200" />
             </button>
@@ -89,8 +89,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onStartExam, onUpgra
                   <Target className="w-8 h-8 text-green-600 group-hover:text-white" />
                </div>
                <div className="flex-1">
-                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">Smart Analysis</h4>
-                  <p className="text-xs text-gray-400 font-bold mt-1">Review your score and history</p>
+                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">Performance Analytics</h4>
+                  <p className="text-xs text-gray-400 font-bold mt-1">Review your growth and exam history</p>
                </div>
                <ArrowRight className="w-5 h-5 text-gray-200" />
             </button>

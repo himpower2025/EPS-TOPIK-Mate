@@ -57,6 +57,14 @@ const App: React.FC = () => {
     setCurrentState(AppState.EXAM);
   };
 
+  const handleProgressUpdate = (index: number) => {
+    if (!user || user.plan === 'free' || examMode === 'FULL') return;
+    // Persist drill progress
+    setDoc(doc(db, 'users', user.id), {
+      [`last_${examMode.toLowerCase()}_index`]: index
+    }, { merge: true });
+  };
+
   const handleViewAnalysis = async () => {
     if (!user) return;
     const q = query(collection(db, 'exams'), where('userId', '==', user.id), orderBy('createdAt', 'desc'), limit(1));
@@ -65,11 +73,11 @@ const App: React.FC = () => {
       setLastSession(snap.docs[0].data() as ExamSession);
       setCurrentState(AppState.ANALYTICS);
     } else {
-      alert("아직 완료한 시험 내역이 없습니다.");
+      alert("No completed exam records found.");
     }
   };
 
-  if (isLoading) return <div className="h-screen flex items-center justify-center bg-indigo-900 text-white font-black animate-pulse">EPS Mate Loading...</div>;
+  if (isLoading) return <div className="h-screen flex items-center justify-center bg-indigo-900 text-white font-black animate-pulse uppercase tracking-widest">EPS Mate Loading...</div>;
 
   return (
     <div className="h-[100dvh] w-full bg-gray-100 overflow-hidden flex flex-col relative">
@@ -84,12 +92,19 @@ const App: React.FC = () => {
       )}
       
       {currentState === AppState.EXAM && user && (
-        <ExamSimulator onComplete={(s) => { 
-          setDoc(doc(db, 'exams', s.id), { ...s, userId: user.id, createdAt: serverTimestamp() });
-          setDoc(doc(db, 'users', user.id), { examsRemaining: user.plan === 'free' ? 0 : 9999 }, { merge: true });
-          setLastSession(s); 
-          setCurrentState(AppState.ANALYTICS); 
-        }} onExit={() => setCurrentState(AppState.DASHBOARD)} isPremium={user.plan !== 'free'} mode={examMode} />
+        <ExamSimulator 
+          onComplete={(s) => { 
+            setDoc(doc(db, 'exams', s.id), { ...s, userId: user.id, createdAt: serverTimestamp() });
+            setDoc(doc(db, 'users', user.id), { examsRemaining: user.plan === 'free' ? 0 : 9999 }, { merge: true });
+            setLastSession(s); 
+            setCurrentState(AppState.ANALYTICS); 
+          }} 
+          onExit={() => setCurrentState(AppState.DASHBOARD)} 
+          isPremium={user.plan !== 'free'} 
+          mode={examMode} 
+          startFromIndex={(user as any)[`last_${examMode.toLowerCase()}_index`] || 0}
+          onProgressUpdate={handleProgressUpdate}
+        />
       )}
       
       {currentState === AppState.ANALYTICS && lastSession && (
