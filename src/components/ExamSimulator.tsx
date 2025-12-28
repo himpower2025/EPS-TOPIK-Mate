@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Question, QuestionType, ExamSession } from '../types';
 import { generateQuestions, generateSpeech, generateImageForQuestion } from '../services/geminiService';
-import { CheckCircle, Clock, Menu, X, ChevronLeft, Headphones, Volume2, Sparkles } from 'lucide-react';
+import { CheckCircle, Clock, Menu, X, ChevronLeft, Headphones, Volume2, Sparkles, Play } from 'lucide-react';
 import LoadingSpinner from './LoadingSpinner';
 
 interface ExamSimulatorProps {
@@ -24,8 +24,10 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [currentAiImage, setCurrentAiImage] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [audioStarted, setAudioStarted] = useState(false); // 오디오 시작 제스처 확인
   
   const contentRef = useRef<HTMLDivElement>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -45,14 +47,12 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
     fetchQuestions();
   }, [isPremium, mode]);
 
-  // 문제 변경 시 자동 트리거 (이미지 생성/오디오 재생)
   useEffect(() => {
     if (questions.length === 0) return;
     const currentQ = questions[currentIndex];
     setCurrentAiImage(null);
 
-    // 1. AI 이미지 생성 (그림 설명은 있지만 URL은 아닌 경우)
-    if (currentQ.context && !currentQ.context.startsWith('http') && currentQ.context.length < 100) {
+    if (currentQ.context && !currentQ.context.startsWith('http') && currentQ.context.length < 150) {
       setIsGeneratingImage(true);
       generateImageForQuestion(currentQ.context).then(img => {
         setCurrentAiImage(img);
@@ -60,11 +60,11 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
       });
     }
 
-    // 2. 듣기 문제 자동 재생
-    if (currentQ.type === QuestionType.LISTENING) {
+    // 듣기 문제일 때 오디오 컨텍스트가 활성화되어 있으면 자동 재생 시도
+    if (currentQ.type === QuestionType.LISTENING && audioStarted) {
       handlePlayAudio();
     }
-  }, [currentIndex, questions]);
+  }, [currentIndex, questions, audioStarted]);
 
   useEffect(() => {
     if (loading || timeLeft <= 0 || error) return;
@@ -79,20 +79,29 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
 
     setLoadingAudio(true);
     try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({sampleRate: 24000});
+      }
+      if (audioContextRef.current.state === 'suspended') {
+        await audioContextRef.current.resume();
+      }
+
       const buffer = await generateSpeech(currentQuestion.context);
       if (buffer) {
-        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({sampleRate: 24000});
-        const source = ctx.createBufferSource();
+        const source = audioContextRef.current.createBufferSource();
         source.buffer = buffer;
-        source.connect(ctx.destination);
+        source.connect(audioContextRef.current.destination);
         source.start(0);
         setIsPlaying(true);
         source.onended = () => {
           setIsPlaying(false);
           setLoadingAudio(false);
         };
+      } else {
+        throw new Error("Buffer is null");
       }
     } catch (e) {
+      console.error("Audio Playback Error:", e);
       setIsPlaying(false);
       setLoadingAudio(false);
     }
@@ -118,6 +127,23 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
 
   if (loading) return <LoadingSpinner message="시험지를 생성하고 있습니다..." />;
 
+  // 오디오 시작 버튼 (브라우저 정책 준수)
+  if (!audioStarted && mode !== 'READING') {
+    return (
+      <div className="flex flex-col items-center justify-center h-full bg-indigo-900 text-white p-8 text-center">
+        <Headphones className="w-20 h-20 mb-6 text-indigo-300 animate-bounce" />
+        <h2 className="text-2xl font-black mb-4">듣기 시험 준비 완료</h2>
+        <p className="mb-8 opacity-80 font-medium">오디오 재생을 위해 아래 버튼을 눌러주세요.</p>
+        <button 
+          onClick={() => setAudioStarted(true)} 
+          className="bg-white text-indigo-900 px-10 py-5 rounded-2xl font-black text-xl shadow-2xl flex items-center gap-3 active:scale-95"
+        >
+          <Play className="w-6 h-6 fill-current" /> 시험 시작하기
+        </button>
+      </div>
+    );
+  }
+
   const currentQ = questions[currentIndex];
   const isLast = currentIndex === questions.length - 1;
 
@@ -129,7 +155,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
               <button onClick={() => setIsDrawerOpen(true)} className="p-2 -ml-2 text-gray-600"><Menu className="w-6 h-6" /></button>
               <div className="flex flex-col">
                   <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{mode} MODE</span>
-                  <span className="text-sm font-bold">Q{currentIndex + 1} of {questions.length}</span>
+                  <span className="text-sm font-bold">문제 {currentIndex + 1} / {questions.length}</span>
               </div>
             </div>
             <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
@@ -163,7 +189,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
                   <img src={currentQ.context} className="max-h-[350px] object-contain w-full p-4" />
                 ) : currentQ.type === QuestionType.LISTENING ? (
                    <button onClick={handlePlayAudio} className="w-full h-full flex flex-col items-center justify-center gap-4 py-10">
-                      <div className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition-all ${isPlaying ? 'bg-indigo-600 text-white scale-110' : 'bg-white text-indigo-600 border'}`}>
+                      <div className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition-all ${isPlaying ? 'bg-indigo-600 text-white scale-110 shadow-indigo-200' : 'bg-white text-indigo-600 border'}`}>
                         {loadingAudio ? <div className="w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin"/> : <Volume2 className="w-10 h-10" />}
                       </div>
                       <span className="font-bold text-indigo-900 uppercase text-xs tracking-widest">{isPlaying ? "듣는 중..." : "다시 듣기 (Tap to Play)"}</span>
@@ -177,7 +203,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
                 {currentQ.options.map((option, idx) => {
                     const isSelected = answers[currentQ.id] === idx;
                     return (
-                        <button key={idx} onClick={() => handleAnswer(idx)} className={`w-full p-5 rounded-2xl text-left transition-all flex items-center gap-4 border-2 shadow-sm active:scale-[0.98] ${isSelected ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-gray-100 bg-white text-gray-700'}`}>
+                        <button key={idx} onClick={() => handleAnswer(idx)} className={`w-full p-5 rounded-2xl text-left transition-all flex items-center gap-4 border-2 shadow-sm active:scale-[0.98] ${isSelected ? 'border-indigo-600 bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'border-gray-100 bg-white text-gray-700'}`}>
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black shrink-0 ${isSelected ? 'bg-white text-indigo-600' : 'bg-gray-100 text-gray-400'}`}>{idx + 1}</div>
                           <span className="text-base font-bold">{option}</span>
                           {isSelected && <CheckCircle className="ml-auto w-6 h-6 text-indigo-200" />}
