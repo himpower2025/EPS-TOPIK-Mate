@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ExamMode } from '../types';
-import { ChevronLeft, Lock, Star, PlayCircle } from 'lucide-react';
+import { ChevronLeft, Lock, Star } from 'lucide-react';
 
 interface SetSelectorProps {
   mode: ExamMode;
