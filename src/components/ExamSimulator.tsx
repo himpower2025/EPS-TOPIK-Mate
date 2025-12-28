@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Question, QuestionType, ExamSession } from '../types';
 import { generateQuestions, generateSpeech, generateImageForQuestion } from '../services/geminiService';
-import { Play, CheckCircle, AlertCircle, Clock, Menu, X, ChevronRight, ChevronLeft, Headphones, Volume2, Sparkles } from 'lucide-react';
+import { CheckCircle, Clock, Menu, X, ChevronLeft, Headphones, Volume2, Sparkles } from 'lucide-react';
 import LoadingSpinner from './LoadingSpinner';
 
 interface ExamSimulatorProps {
@@ -32,7 +32,8 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
       setLoading(true);
       setError(null);
       try {
-        const generated = await generateQuestions(mode === 'FULL' ? 40 : 20, isPremium, mode); 
+        const count = mode === 'FULL' ? 40 : 20;
+        const generated = await generateQuestions(count, isPremium, mode); 
         if (generated.length === 0) throw new Error("문제를 불러오지 못했습니다.");
         setQuestions(generated);
       } catch (err) {
@@ -44,14 +45,14 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
     fetchQuestions();
   }, [isPremium, mode]);
 
-  // 문제 변경 시 이미지 생성 또는 TTS 자동 재생
+  // 문제 변경 시 자동 트리거 (이미지 생성/오디오 재생)
   useEffect(() => {
     if (questions.length === 0) return;
     const currentQ = questions[currentIndex];
     setCurrentAiImage(null);
 
-    // 1. 이미지 생성 (설명만 있고 URL이 없는 경우)
-    if (currentQ.context && !currentQ.context.startsWith('http')) {
+    // 1. AI 이미지 생성 (그림 설명은 있지만 URL은 아닌 경우)
+    if (currentQ.context && !currentQ.context.startsWith('http') && currentQ.context.length < 100) {
       setIsGeneratingImage(true);
       generateImageForQuestion(currentQ.context).then(img => {
         setCurrentAiImage(img);
@@ -59,7 +60,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
       });
     }
 
-    // 2. 듣기 문제인 경우 자동 안내
+    // 2. 듣기 문제 자동 재생
     if (currentQ.type === QuestionType.LISTENING) {
       handlePlayAudio();
     }
@@ -128,7 +129,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
               <button onClick={() => setIsDrawerOpen(true)} className="p-2 -ml-2 text-gray-600"><Menu className="w-6 h-6" /></button>
               <div className="flex flex-col">
                   <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{mode} MODE</span>
-                  <span className="text-sm font-bold">Question {currentIndex + 1} / {questions.length}</span>
+                  <span className="text-sm font-bold">Q{currentIndex + 1} of {questions.length}</span>
               </div>
             </div>
             <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
@@ -147,10 +148,10 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
                         {currentQ.type}
                     </span>
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 leading-relaxed whitespace-pre-wrap">{currentQ.questionText}</h2>
+                <h2 className="text-xl font-bold text-gray-900 leading-relaxed">{currentQ.questionText}</h2>
             </div>
 
-            <div className="bg-white rounded-[2rem] border-2 border-dashed border-gray-200 overflow-hidden min-h-[240px] flex items-center justify-center relative bg-gray-50/50">
+            <div className="bg-white rounded-[2rem] border-2 border-dashed border-gray-200 overflow-hidden min-h-[260px] flex items-center justify-center relative bg-gray-50/50">
                 {isGeneratingImage ? (
                   <div className="flex flex-col items-center gap-2">
                     <Sparkles className="w-8 h-8 text-indigo-400 animate-pulse" />
@@ -165,10 +166,10 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
                       <div className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition-all ${isPlaying ? 'bg-indigo-600 text-white scale-110' : 'bg-white text-indigo-600 border'}`}>
                         {loadingAudio ? <div className="w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin"/> : <Volume2 className="w-10 h-10" />}
                       </div>
-                      <span className="font-bold text-indigo-900">{isPlaying ? "듣는 중..." : "다시 듣기"}</span>
+                      <span className="font-bold text-indigo-900 uppercase text-xs tracking-widest">{isPlaying ? "듣는 중..." : "다시 듣기 (Tap to Play)"}</span>
                    </button>
                 ) : currentQ.context ? (
-                   <div className="p-8 text-lg font-serif leading-loose text-gray-800 bg-white w-full">{currentQ.context}</div>
+                   <div className="p-8 text-lg font-serif leading-loose text-gray-800 bg-white w-full border border-gray-100 rounded-xl">{currentQ.context}</div>
                 ) : <span className="text-gray-300 font-bold uppercase tracking-widest text-[10px]">No visual data</span>}
             </div>
 
