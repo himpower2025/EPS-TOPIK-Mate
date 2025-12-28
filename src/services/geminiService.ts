@@ -39,15 +39,15 @@ async function decodeAudioData(
 }
 
 /**
- * AI Image Generation for Exam Context
+ * AI Image Generation for Exam Context (Nano Banana)
  */
 export const generateImageForQuestion = async (description: string): Promise<string | null> => {
   if (!description || description.length > 200) return null;
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
+      model: 'gemini-2.5-flash-image', // 나노 바나나 모델 사용
       contents: {
-        parts: [{ text: `Professional EPS-TOPIK exam illustration. Simple line art, high contrast, clear objects. Subject: ${description}. White background.` }]
+        parts: [{ text: `Professional EPS-TOPIK exam illustration: ${description}. Style: Clear black-and-white high-quality line art, minimalistic, educational, official workbook style. Pure white background. No text labels inside the image.` }]
       },
       config: { imageConfig: { aspectRatio: "1:1" } }
     });
@@ -59,13 +59,13 @@ export const generateImageForQuestion = async (description: string): Promise<str
     }
     return null;
   } catch (error) {
+    console.error("AI Image Generation failed:", error);
     return null;
   }
 };
 
 /**
- * AI Question Generation Engine
- * Uses the 400-question DB as a seed to maintain style and difficulty.
+ * AI Question Generator based on official seed data
  */
 export const generateQuestions = async (count: number = 40, isPremium: boolean = false, mode: 'FULL' | 'LISTENING' | 'READING' = 'FULL'): Promise<Question[]> => {
   let dbPool = [...STATIC_EXAM_DATA];
@@ -79,11 +79,13 @@ export const generateQuestions = async (count: number = 40, isPremium: boolean =
 
   try {
     const seedSamples = shuffledDb.slice(0, 5);
-    const prompt = `You are an expert EPS-TOPIK examiner. Create ${count} new questions mirroring these samples: ${JSON.stringify(seedSamples)}.
-    Mode: ${mode}. If FULL, Questions 1-20 are READING, 21-40 are LISTENING.
-    Text must be in natural Korean. Explain in English. 
-    Listening scripts should involve conversations like 'Man: ... Woman: ...' for realism.
-    Return JSON array of Question objects.`;
+    const prompt = `You are an expert EPS-TOPIK examiner. Create ${count} new questions mirroring these official samples: ${JSON.stringify(seedSamples)}.
+    Mode: ${mode}.
+    Requirement: 
+    1. If mode is FULL, generate 1-20 Reading, 21-40 Listening.
+    2. Listening context MUST be a dialogue (Man: ..., Woman: ...).
+    3. Reading context for images should be a description for an illustrator.
+    Return JSON Question array. English explanations. natural Korean text.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
@@ -112,28 +114,27 @@ export const generateQuestions = async (count: number = 40, isPremium: boolean =
 
     const aiQuestions = JSON.parse(cleanJsonString(response.text || '[]'));
     if (aiQuestions && aiQuestions.length > 0) {
-      // Merge DB and AI questions for the ultimate pool
-      return [...selectedFromDb.slice(0, count/2), ...aiQuestions.slice(0, count/2)].sort(() => 0.5 - Math.random());
+      return aiQuestions.slice(0, count);
     }
   } catch (error) {
-    console.warn("AI Generation fallback to DB.");
+    console.warn("AI Question Generation fallback.");
   }
   return selectedFromDb;
 };
 
 /**
- * Natural Multi-Speaker TTS System
- * Automatically detects Man/Woman in script and uses distinct voices.
+ * Dual-Speaker Natural TTS
  */
 export const generateSpeech = async (text: string): Promise<AudioBuffer | null> => {
   try {
-    const hasMultipleSpeakers = /남:|여:|Man:|Woman:/.test(text);
+    const hasMan = /남:|Man:|Nam:/.test(text);
+    const hasWoman = /여:|Woman:|Yeo:/.test(text);
     
     const config: any = {
       responseModalities: [Modality.AUDIO],
     };
 
-    if (hasMultipleSpeakers) {
+    if (hasMan && hasWoman) {
       config.speechConfig = {
         multiSpeakerVoiceConfig: {
           speakerVoiceConfigs: [
@@ -146,14 +147,14 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
       };
     } else {
       config.speechConfig = {
-        voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } }
+        voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } },
       };
     }
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
       contents: [{ parts: [{ text: `잘 듣고 질문에 답하십시오. ${text}` }] }],
-      config: config
+      config: config,
     });
 
     const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
@@ -164,7 +165,6 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
     }
     return null;
   } catch (error) {
-    console.error("TTS Error:", error);
     return null;
   }
 };
@@ -173,7 +173,7 @@ export const analyzePerformance = async (session: ExamSession): Promise<Analytic
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: `Analyze EPS-TOPIK score: ${session.score}/${session.questions.length}. Provide English feedback.`,
+      contents: `Analyze result: ${session.score}/${session.questions.length}. Provide English feedback.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: {

@@ -13,7 +13,7 @@ import { ExamSession, User } from './types';
 
 import { auth, db } from './firebase';
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp, onSnapshot, collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, onSnapshot, collection, query, where, getDocs, orderBy, limit, getDoc } from 'firebase/firestore';
 
 enum AppState { LANDING, DASHBOARD, EXAM, ANALYTICS }
 
@@ -26,6 +26,7 @@ const App: React.FC = () => {
   const [lastSession, setLastSession] = useState<ExamSession | null>(null);
   const [examMode, setExamMode] = useState<'FULL' | 'LISTENING' | 'READING'>('FULL');
   const [isLoading, setIsLoading] = useState(true);
+  const [startIdx, setStartIdx] = useState(0);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
@@ -48,18 +49,41 @@ const App: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  const handleStartExam = (mode: 'FULL' | 'LISTENING' | 'READING' = 'FULL') => {
+  const handleStartExam = async (mode: 'FULL' | 'LISTENING' | 'READING' = 'FULL') => {
     if (user?.plan === 'free' && user.examsRemaining <= 0) {
       setShowPaywall(true);
       return;
     }
+    
     setExamMode(mode);
+    
+    // For Drills, try to fetch last saved progress
+    if (mode !== 'FULL' && user) {
+      const userRef = doc(db, 'users', user.id);
+      const snap = await getDoc(userRef);
+      if (snap.exists()) {
+        const data = snap.data();
+        const savedIdx = data[`last_${mode.toLowerCase()}_index`];
+        if (savedIdx && data.plan !== 'free') {
+           if (confirm(`Resume from Question ${savedIdx + 1}?`)) {
+             setStartIdx(savedIdx);
+           } else {
+             setStartIdx(0);
+           }
+        } else {
+           setStartIdx(0);
+        }
+      }
+    } else {
+      setStartIdx(0);
+    }
+
     setCurrentState(AppState.EXAM);
   };
 
   const handleProgressUpdate = (index: number) => {
     if (!user || user.plan === 'free' || examMode === 'FULL') return;
-    // Persist drill progress
+    // Persist progress asynchronously
     setDoc(doc(db, 'users', user.id), {
       [`last_${examMode.toLowerCase()}_index`]: index
     }, { merge: true });
@@ -73,7 +97,7 @@ const App: React.FC = () => {
       setLastSession(snap.docs[0].data() as ExamSession);
       setCurrentState(AppState.ANALYTICS);
     } else {
-      alert("No completed exam records found.");
+      alert("No results found.");
     }
   };
 
@@ -102,7 +126,7 @@ const App: React.FC = () => {
           onExit={() => setCurrentState(AppState.DASHBOARD)} 
           isPremium={user.plan !== 'free'} 
           mode={examMode} 
-          startFromIndex={(user as any)[`last_${examMode.toLowerCase()}_index`] || 0}
+          startFromIndex={startIdx}
           onProgressUpdate={handleProgressUpdate}
         />
       )}
