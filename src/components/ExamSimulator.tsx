@@ -1,26 +1,29 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Question, QuestionType, ExamSession } from '../types';
-import { generateQuestions, generateSpeech } from '../services/geminiService';
-import { Play, CheckCircle, AlertCircle, Clock, Menu, X, ChevronRight, ChevronLeft, Headphones, Volume2 } from 'lucide-react';
+import { generateQuestions, generateSpeech, generateImageForQuestion } from '../services/geminiService';
+import { Play, CheckCircle, AlertCircle, Clock, Menu, X, ChevronRight, ChevronLeft, Headphones, Volume2, Sparkles } from 'lucide-react';
 import LoadingSpinner from './LoadingSpinner';
 
 interface ExamSimulatorProps {
   onComplete: (session: ExamSession) => void;
   onExit: () => void;
   isPremium?: boolean;
+  mode?: 'FULL' | 'LISTENING' | 'READING';
 }
 
-export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit, isPremium = false }) => {
+export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit, isPremium = false, mode = 'FULL' }) => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(50 * 60); 
+  const [timeLeft, setTimeLeft] = useState(mode === 'FULL' ? 50 * 60 : 25 * 60); 
   const [loadingAudio, setLoadingAudio] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [currentAiImage, setCurrentAiImage] = useState<string | null>(null);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -29,31 +32,44 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
       setLoading(true);
       setError(null);
       try {
-        // 실제 시험인 40문제를 불러옵니다.
-        const generated = await generateQuestions(40, isPremium); 
-        if (generated.length === 0) throw new Error("Failed to load questions.");
+        const generated = await generateQuestions(mode === 'FULL' ? 40 : 20, isPremium, mode); 
+        if (generated.length === 0) throw new Error("문제를 불러오지 못했습니다.");
         setQuestions(generated);
       } catch (err) {
-        console.error(err);
-        setError("Unable to load exam questions. Please try again.");
+        setError("시험 문제를 로드할 수 없습니다.");
       } finally {
         setLoading(false);
       }
     };
     fetchQuestions();
-  }, [isPremium]);
+  }, [isPremium, mode]);
+
+  // 문제 변경 시 이미지 생성 또는 TTS 자동 재생
+  useEffect(() => {
+    if (questions.length === 0) return;
+    const currentQ = questions[currentIndex];
+    setCurrentAiImage(null);
+
+    // 1. 이미지 생성 (설명만 있고 URL이 없는 경우)
+    if (currentQ.context && !currentQ.context.startsWith('http')) {
+      setIsGeneratingImage(true);
+      generateImageForQuestion(currentQ.context).then(img => {
+        setCurrentAiImage(img);
+        setIsGeneratingImage(false);
+      });
+    }
+
+    // 2. 듣기 문제인 경우 자동 안내
+    if (currentQ.type === QuestionType.LISTENING) {
+      handlePlayAudio();
+    }
+  }, [currentIndex, questions]);
 
   useEffect(() => {
     if (loading || timeLeft <= 0 || error) return;
     const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
     return () => clearInterval(timer);
   }, [loading, timeLeft, error]);
-
-  useEffect(() => {
-    if (contentRef.current) {
-      contentRef.current.scrollTo(0, 0);
-    }
-  }, [currentIndex]);
 
   const handlePlayAudio = async () => {
     const currentQuestion = questions[currentIndex];
@@ -63,10 +79,8 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
     setLoadingAudio(true);
     try {
       const buffer = await generateSpeech(currentQuestion.context);
-      
       if (buffer) {
-        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-        if (ctx.state === 'suspended') await ctx.resume();
+        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({sampleRate: 24000});
         const source = ctx.createBufferSource();
         source.buffer = buffer;
         source.connect(ctx.destination);
@@ -76,19 +90,8 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
           setIsPlaying(false);
           setLoadingAudio(false);
         };
-      } else {
-        const utterance = new SpeechSynthesisUtterance(currentQuestion.context);
-        utterance.lang = 'ko-KR';
-        utterance.rate = 0.9;
-        utterance.onend = () => {
-          setIsPlaying(false);
-          setLoadingAudio(false);
-        };
-        setIsPlaying(true);
-        window.speechSynthesis.speak(utterance);
       }
     } catch (e) {
-      console.error(e);
       setIsPlaying(false);
       setLoadingAudio(false);
     }
@@ -103,206 +106,107 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ onComplete, onExit
     questions.forEach(q => {
       if (answers[q.id] === q.correctAnswer) correctCount++;
     });
-    const session: ExamSession = {
+    onComplete({
       id: Date.now().toString(),
       questions,
       userAnswers: answers,
       score: correctCount,
       completedAt: new Date().toISOString()
-    };
-    onComplete(session);
+    });
   };
 
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s < 10 ? '0' : ''}${s}`;
-  };
-
-  const isImageUrl = (text?: string) => {
-    return text && (text.startsWith('http') || text.startsWith('data:image'));
-  };
-
-  if (loading) return <LoadingSpinner message="Preparing your 40-Question Exam..." />;
-
-  if (error) return (
-    <div className="flex flex-col items-center justify-center h-full p-8 text-center space-y-4">
-      <AlertCircle className="w-16 h-16 text-red-500" />
-      <h2 className="text-2xl font-bold">Connection Error</h2>
-      <p className="text-gray-600">{error}</p>
-      <button onClick={onExit} className="px-6 py-2 bg-indigo-600 text-white rounded-lg">Exit</button>
-    </div>
-  );
+  if (loading) return <LoadingSpinner message="시험지를 생성하고 있습니다..." />;
 
   const currentQ = questions[currentIndex];
   const isLast = currentIndex === questions.length - 1;
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 font-sans">
-      
-      {/* 1. Header (Fixed Top) */}
-      <div className="bg-white border-b border-gray-200 z-30 pt-safe shrink-0 shadow-sm">
-        <div className="px-4 py-3 flex justify-between items-center h-14">
+    <div className="flex flex-col h-full bg-gray-100 font-sans">
+      <div className="bg-white border-b border-gray-200 pt-safe shrink-0 shadow-sm z-30">
+        <div className="px-4 py-3 flex justify-between items-center">
             <div className="flex items-center gap-3">
-            <button onClick={() => setIsDrawerOpen(true)} className="p-2 -ml-2 text-gray-600 active:bg-gray-100 rounded-lg">
-                <Menu className="w-6 h-6" />
-            </button>
-            <div className="flex flex-col leading-none">
-                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider mb-0.5">EPS-TOPIK FULL TEST</span>
-                <span className="text-sm font-bold text-gray-900">Q {currentIndex + 1} <span className="text-gray-400 font-normal">/ {questions.length}</span></span>
-            </div>
+              <button onClick={() => setIsDrawerOpen(true)} className="p-2 -ml-2 text-gray-600"><Menu className="w-6 h-6" /></button>
+              <div className="flex flex-col">
+                  <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{mode} MODE</span>
+                  <span className="text-sm font-bold">Question {currentIndex + 1} / {questions.length}</span>
+              </div>
             </div>
             <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
-            <Clock className={`w-4 h-4 ${timeLeft < 300 ? 'text-red-500 animate-pulse' : 'text-gray-500'}`} />
-            <span className={`font-mono font-bold text-sm ${timeLeft < 300 ? 'text-red-600' : 'text-gray-700'}`}>{formatTime(timeLeft)}</span>
+              <Clock className={`w-4 h-4 ${timeLeft < 300 ? 'text-red-500 animate-pulse' : 'text-gray-500'}`} />
+              <span className={`font-mono font-bold text-sm ${timeLeft < 300 ? 'text-red-600' : 'text-gray-700'}`}>{Math.floor(timeLeft/60)}:{(timeLeft%60).toString().padStart(2,'0')}</span>
             </div>
-        </div>
-        <div className="h-1 w-full bg-gray-100">
-            <div className="h-full bg-indigo-600 transition-all duration-300" style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}></div>
         </div>
       </div>
 
-      {/* 2. Content */}
-      <div ref={contentRef} className="flex-1 overflow-y-auto bg-gray-50 scroll-smooth p-4 pb-28">
+      <div className="flex-1 overflow-y-auto p-4 pb-28" ref={contentRef}>
          <div className="max-w-2xl mx-auto space-y-6">
-            
-            <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                <div className="mb-3">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide border ${currentQ.type === QuestionType.LISTENING ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
+            <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100">
+                <div className="mb-4">
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${currentQ.type === QuestionType.LISTENING ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
                         {currentQ.type === QuestionType.LISTENING ? <Headphones className="w-3 h-3"/> : "Aa"}
                         {currentQ.type}
                     </span>
                 </div>
-                <h2 className="text-lg font-bold text-gray-900 leading-relaxed whitespace-pre-wrap break-words">
-                    {currentQ.questionText}
-                </h2>
+                <h2 className="text-xl font-bold text-gray-900 leading-relaxed whitespace-pre-wrap">{currentQ.questionText}</h2>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-                {currentQ.context && (
-                    isImageUrl(currentQ.context) ? (
-                    <div className="w-full bg-gray-50 p-4 flex justify-center">
-                        <img 
-                        src={currentQ.context} 
-                        alt="Context" 
-                        className="max-h-[300px] object-contain rounded-lg" 
-                        onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=Image+Load+Error'; }}
-                        />
-                    </div>
-                    ) : (
-                    <div className={`p-6 ${currentQ.type === QuestionType.LISTENING ? 'bg-gray-50 flex flex-col items-center justify-center' : 'bg-orange-50/30'}`}>
-                        {currentQ.type === QuestionType.READING ? (
-                          <p className="text-base text-gray-800 whitespace-pre-wrap leading-loose font-serif">
-                            {currentQ.context}
-                          </p>
-                        ) : (
-                          <div className="w-full flex flex-col items-center py-4">
-                            <button
-                              onClick={handlePlayAudio}
-                              disabled={loadingAudio || isPlaying}
-                              className={`
-                                relative group w-28 h-28 rounded-full flex items-center justify-center shadow-lg transition-all
-                                ${isPlaying ? 'bg-indigo-600 text-white scale-105 ring-4 ring-indigo-200' : 'bg-white text-indigo-600 border-2 border-indigo-100'}
-                              `}
-                            >
-                              {loadingAudio ? <div className="w-8 h-8 border-3 border-current border-t-transparent rounded-full animate-spin"/> : isPlaying ? <Volume2 className="w-12 h-12 animate-pulse" /> : <Play className="w-12 h-12 fill-current ml-1" />}
-                            </button>
-                            <p className="mt-4 text-sm font-bold text-indigo-900">
-                              {loadingAudio ? "Generating AI Voice..." : isPlaying ? "Listening Carefully..." : "Tap to Play Listening Question"}
-                            </p>
-                          </div>
-                        )}
-                    </div>
-                    )
-                )}
+            <div className="bg-white rounded-[2rem] border-2 border-dashed border-gray-200 overflow-hidden min-h-[240px] flex items-center justify-center relative bg-gray-50/50">
+                {isGeneratingImage ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <Sparkles className="w-8 h-8 text-indigo-400 animate-pulse" />
+                    <span className="text-xs font-bold text-gray-400">AI가 그림을 그리고 있습니다...</span>
+                  </div>
+                ) : currentAiImage ? (
+                  <img src={currentAiImage} className="max-h-[350px] object-contain w-full p-4 animate-fade-in" />
+                ) : currentQ.context && currentQ.context.startsWith('http') ? (
+                  <img src={currentQ.context} className="max-h-[350px] object-contain w-full p-4" />
+                ) : currentQ.type === QuestionType.LISTENING ? (
+                   <button onClick={handlePlayAudio} className="w-full h-full flex flex-col items-center justify-center gap-4 py-10">
+                      <div className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition-all ${isPlaying ? 'bg-indigo-600 text-white scale-110' : 'bg-white text-indigo-600 border'}`}>
+                        {loadingAudio ? <div className="w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin"/> : <Volume2 className="w-10 h-10" />}
+                      </div>
+                      <span className="font-bold text-indigo-900">{isPlaying ? "듣는 중..." : "다시 듣기"}</span>
+                   </button>
+                ) : currentQ.context ? (
+                   <div className="p-8 text-lg font-serif leading-loose text-gray-800 bg-white w-full">{currentQ.context}</div>
+                ) : <span className="text-gray-300 font-bold uppercase tracking-widest text-[10px]">No visual data</span>}
             </div>
 
             <div className="space-y-3">
                 {currentQ.options.map((option, idx) => {
                     const isSelected = answers[currentQ.id] === idx;
                     return (
-                        <button
-                        key={idx}
-                        onClick={() => handleAnswer(idx)}
-                        className={`
-                            w-full p-4 rounded-xl text-left transition-all duration-200 flex items-center gap-4 border shadow-sm active:scale-[0.98]
-                            ${isSelected 
-                            ? 'bg-indigo-600 text-white border-indigo-600 ring-4 ring-indigo-100' 
-                            : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300 hover:bg-gray-50'}
-                        `}
-                        >
-                        <div className={`
-                            w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 border
-                            ${isSelected ? 'bg-white text-indigo-600 border-white' : 'bg-gray-100 text-gray-500 border-gray-200'}
-                        `}>
-                            {idx + 1}
-                        </div>
-                        <span className="text-base font-bold leading-snug">{option}</span>
-                        {isSelected && <CheckCircle className="ml-auto w-6 h-6 text-indigo-200" />}
+                        <button key={idx} onClick={() => handleAnswer(idx)} className={`w-full p-5 rounded-2xl text-left transition-all flex items-center gap-4 border-2 shadow-sm active:scale-[0.98] ${isSelected ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-gray-100 bg-white text-gray-700'}`}>
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black shrink-0 ${isSelected ? 'bg-white text-indigo-600' : 'bg-gray-100 text-gray-400'}`}>{idx + 1}</div>
+                          <span className="text-base font-bold">{option}</span>
+                          {isSelected && <CheckCircle className="ml-auto w-6 h-6 text-indigo-200" />}
                         </button>
                     );
                 })}
             </div>
-
          </div>
       </div>
 
-      {/* 3. Footer */}
-      <div className="bg-white border-t border-gray-200 pb-safe z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] shrink-0">
-         <div className="p-4 flex gap-3 max-w-2xl mx-auto">
-            <button 
-              onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
-              disabled={currentIndex === 0}
-              className="px-5 py-3.5 rounded-xl bg-gray-100 text-gray-700 disabled:opacity-30 font-bold active:bg-gray-200 transition-colors"
-            >
-               <ChevronLeft className="w-6 h-6" />
-            </button>
-            
-            {isLast ? (
-               <button onClick={handleSubmit} className="flex-1 bg-green-600 text-white font-bold rounded-xl shadow-lg shadow-green-200 active:scale-95 transition-all flex items-center justify-center gap-2 text-lg">
-                 Submit Exam <CheckCircle className="w-5 h-5" />
-               </button>
-            ) : (
-               <button onClick={() => setCurrentIndex(prev => prev + 1)} className="flex-1 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 active:scale-95 transition-all flex items-center justify-center gap-2 text-lg">
-                 Next Question <ChevronRight className="w-5 h-5" />
-               </button>
-            )}
-         </div>
+      <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-100 p-4 pb-safe flex gap-3 max-w-2xl mx-auto z-20">
+          <button onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))} disabled={currentIndex === 0} className="px-5 py-4 rounded-2xl bg-gray-100 text-gray-700 disabled:opacity-30 font-bold active:bg-gray-200 transition-colors"><ChevronLeft className="w-6 h-6" /></button>
+          {isLast ? (
+             <button onClick={handleSubmit} className="flex-1 bg-green-600 text-white font-black rounded-2xl shadow-xl shadow-green-100 active:scale-95 text-lg">결과 제출하기</button>
+          ) : (
+             <button onClick={() => setCurrentIndex(prev => prev + 1)} className="flex-1 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 active:scale-95 text-lg">다음 문제로</button>
+          )}
       </div>
 
-      {/* Drawer */}
       {isDrawerOpen && (
         <div className="fixed inset-0 z-50 flex">
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsDrawerOpen(false)}></div>
-          <div className="relative w-72 bg-white h-full shadow-2xl flex flex-col pt-safe pb-safe animate-slide-in-right">
-            <div className="p-5 border-b border-gray-100 flex justify-between items-center">
-               <span className="font-bold text-lg">Exam Map</span>
-               <button onClick={() => setIsDrawerOpen(false)}><X className="w-6 h-6 text-gray-400" /></button>
-            </div>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsDrawerOpen(false)}></div>
+          <div className="relative w-80 bg-white h-full shadow-2xl flex flex-col pt-safe animate-slide-in-right">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center"><span className="font-black text-lg uppercase tracking-tight">Exam Map</span><button onClick={() => setIsDrawerOpen(false)}><X className="w-6 h-6" /></button></div>
             <div className="flex-1 overflow-y-auto p-4 grid grid-cols-4 gap-3 content-start">
-               {questions.map((q, idx) => {
-                  const isActive = idx === currentIndex;
-                  const isDone = answers[q.id] !== undefined;
-                  return (
-                    <button
-                      key={q.id}
-                      onClick={() => {
-                        setCurrentIndex(idx);
-                        setIsDrawerOpen(false);
-                      }}
-                      className={`aspect-square rounded-lg font-bold text-sm border-2 flex items-center justify-center transition-all
-                        ${isActive ? 'border-indigo-600 bg-indigo-600 text-white' : 
-                          isDone ? 'border-indigo-200 bg-indigo-50 text-indigo-700' : 'border-gray-100 bg-white text-gray-400'}
-                      `}
-                    >
-                      {idx + 1}
-                    </button>
-                  )
-               })}
+               {questions.map((q, idx) => (
+                  <button key={q.id} onClick={() => { setCurrentIndex(idx); setIsDrawerOpen(false); }} className={`aspect-square rounded-xl font-black text-xs border-2 flex items-center justify-center transition-all ${idx === currentIndex ? 'bg-indigo-600 border-indigo-600 text-white' : answers[q.id] !== undefined ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-gray-100 text-gray-300'}`}>{idx + 1}</button>
+               ))}
             </div>
-            <div className="p-4 border-t border-gray-100 text-center">
-               <span className="text-[10px] text-gray-400 font-bold uppercase">1-20 Reading | 21-40 Listening</span>
-            </div>
+            <div className="p-6 border-t border-gray-100 text-center"><button onClick={onExit} className="w-full py-4 text-red-500 font-bold border border-red-100 rounded-2xl">시험 종료 (포기)</button></div>
           </div>
         </div>
       )}
