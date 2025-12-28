@@ -1,10 +1,12 @@
-// Enum 대신 const object를 사용하여 런타임 바인딩 에러 방지
+
 export const QuestionType = {
   READING: 'READING',
   LISTENING: 'LISTENING'
 } as const;
 
 export type QuestionType = typeof QuestionType[keyof typeof QuestionType];
+
+export type ExamMode = 'FULL' | 'LISTENING' | 'READING';
 
 export interface Question {
   id: string;
@@ -20,18 +22,12 @@ export interface Question {
 
 export interface ExamSession {
   id: string;
+  mode: ExamMode;
+  setNumber: number;
   questions: Question[];
   userAnswers: Record<string, number>;
   score: number;
   completedAt: string;
-}
-
-export interface UserStats {
-  totalExams: number;
-  averageScore: number;
-  weakAreas: string[];
-  recentScores: number[];
-  categoryPerformance: Record<string, number>;
 }
 
 export interface AnalyticsFeedback {

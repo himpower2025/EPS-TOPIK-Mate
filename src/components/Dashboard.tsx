@@ -1,17 +1,17 @@
 
 import React from 'react';
 import { PlayCircle, Target, BookOpen, Globe, Lock, Star, User as UserIcon, ArrowRight } from 'lucide-react';
-import { User } from '../types';
+import { User, ExamMode } from '../types';
 
 interface DashboardProps {
   user: User;
-  onStartExam: (mode?: 'FULL' | 'LISTENING' | 'READING') => void;
+  onModeSelect: (mode: ExamMode) => void;
   onUpgrade: () => void;
   onProfileClick: () => void;
   onViewAnalysis: () => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ user, onStartExam, onUpgrade, onProfileClick, onViewAnalysis }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgrade, onProfileClick, onViewAnalysis }) => {
   const isPremium = user.plan !== 'free';
 
   return (
@@ -45,13 +45,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onStartExam, onUpgra
               )}
               
               <div className="w-full max-w-sm space-y-4">
-                <button onClick={() => onStartExam('FULL')} className="bg-white text-indigo-900 w-full py-5 rounded-[1.5rem] font-black shadow-2xl flex items-center justify-center gap-4 transition-transform active:scale-95 group">
+                <button onClick={() => onModeSelect('FULL')} className="bg-white text-indigo-900 w-full py-5 rounded-[1.5rem] font-black shadow-2xl flex items-center justify-center gap-4 transition-transform active:scale-95 group">
                   <PlayCircle className="w-7 h-7 text-indigo-600 group-hover:scale-110 transition-transform" />
                   <span className="text-xl font-black uppercase">Take Mock Exam</span>
                 </button>
                 {!isPremium && (
                   <button onClick={onUpgrade} className="bg-indigo-800/50 backdrop-blur-md border border-indigo-400/30 text-white w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95">
-                    <Lock className="w-5 h-5 text-indigo-300" /> UNLOCK PREMIUM ACCESS
+                    <Lock className="w-5 h-5 text-indigo-300" /> UNLOCK ALL ROUNDS
                   </button>
                 )}
               </div>
@@ -62,24 +62,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onStartExam, onUpgra
           <h3 className="text-gray-900 font-black text-xs uppercase tracking-[0.2em] mb-6 opacity-40">Practice Labs</h3>
           
           <div className="grid grid-cols-1 gap-4">
-            <button onClick={() => onStartExam('READING')} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-6 hover:border-indigo-200 active:scale-[0.98] transition-all text-left group">
+            <button onClick={() => onModeSelect('READING')} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-6 hover:border-indigo-200 active:scale-[0.98] transition-all text-left group">
                <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-indigo-600 transition-colors">
                   <Globe className="w-8 h-8 text-blue-600 group-hover:text-white" />
                </div>
                <div className="flex-1">
                   <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">Reading Drills</h4>
-                  <p className="text-xs text-gray-400 font-bold mt-1">Focus on Reading Comprehension (1-20)</p>
+                  <p className="text-xs text-gray-400 font-bold mt-1">30 Rounds of Reading Intensive Training</p>
                </div>
                <ArrowRight className="w-5 h-5 text-gray-200" />
             </button>
 
-            <button onClick={() => onStartExam('LISTENING')} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-6 hover:border-indigo-200 active:scale-[0.98] transition-all text-left group">
+            <button onClick={() => onModeSelect('LISTENING')} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-6 hover:border-indigo-200 active:scale-[0.98] transition-all text-left group">
                <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-orange-600 transition-colors">
                   <BookOpen className="w-8 h-8 text-orange-600 group-hover:text-white" />
                </div>
                <div className="flex-1">
                   <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">Listening Drills</h4>
-                  <p className="text-xs text-gray-400 font-bold mt-1">AI-Powered Conversation Practice (21-40)</p>
+                  <p className="text-xs text-gray-400 font-bold mt-1">30 Rounds of Audio Comprehension</p>
                </div>
                <ArrowRight className="w-5 h-5 text-gray-200" />
             </button>

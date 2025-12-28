@@ -1,33 +1,31 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Question, QuestionType, ExamSession } from '../types';
-import { generateQuestions, generateSpeech, generateImageForQuestion } from '../services/geminiService';
+import { Question, QuestionType, ExamSession, ExamMode } from '../types';
+import { generateQuestionsBySet, generateSpeech, generateImageForQuestion } from '../services/geminiService';
 import { CheckCircle, Clock, Menu, X, ChevronLeft, Headphones, Volume2, Sparkles, Play } from 'lucide-react';
 import LoadingSpinner from './LoadingSpinner';
 
 interface ExamSimulatorProps {
+  mode: ExamMode;
+  setNumber: number;
   onComplete: (session: ExamSession) => void;
   onExit: () => void;
   isPremium?: boolean;
-  mode?: 'FULL' | 'LISTENING' | 'READING';
-  startFromIndex?: number;
-  onProgressUpdate?: (index: number) => void;
 }
 
 export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ 
+  mode,
+  setNumber,
   onComplete, 
   onExit, 
-  isPremium = false, 
-  mode = 'FULL',
-  startFromIndex = 0,
-  onProgressUpdate
+  isPremium = false 
 }) => {
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(startFromIndex);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(mode === 'FULL' ? 50 * 60 : 60 * 60); 
+  const [timeLeft, setTimeLeft] = useState(mode === 'FULL' ? 50 * 60 : 25 * 60); 
   const [loadingAudio, setLoadingAudio] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [currentAiImage, setCurrentAiImage] = useState<string | null>(null);
@@ -41,17 +39,16 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
     const fetchQuestions = async () => {
       setLoading(true);
       try {
-        const count = mode === 'FULL' ? 40 : 100;
-        const generated = await generateQuestions(count, isPremium, mode); 
+        const generated = await generateQuestionsBySet(mode, setNumber, isPremium); 
         setQuestions(generated);
       } catch (err) {
-        console.error("Fetch questions failed");
+        console.error("Fetch questions failed", err);
       } finally {
         setLoading(false);
       }
     };
     fetchQuestions();
-  }, [isPremium, mode]);
+  }, [mode, setNumber, isPremium]);
 
   const initAudio = async () => {
     try {
@@ -63,16 +60,16 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
       }
       setAudioContextReady(true);
     } catch (e) {
-      console.error("Audio Context Init Error", e);
+      setAudioContextReady(true);
     }
   };
 
   useEffect(() => {
-    if (questions.length === 0) return;
+    if (questions.length === 0 || loading) return;
+    
     const currentQ = questions[currentIndex];
     setCurrentAiImage(null);
 
-    // AI 이미지 생성: 읽기 문제 중 이미지가 없는 경우 자동 sketch
     if (currentQ.type === QuestionType.READING && currentQ.context && !currentQ.context.startsWith('http')) {
       setIsGeneratingImage(true);
       generateImageForQuestion(currentQ.context).then(img => {
@@ -84,11 +81,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
     if (currentQ.type === QuestionType.LISTENING && audioContextReady) {
       handlePlayAudio();
     }
-
-    if (onProgressUpdate && isPremium) {
-      onProgressUpdate(currentIndex);
-    }
-  }, [currentIndex, questions, audioContextReady]);
+  }, [currentIndex, questions, audioContextReady, loading]);
 
   useEffect(() => {
     if (loading || timeLeft <= 0) return;
@@ -122,7 +115,6 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
         setLoadingAudio(false);
       }
     } catch (e) {
-      console.error("Audio Playback Error", e);
       setIsPlaying(false);
       setLoadingAudio(false);
     }
@@ -143,6 +135,8 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
     questions.forEach(q => { if (answers[q.id] === q.correctAnswer) correctCount++; });
     onComplete({
       id: Date.now().toString(),
+      mode,
+      setNumber,
       questions,
       userAnswers: answers,
       score: correctCount,
@@ -150,16 +144,16 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
     });
   };
 
-  if (loading) return <LoadingSpinner message="Preparing Test Session..." />;
+  if (loading) return <LoadingSpinner message={`Generating Set ${setNumber}...`} />;
 
-  if (!audioContextReady && mode !== 'READING') {
+  if (!audioContextReady && (mode === 'LISTENING' || mode === 'FULL')) {
     return (
       <div className="flex flex-col items-center justify-center h-full bg-indigo-900 text-white p-8 text-center pt-safe">
         <Headphones className="w-20 h-20 mb-6 text-indigo-300 animate-bounce" />
-        <h2 className="text-2xl font-black mb-4 uppercase tracking-tighter">Ready for Listening?</h2>
-        <p className="mb-10 opacity-70 font-medium tracking-tight">Activating professional dual-speaker audio engine.</p>
+        <h2 className="text-3xl font-black mb-4 uppercase tracking-tighter">Round {setNumber} Ready</h2>
+        <p className="mb-10 opacity-70 font-medium tracking-tight">Syncing native Korean audio engine for your success.</p>
         <button onClick={initAudio} className="bg-white text-indigo-900 px-12 py-5 rounded-2xl font-black text-xl shadow-2xl active:scale-95 flex items-center gap-3">
-          <Play className="w-6 h-6 fill-current" /> START NOW
+          <Play className="w-6 h-6 fill-current" /> START EXAM
         </button>
       </div>
     );
@@ -175,8 +169,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
             <div className="flex items-center gap-3">
               <button onClick={() => setIsDrawerOpen(true)} className="p-2 -ml-2 text-gray-600"><Menu className="w-6 h-6" /></button>
               <div className="flex flex-col">
-                  <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{mode} PRACTICE</span>
-                  {/* 무조건 1번부터 표시 */}
+                  <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Round {setNumber} • {mode}</span>
                   <span className="text-sm font-bold uppercase">Question {currentIndex + 1} <span className="text-gray-400 font-normal">/ {questions.length}</span></span>
               </div>
             </div>
@@ -196,14 +189,17 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
                         {currentQ.type}
                     </span>
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 leading-relaxed selectable">{currentQ.questionText}</h2>
+                <h2 className="text-xl font-bold text-gray-900 leading-relaxed selectable">
+                  <span className="text-indigo-600 mr-2">Q{currentIndex + 1}.</span>
+                  {currentQ.questionText}
+                </h2>
             </div>
 
             <div className="bg-white rounded-[2rem] border-2 border-dashed border-gray-200 overflow-hidden min-h-[280px] flex items-center justify-center relative bg-gray-50/50 shadow-inner">
                 {isGeneratingImage ? (
                   <div className="flex flex-col items-center gap-2">
                     <Sparkles className="w-10 h-10 text-indigo-400 animate-pulse" />
-                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">AI Illustrator Sketching...</span>
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">AI Sketching...</span>
                   </div>
                 ) : currentAiImage ? (
                   <img src={currentAiImage} className="max-h-[350px] object-contain w-full p-6 animate-fade-in" />
@@ -245,7 +241,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
             <ChevronLeft className="w-7 h-7" />
           </button>
           {isLast ? (
-             <button onClick={handleSubmit} className="flex-1 bg-green-600 text-white font-black rounded-2xl shadow-xl shadow-green-100 active:scale-95 text-lg uppercase tracking-tight">Submit Exam</button>
+             <button onClick={handleSubmit} className="flex-1 bg-green-600 text-white font-black rounded-2xl shadow-xl shadow-green-100 active:scale-95 text-lg uppercase tracking-tight">Submit Round</button>
           ) : (
              <button onClick={handleNext} className="flex-1 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 active:scale-95 text-lg uppercase tracking-tight">Next Question</button>
           )}
