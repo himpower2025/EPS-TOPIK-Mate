@@ -16,12 +16,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgr
 
   return (
     <div className="flex flex-col h-full bg-gray-50 overflow-hidden">
+      {/* Navbar */}
       <div className="bg-indigo-900 pt-safe text-white shrink-0 shadow-lg z-20">
          <div className="px-5 py-5 flex justify-between items-center">
             <div className="flex items-center gap-3">
-                <div className="relative w-9 h-9">
-                    <div className="absolute top-0 left-0 bg-white rounded-lg text-indigo-900 text-[10px] font-black w-6 h-6 flex items-center justify-center z-10 shadow-md">가</div>
-                    <div className="absolute bottom-0 right-0 bg-purple-500 rounded-lg text-white text-[10px] font-black w-6 h-6 flex items-center justify-center shadow-md">A</div>
+                <div className="relative w-10 h-10">
+                    <div className="absolute top-0 left-0 bg-white rounded-lg text-indigo-900 text-[11px] font-black w-7 h-7 flex items-center justify-center z-10 shadow-md">가</div>
+                    <div className="absolute bottom-0 right-0 bg-purple-500 rounded-lg text-white text-[11px] font-black w-7 h-7 flex items-center justify-center shadow-md">A</div>
                 </div>
                 <div className="font-black text-xl tracking-tighter uppercase">EPS Mate</div>
             </div>
@@ -31,74 +32,78 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgr
          </div>
       </div>
 
+      {/* Hero & Selection */}
       <div className="flex-1 overflow-y-auto pb-24">
-        <div className="bg-indigo-900 text-white rounded-b-[3rem] px-5 pb-16 pt-4 relative overflow-hidden shadow-xl">
+        <div className="bg-indigo-900 text-white rounded-b-[3.5rem] px-5 pb-16 pt-4 relative overflow-hidden shadow-xl">
            <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
            <div className="relative z-10 max-w-2xl mx-auto text-center flex flex-col items-center">
-              <h1 className="text-4xl font-black mb-2 tracking-tight">Hi, {user.name.split(' ')[0]}!</h1>
+              <h1 className="text-4xl font-black mb-2 tracking-tight">안녕하세요, {user.name.split(' ')[0]}님!</h1>
               {isPremium ? (
                 <span className="bg-yellow-400 text-indigo-950 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg flex items-center gap-1.5 mb-8">
-                  <Star className="w-3 h-3 fill-current" /> Premium Member
+                  <Star className="w-3 h-3 fill-current" /> 프리미엄 멤버
                 </span>
               ) : (
-                <p className="text-indigo-200 mb-10 text-sm font-bold opacity-80 uppercase tracking-widest">Join the professional workers</p>
+                <p className="text-indigo-200 mb-10 text-sm font-bold opacity-80 uppercase tracking-widest">실전 같은 모의고사로 합격하세요</p>
               )}
               
               <div className="w-full max-w-sm space-y-4">
-                <button onClick={() => onModeSelect('FULL')} className="bg-white text-indigo-900 w-full py-5 rounded-[1.5rem] font-black shadow-2xl flex items-center justify-center gap-4 transition-transform active:scale-95 group">
-                  <PlayCircle className="w-7 h-7 text-indigo-600 group-hover:scale-110 transition-transform" />
-                  <span className="text-xl font-black uppercase">Start Mock Exam</span>
+                <button onClick={() => onModeSelect('FULL')} className="bg-white text-indigo-900 w-full py-5 rounded-[1.8rem] font-black shadow-2xl flex items-center justify-center gap-4 transition-transform active:scale-95 group">
+                  <PlayCircle className="w-8 h-8 text-indigo-600 group-hover:scale-110 transition-transform" />
+                  <span className="text-2xl font-black uppercase">실전 모의고사</span>
                 </button>
                 {!isPremium && (
                   <button onClick={onUpgrade} className="bg-indigo-800/50 backdrop-blur-md border border-indigo-400/30 text-white w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95">
-                    <Lock className="w-5 h-5 text-indigo-300" /> UNLOCK ALL ROUNDS
+                    <Lock className="w-5 h-5 text-indigo-300" /> 모든 회차 잠금 해제
                   </button>
                 )}
               </div>
            </div>
         </div>
 
+        {/* Categories */}
         <div className="px-5 py-10 max-w-4xl mx-auto">
-          <h3 className="text-gray-900 font-black text-xs uppercase tracking-[0.2em] mb-6 opacity-40">Practice Labs</h3>
+          <h3 className="text-gray-900 font-black text-xs uppercase tracking-[0.2em] mb-6 opacity-40">영역별 집중 학습</h3>
           
           <div className="grid grid-cols-1 gap-4">
-            <button onClick={() => onModeSelect('READING')} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-6 hover:border-indigo-200 active:scale-[0.98] transition-all text-left group">
+            <button onClick={() => onModeSelect('READING')} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center gap-6 hover:border-indigo-200 active:scale-[0.98] transition-all text-left group">
                <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-indigo-600 transition-colors">
                   <Globe className="w-8 h-8 text-blue-600 group-hover:text-white" />
                </div>
                <div className="flex-1">
-                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">Reading Drills</h4>
-                  <p className="text-xs text-gray-400 font-bold mt-1">Intensive training for reading comprehension</p>
+                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">읽기 집중 훈련</h4>
+                  <p className="text-xs text-gray-400 font-bold mt-1">다양한 산업 현장의 지문을 학습합니다</p>
                </div>
                <ArrowRight className="w-5 h-5 text-gray-200 group-hover:text-indigo-600 transition-colors" />
             </button>
 
-            <button onClick={() => onModeSelect('LISTENING')} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-6 hover:border-indigo-200 active:scale-[0.98] transition-all text-left group">
+            <button onClick={() => onModeSelect('LISTENING')} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center gap-6 hover:border-indigo-200 active:scale-[0.98] transition-all text-left group">
                <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-orange-600 transition-colors">
                   <BookOpen className="w-8 h-8 text-orange-600 group-hover:text-white" />
                </div>
                <div className="flex-1">
-                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">Listening Drills</h4>
-                  <p className="text-xs text-gray-400 font-bold mt-1">Master native audio with AI voice engine</p>
+                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">듣기 집중 훈련</h4>
+                  <p className="text-xs text-gray-400 font-bold mt-1">AI 성우의 원어민 음성으로 귀를 엽니다</p>
                </div>
                <ArrowRight className="w-5 h-5 text-gray-200 group-hover:text-orange-600 transition-colors" />
             </button>
 
-            <button onClick={onViewAnalysis} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-6 hover:border-indigo-200 active:scale-[0.98] transition-all text-left group">
+            <button onClick={onViewAnalysis} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center gap-6 hover:border-indigo-200 active:scale-[0.98] transition-all text-left group">
                <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-green-600 transition-colors">
                   <Target className="w-8 h-8 text-green-600 group-hover:text-white" />
                </div>
                <div className="flex-1">
-                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">Skill Analytics</h4>
-                  <p className="text-xs text-gray-400 font-bold mt-1">Review AI score reports and weak areas</p>
+                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">학습 분석 리포트</h4>
+                  <p className="text-xs text-gray-400 font-bold mt-1">AI가 분석한 나의 취약점을 확인하세요</p>
                </div>
                <ArrowRight className="w-5 h-5 text-gray-200 group-hover:text-green-600 transition-colors" />
             </button>
           </div>
         </div>
       </div>
+      
+      {/* Footer */}
       <div className="text-center py-6 text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] border-t border-gray-50 shrink-0">
-        © EPS Mate • Powered by Gemini AI
+        © EPS Mate • Powered by Gemini 3 Pro
       </div>
     </div>
   );
