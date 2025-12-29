@@ -7,6 +7,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // --- Helper: 문항 텍스트에서 불필요한 번호(1. 21. 등) 제거 ---
 const stripLeadingNumbers = (text: string): string => {
+  if (!text) return "";
   // 문장 시작 부분의 "1. ", "21. ", "1) ", "Q1:" 등 패턴 제거
   return text.replace(/^(\d+[\s.)-]+\s*|Q\d+[:\s-]*)/i, '').trim();
 };
@@ -44,43 +45,45 @@ async function decodeAudioData(
 const cleanJson = (text: string) => text.replace(/```json/g, '').replace(/```/g, '').trim();
 
 /**
- * AI 문항 합성 엔진: 회차별 고유 시나리오를 창작합니다.
+ * AI 문항 합성 엔진: 읽기/듣기 영역을 엄격하게 구분하여 생성합니다.
  */
 export const generateQuestionsBySet = async (
   mode: ExamMode, 
   setNumber: number, 
-  isPremium: boolean
+  _isPremium: boolean
 ): Promise<Question[]> => {
-  const readingCount = mode === 'LISTENING' ? 0 : 20;
-  const listeningCount = mode === 'READING' ? 0 : 20;
+  const isFull = mode === 'FULL';
+  const readingCount = mode === 'LISTENING' ? 0 : (isFull ? 20 : 20);
+  const listeningCount = mode === 'READING' ? 0 : (isFull ? 20 : 20);
 
   const themes = [
-    "Workplace Safety Gear & Protection",
-    "Agricultural Machinery & Tool Use",
+    "Workplace Safety & Protective Gear",
+    "Agricultural Tools & Equipment",
     "Construction Site Communication",
     "Employment Contract & Labor Rights",
     "Daily Life & Public Transportation",
-    "Korean Traditional Culture & Respect",
-    "Industrial Accident & First Aid",
-    "Office Manners & Work Habits",
-    "Traditional Markets & Price Negotiation",
-    "Hospitals, Banks & Public Services"
+    "Korean Traditional Culture & Manners",
+    "Manufacturing & Machine Operation",
+    "Office Etiquette & Habits",
+    "Emergency Situations & First Aid",
+    "Banking & Public Institutions"
   ];
   const currentTheme = themes[(setNumber - 1) % themes.length];
 
   try {
-    const prompt = `You are a Senior EPS-TOPIK Examiner. Create Exam Set #${setNumber}.
+    const prompt = `You are a professional EPS-TOPIK examiner. Create a completely NEW Exam Set #${setNumber}.
     THEME: ${currentTheme}.
+    MODE: ${mode} (${readingCount} Reading questions, ${listeningCount} Listening questions).
     
-    CRITICAL REQUIREMENTS:
-    1. SYNTHESIZE 100% NEW SCENARIOS. Use unique names, places, and specific objects.
-    2. NEVER REUSE text from existing databases.
-    3. REMOVE all leading question numbers (like "1. ", "21. ") from questionText and context.
-    4. For READING: Create situational passages or vocabulary questions.
-    5. For LISTENING: Create a natural dialogue script (not just single words) for TTS.
+    STRICT GUIDELINES:
+    1. SYNTHESIZE original scenarios. Do NOT copy from existing databases.
+    2. QUESTION SEPARATION: 
+       - If type is READING, the 'context' must be a text passage or image description.
+       - If type is LISTENING, the 'context' must be the script for audio. Users will NOT see this text.
+    3. NO NUMBERS: Do NOT include question numbers (like "1. ", "21. ") inside 'questionText' or 'context'.
+    4. VARIETY: Use unique names, places, and specific industrial numbers.
     
-    Structure: ${readingCount} Reading + ${listeningCount} Listening.
-    Return as JSON array.`;
+    Return as JSON array of Question objects.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
@@ -109,7 +112,7 @@ export const generateQuestionsBySet = async (
 
     const questions: Question[] = JSON.parse(cleanJson(response.text || '[]'));
     
-    // 번호 정화 작업 적용
+    // 후처리: 번호 정화 작업 및 타입 보정
     return questions.map(q => ({
       ...q,
       questionText: stripLeadingNumbers(q.questionText),
@@ -121,14 +124,19 @@ export const generateQuestionsBySet = async (
   }
 
   // Fallback (셔플 + 번호 정화)
-  return [...STATIC_EXAM_DATA]
-    .sort(() => Math.random() - 0.5)
-    .slice(0, readingCount + listeningCount)
-    .map(q => ({
-      ...q,
-      questionText: stripLeadingNumbers(q.questionText),
-      context: q.context ? stripLeadingNumbers(q.context) : undefined
-    }));
+  const pool = [...STATIC_EXAM_DATA]
+    .filter(q => {
+      if (mode === 'READING') return q.type === QuestionType.READING;
+      if (mode === 'LISTENING') return q.type === QuestionType.LISTENING;
+      return true;
+    })
+    .sort(() => Math.random() - 0.5);
+
+  return pool.slice(0, readingCount + listeningCount).map(q => ({
+    ...q,
+    questionText: stripLeadingNumbers(q.questionText),
+    context: q.context ? stripLeadingNumbers(q.context) : undefined
+  }));
 };
 
 export const generateSpeech = async (text: string): Promise<AudioBuffer | null> => {
@@ -154,17 +162,20 @@ export const generateImageForQuestion = async (description: string): Promise<str
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
-      contents: { parts: [{ text: `Professional EPS-TOPIK exam line-art illustration. Simple, clean, black and white. Theme: ${description}` }] },
+      contents: { parts: [{ text: `Simple black and white line art illustration for EPS-TOPIK Korean exam. Topic: ${description}` }] },
     });
     const parts = response.candidates?.[0]?.content?.parts;
     const imgPart = parts?.find(p => p.inlineData);
-    return imgPart ? `data:image/png;base64,${imgPart.inlineData.data}` : null;
+    if (imgPart && imgPart.inlineData) {
+      return `data:image/png;base64,${imgPart.inlineData.data}`;
+    }
+    return null;
   } catch { return null; }
 };
 
 export const analyzePerformance = async (session: ExamSession): Promise<AnalyticsFeedback | null> => {
   try {
-    const prompt = `Analyze this EPS-TOPIK result. Score: ${session.score}/${session.questions.length}. Provide JSON feedback.`;
+    const prompt = `Analyze this EPS-TOPIK result. Score: ${session.score}/${session.questions.length}. Provide expert JSON feedback.`;
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
