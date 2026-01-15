@@ -1,15 +1,15 @@
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { Question, QuestionType, AnalyticsFeedback, ExamSession, ExamMode } from '../types';
+import { Question, AnalyticsFeedback, ExamSession, ExamMode } from '../types';
 import { STATIC_EXAM_DATA } from '../data/examData';
 
 /**
- * Re-initialize AI client to ensure the latest API key is used.
+ * AI 인스턴스 생성 함수
  */
 const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-// --- Audio Helpers ---
+// --- 오디오 처리 유틸리티 ---
 function decode(base64: string): Uint8Array {
-  const binaryString = atob(base64);
+  const binaryString = window.atob(base64);
   const len = binaryString.length;
   const bytes = new Uint8Array(len);
   for (let i = 0; i < len; i++) {
@@ -36,11 +36,12 @@ async function decodeAudioData(
   return buffer;
 }
 
-const cleanJson = (text: string) => text.replace(/```json/g, '').replace(/```/g, '').trim();
+const cleanJson = (text: string) => {
+  return text.replace(/```json/g, '').replace(/```/g, '').replace(/\/\*.*?\*\//gs, '').trim();
+};
 
 /**
- * INFINITE QUESTION GENERATOR
- * Uses Gemini 3 Pro to create new, unique exam content based on current trends.
+ * 무한 문제 생성 엔진 (Infinite Generator)
  */
 export const generateQuestionsBySet = async (
   mode: ExamMode, 
@@ -48,14 +49,14 @@ export const generateQuestionsBySet = async (
   _isPremium: boolean
 ): Promise<Question[]> => {
   const ai = getAI();
-  const themes = ["Safety", "Hospital", "Transport", "Market", "Bank", "Farming", "Factory", "Etiquette"];
+  const themes = ["Safety", "Hospital", "Transport", "Market", "Bank", "Farming", "Manufacturing", "Daily Life"];
   const theme = themes[setNumber % themes.length];
 
   try {
-    const prompt = `Act as an official EPS-TOPIK examiner. Create 20 unique Korean questions for Round ${setNumber} (Theme: ${theme}).
-    IMPORTANT: Provide English explanations. Every question MUST have an 'imagePrompt' for AI visualization.
-    For Listening questions, provide 'context' as a Man/Woman dialogue if needed.
-    Return only a JSON array matching the Question type.`;
+    const prompt = `Act as an EPS-TOPIK expert. Create 20 unique exam questions for Set ${setNumber}.
+    Theme: ${theme}. Mode: ${mode}.
+    Include 'imagePrompt' for each question. Explanations must be in English.
+    Return ONLY a valid JSON array matching the Question type.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
@@ -72,7 +73,7 @@ export const generateQuestionsBySet = async (
               category: { type: Type.STRING },
               questionText: { type: Type.STRING },
               context: { type: Type.STRING },
-              options: { type: Type.ARRAY, items: { type: Type.STRING } },
+              options: { type: Type.ARRAY, items: { type: Type.STRING }, minItems: 4, maxItems: 4 },
               correctAnswer: { type: Type.INTEGER },
               explanation: { type: Type.STRING },
               imagePrompt: { type: Type.STRING }
@@ -83,27 +84,27 @@ export const generateQuestionsBySet = async (
       }
     });
 
-    return JSON.parse(cleanJson(response.text || '[]'));
+    const questions = JSON.parse(cleanJson(response.text || '[]'));
+    return questions.length > 0 ? questions : STATIC_EXAM_DATA.slice(0, 20);
   } catch (error) {
-    console.warn("AI generation failed, using static fallback.");
+    console.error("AI Generation Error:", error);
     return [...STATIC_EXAM_DATA].sort(() => Math.random() - 0.5).slice(0, 20);
   }
 };
 
 /**
- * PRO VISUAL SYNTHESIS
- * Generates realistic exam images including tables and IDs.
+ * AI 이미지 생성 (고품질 1K)
  */
 export const generateImage = async (prompt: string): Promise<string | null> => {
   if (!prompt) return null;
   const ai = getAI();
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-image-preview',
+      model: 'gemini-2.5-flash-image',
       contents: { 
-        parts: [{ text: `Official EPS-TOPIK Exam Graphic. Clean, high-quality, professional educational illustration. SUBJECT: ${prompt}.` }] 
+        parts: [{ text: `Professional EPS-TOPIK illustration, flat design, educational style, clean background: ${prompt}` }] 
       },
-      config: { imageConfig: { aspectRatio: "1:1", imageSize: "1K" } }
+      config: { imageConfig: { aspectRatio: "1:1" } }
     });
     const parts = response.candidates?.[0]?.content?.parts;
     const imgPart = parts?.find(p => p.inlineData);
@@ -112,11 +113,12 @@ export const generateImage = async (prompt: string): Promise<string | null> => {
 };
 
 /**
- * MULTI-SPEAKER SPEECH GENERATION
+ * AI 음성 생성 (멀티 스피커 대화 지원)
  */
 export const generateSpeech = async (text: string): Promise<AudioBuffer | null> => {
   const ai = getAI();
-  const isDialogue = text.includes("Man:") || text.includes("Woman:") || text.includes("가:") || text.includes("나:");
+  const isDialogue = text.includes("Man:") || text.includes("Woman:") || text.includes("남:") || text.includes("여:");
+  
   try {
     const config: any = { responseModalities: [Modality.AUDIO] };
     if (isDialogue) {
@@ -134,9 +136,10 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text: `잘 듣고 질문에 알맞은 대답을 고르십시오. ${text}` }] }],
+      contents: [{ parts: [{ text: `문제를 잘 듣고 알맞은 것을 고르십시오. ${text}` }] }],
       config
     });
+    
     const base64 = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
     if (base64) {
       const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({sampleRate: 24000});
@@ -149,7 +152,7 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
 export const analyzePerformance = async (session: ExamSession): Promise<AnalyticsFeedback | null> => {
   const ai = getAI();
   try {
-    const prompt = `Analyze EPS-TOPIK results. Score: ${session.score}/${session.questions.length}. Provide expert feedback in English. Return JSON.`;
+    const prompt = `Analyze EPS-TOPIK mock exam results. Total Score: ${session.score}/${session.questions.length}. Provide expert feedback and a study plan in English. Return JSON.`;
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,

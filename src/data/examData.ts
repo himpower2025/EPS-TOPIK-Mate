@@ -1177,6 +1177,7 @@ export const STATIC_EXAM_DATA: Question[] = [
 /**
  * [EPS-TOPIK 정식 문항 데이터베이스]
  * 제 4세트 (ID: s4_...) 및 제 5세트 (ID: s5_...) 통합본
+ */
 
   // ==========================================
   // --- [제 4세트: 읽기 1~20, 듣기 21~40] ---
@@ -2079,19 +2080,7 @@ export const STATIC_EXAM_DATA: Question[] = [
     correctAnswer: 2,
     explanation: "매표소는 복잡하니 서점에서 만나기로 최종 약속했습니다.",
     imagePrompt: "A bookstore located right next to a cinema building."
-  }
-
-
-
-/**
- * [EPS-TOPIK 정식 문항 데이터베이스]
- * 제 4세트 (s4_...), 제 5세트 (s5_...), 제 6세트 (s6_...) 통합본
-
-  // --- [제 4세트 및 5세트 데이터는 시스템 안정성을 위해 내부 유지 중이며, 아래에 6세트를 상세히 추가합니다] ---
-  // (기존 4, 5세트 80문항 생략 방지를 위해 실제 파일에는 전체가 포함되어야 함을 전제로 6세트 포함 전체 코드를 제공합니다)
-
-  // ... (제 4세트 & 5세트 데이터 생략 - 실제 파일에는 포함됨) ...
-  // [공간 절약을 위해 6세트 위주로 구성하되, 전체 구조를 유지하여 에러를 방지합니다]
+  },
 
   // ==========================================
   // --- [제 6세트: 읽기 1~20, 듣기 21~40] ---
@@ -2533,17 +2522,7 @@ export const STATIC_EXAM_DATA: Question[] = [
     correctAnswer: 3,
     explanation: "하늘 씨가 좋아하는 카레를 직접 만들어 주기로 했습니다.",
     imagePrompt: "A steaming pot of yellow curry being served into a bowl."
-  }
-
-
-
-/**
- * [EPS-TOPIK 정식 문항 데이터베이스]
- * 제 4세트 ~ 제 7세트 통합본
- * 주의: 이 파일 내에는 'STATIC_EXAM_DATA' 선언이 단 하나만 존재해야 에러가 발생하지 않습니다.
-
-  // --- [기존 제 4~6세트 데이터 (안정성을 위해 핵심 구조 유지)] ---
-  // (사용자님의 기존 4, 5, 6세트 120문항이 이 배열 안에 포함되어 있습니다)
+  },
 
   // ==========================================
   // --- [신규 제 7세트: 읽기 1~20, 듣기 21~40] ---
@@ -4704,7 +4683,6 @@ export const STATIC_EXAM_DATA: Question[] = [
     imagePrompt: "A black skirt hanging in a clothing store."
   },
 
-
   // ==========================================
   // --- [제 8세트 (40문항)] ---
   // ==========================================
@@ -6137,5 +6115,5 @@ export const STATIC_EXAM_DATA: Question[] = [
   { id: "s30_l_37", type: QuestionType.LISTENING, category: "장소 파악", questionText: "반방 씨는 어디에서 일하고 있습니까?", context: "건물을 짓는 공사장에서 일하고 있어요.", options: ["건설 현장", "정비 현장", "가구 제작", "제설 작업"], correctAnswer: 0, explanation: "건물이 올라가고 있는 공사 현장 그림을 고릅니다.", imagePrompt: "A construction site with a steel frame of a building." },
   { id: "s30_l_38", type: QuestionType.LISTENING, category: "활동 파악", questionText: "여자는 지금 무엇을 하려고 합니까?", context: "극장 앞에 차를 세워도 돼요? 아니요.", options: ["차 구매", "차 세우기", "택시비 지불", "주차비 지불"], correctAnswer: 1, explanation: "주차 가능 여부를 묻는 것은 '차를 세우려는' 목적입니다.", imagePrompt: "A woman pointing at a car space in front of a cinema." },
   { id: "s30_l_39", type: QuestionType.LISTENING, category: "활동 파악", questionText: "남자는 지금 무엇을 하고 있습니까?", context: "드라마 대장금 노래를 듣고 있어요.", options: ["음악 듣기", "운동 하기", "노래 부르기", "책 읽기"], correctAnswer: 0, explanation: "헤드셋이나 이어폰으로 음악을 감상하는 중입니다.", imagePrompt: "A man wearing headphones, looking relaxed." },
-  { id: "s30_l_40", type: QuestionType.LISTENING, category: "인원 파악", questionText: "이 공장에서 일하는 외국인은 모두 몇 명입니까?", context: "4명 있어요. 3명은 외국 사람이고 한 명은 한국 사람이에요.", options: ["1명", "2명", "3명", "4명"], correctAnswer: 2, explanation: "전체 4명 중 외국인 수인 '3명'이 정답입니다.", imagePrompt: "A group of four workers: three clearly diverse foreigners and one local Korean." },
+  { id: "s30_l_40", type: QuestionType.LISTENING, category: "인원 파악", questionText: "이 공장에서 일하는 외국인은 모두 몇 명입니까?", context: "4명 있어요. 3명은 외국 사람이고 한 명은 한국 사람이에요.", options: ["1명", "2명", "3명", "4명"], correctAnswer: 2, explanation: "전체 4명 중 외국인 수인 '3명'이 정답입니다.", imagePrompt: "A group of four workers: three clearly diverse foreigners and one local Korean." }
 ];
