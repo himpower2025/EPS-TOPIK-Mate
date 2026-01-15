@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dashboard } from './components/Dashboard';
 import { SetSelector } from './components/SetSelector';
@@ -66,7 +65,8 @@ const App: React.FC = () => {
   };
 
   const handleSetSelect = (setNum: number) => {
-    if (user?.plan === 'free' && setNum > 1) {
+    // 무료 플랜은 1, 2세트만 가능
+    if (user?.plan === 'free' && setNum > 2) {
       setShowPaywall(true);
       return;
     }
@@ -78,7 +78,6 @@ const App: React.FC = () => {
     if (!user) return;
     setDoc(doc(db, 'exams', session.id), { ...session, userId: user.id });
     
-    // 무료 사용자의 경우 남은 시험 횟수 차감
     if (user.plan === 'free') {
       setDoc(doc(db, 'users', user.id), { examsRemaining: Math.max(0, user.examsRemaining - 1) }, { merge: true });
     }
@@ -109,20 +108,16 @@ const App: React.FC = () => {
           onModeSelect={handleModeSelect} 
           onUpgrade={() => setShowPaywall(true)} 
           onProfileClick={() => setShowProfile(true)} 
-          // Fix: Replaced boolean comparison with a functional state transition.
-          // This resolves the TypeScript error caused by narrowing 'currentState' to 'AppState.DASHBOARD' in this scope.
-          onViewAnalysis={() => {
-            if (lastSession) setCurrentState(AppState.ANALYTICS);
-          }} 
+          onViewAnalysis={() => { if (lastSession) setCurrentState(AppState.ANALYTICS); }} 
         />
       )}
 
       {currentState === AppState.SET_SELECTION && user && (
         <SetSelector 
           mode={examMode} 
+          plan={user.plan} 
           onSelect={handleSetSelect} 
           onBack={() => setCurrentState(AppState.DASHBOARD)} 
-          isPremium={user.plan !== 'free'}
         />
       )}
       
@@ -132,7 +127,7 @@ const App: React.FC = () => {
           setNumber={selectedSet}
           onComplete={handleExamComplete} 
           onExit={() => setCurrentState(AppState.SET_SELECTION)} 
-          isPremium={user.plan !== 'free'} 
+          plan={user.plan} 
         />
       )}
       
