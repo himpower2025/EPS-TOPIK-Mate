@@ -37,23 +37,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgr
         <div className="bg-indigo-900 text-white rounded-b-[3.5rem] px-5 pb-16 pt-4 relative overflow-hidden shadow-xl">
            <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
            <div className="relative z-10 max-w-2xl mx-auto text-center flex flex-col items-center">
-              <h1 className="text-4xl font-black mb-2 tracking-tight">안녕하세요, {user.name.split(' ')[0]}님!</h1>
+              <h1 className="text-4xl font-black mb-2 tracking-tight">Welcome, {user.name.split(' ')[0]}!</h1>
               {isPremium ? (
                 <span className="bg-yellow-400 text-indigo-950 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg flex items-center gap-1.5 mb-8">
-                  <Star className="w-3 h-3 fill-current" /> 프리미엄 멤버
+                  <Star className="w-3 h-3 fill-current" /> Premium Member
                 </span>
               ) : (
-                <p className="text-indigo-200 mb-10 text-sm font-bold opacity-80 uppercase tracking-widest">실전 같은 모의고사로 합격하세요</p>
+                <p className="text-indigo-200 mb-10 text-sm font-bold opacity-80 uppercase tracking-widest">Master your career in Korea</p>
               )}
               
               <div className="w-full max-w-sm space-y-4">
                 <button onClick={() => onModeSelect('FULL')} className="bg-white text-indigo-900 w-full py-5 rounded-[1.8rem] font-black shadow-2xl flex items-center justify-center gap-4 transition-transform active:scale-95 group">
                   <PlayCircle className="w-8 h-8 text-indigo-600 group-hover:scale-110 transition-transform" />
-                  <span className="text-2xl font-black uppercase">실전 모의고사</span>
+                  <span className="text-2xl font-black uppercase">Start Mock Exam</span>
                 </button>
                 {!isPremium && (
                   <button onClick={onUpgrade} className="bg-indigo-800/50 backdrop-blur-md border border-indigo-400/30 text-white w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95">
-                    <Lock className="w-5 h-5 text-indigo-300" /> 모든 회차 잠금 해제
+                    <Lock className="w-5 h-5 text-indigo-300" /> Unlock Unlimited Rounds
                   </button>
                 )}
               </div>
@@ -62,7 +62,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgr
 
         {/* Categories */}
         <div className="px-5 py-10 max-w-4xl mx-auto">
-          <h3 className="text-gray-900 font-black text-xs uppercase tracking-[0.2em] mb-6 opacity-40">영역별 집중 학습</h3>
+          <h3 className="text-gray-900 font-black text-xs uppercase tracking-[0.2em] mb-6 opacity-40">Practice Labs</h3>
           
           <div className="grid grid-cols-1 gap-4">
             <button onClick={() => onModeSelect('READING')} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center gap-6 hover:border-indigo-200 active:scale-[0.98] transition-all text-left group">
@@ -70,8 +70,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgr
                   <Globe className="w-8 h-8 text-blue-600 group-hover:text-white" />
                </div>
                <div className="flex-1">
-                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">읽기 집중 훈련</h4>
-                  <p className="text-xs text-gray-400 font-bold mt-1">다양한 산업 현장의 지문을 학습합니다</p>
+                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">Reading Lab</h4>
+                  <p className="text-xs text-gray-400 font-bold mt-1">Focus on workplace vocabulary & passages</p>
                </div>
                <ArrowRight className="w-5 h-5 text-gray-200 group-hover:text-indigo-600 transition-colors" />
             </button>
@@ -81,8 +81,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgr
                   <BookOpen className="w-8 h-8 text-orange-600 group-hover:text-white" />
                </div>
                <div className="flex-1">
-                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">듣기 집중 훈련</h4>
-                  <p className="text-xs text-gray-400 font-bold mt-1">AI 성우의 원어민 음성으로 귀를 엽니다</p>
+                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">Listening Lab</h4>
+                  <p className="text-xs text-gray-400 font-bold mt-1">Practice with AI multi-speaker dialogues</p>
                </div>
                <ArrowRight className="w-5 h-5 text-gray-200 group-hover:text-orange-600 transition-colors" />
             </button>
@@ -92,8 +92,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgr
                   <Target className="w-8 h-8 text-green-600 group-hover:text-white" />
                </div>
                <div className="flex-1">
-                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">학습 분석 리포트</h4>
-                  <p className="text-xs text-gray-400 font-bold mt-1">AI가 분석한 나의 취약점을 확인하세요</p>
+                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">AI Score Analysis</h4>
+                  <p className="text-xs text-gray-400 font-bold mt-1">Get personalized feedback on your progress</p>
                </div>
                <ArrowRight className="w-5 h-5 text-gray-200 group-hover:text-green-600 transition-colors" />
             </button>
@@ -103,7 +103,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgr
       
       {/* Footer */}
       <div className="text-center py-6 text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] border-t border-gray-50 shrink-0">
-        © EPS Mate • Powered by Gemini 3 Pro
+        © EPS Mate • AI Exam Partner
       </div>
     </div>
   );
