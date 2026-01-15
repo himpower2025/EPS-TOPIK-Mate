@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Question, QuestionType, ExamSession, ExamMode } from '../types';
 import { generateQuestionsBySet, generateSpeech, generateImage } from '../services/geminiService';
 import { CheckCircle, Clock, Menu, X, ChevronLeft, Headphones, Volume2, Sparkles, Play, ChevronRight } from 'lucide-react';
-import LoadingSpinner from './LoadingSpinner';
+import { LoadingSpinner } from './LoadingSpinner';
 
 interface ExamSimulatorProps {
   mode: ExamMode;
@@ -170,7 +169,6 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
 
   return (
     <div className="flex flex-col h-full bg-gray-50 font-sans">
-      {/* Top Bar */}
       <div className="bg-white border-b border-gray-200 pt-safe shrink-0 shadow-sm z-30">
         <div className="px-4 py-3 flex justify-between items-center">
             <div className="flex items-center gap-3">
@@ -189,8 +187,6 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-8 pb-40 selectable">
          <div className="max-w-2xl mx-auto space-y-6">
-            
-            {/* 1. Question Card */}
             <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100">
                 <div className="mb-4">
                     <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${isListening ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
@@ -204,9 +200,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
                 </h2>
             </div>
 
-            {/* 2. Visual / Context Area */}
             <div className="bg-white rounded-[2.5rem] border-2 border-dashed border-gray-200 overflow-hidden relative shadow-sm min-h-[200px] flex flex-col items-center justify-center p-6">
-                
                 {isGeneratingVisuals ? (
                   <div className="flex flex-col items-center gap-2 py-12 animate-pulse text-center">
                     <Sparkles className="w-12 h-12 text-indigo-400 mb-2" />
@@ -214,19 +208,14 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
                   </div>
                 ) : (
                   <>
-                    {/* Main Image for Context (Signs, Charts, IDs) */}
                     {questionImage && (
                       <div className="w-full flex flex-col items-center">
                         <img src={questionImage} className="max-h-[400px] object-contain w-full rounded-2xl animate-fade-in shadow-md mb-4 bg-white" alt="Exam Visual" />
                       </div>
                     )}
-
-                    {/* Passage text (if no image) */}
                     {!isListening && currentQ.context && !questionImage && (
                       <div className="p-4 text-lg md:text-xl font-serif leading-loose text-gray-800 bg-indigo-50/20 rounded-2xl w-full whitespace-pre-wrap">{currentQ.context}</div>
                     )}
-
-                    {/* Listening Controls */}
                     {isListening && (
                       <div className="flex flex-col items-center justify-center gap-4 py-8">
                         <button onClick={handlePlayAudio} className={`w-24 h-24 rounded-full flex items-center justify-center shadow-2xl transition-all ${isPlaying ? 'bg-indigo-600 text-white scale-110' : 'bg-white text-indigo-600 border border-indigo-100 hover:scale-105'}`}>
@@ -239,7 +228,6 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
                 )}
             </div>
 
-            {/* 3. Answer Options */}
             {isImageOptions ? (
               <div className="grid grid-cols-2 gap-4">
                 {optionImages.map((img, idx) => {
@@ -260,10 +248,8 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
               <div className="space-y-3">
                   {currentQ.options.map((option, idx) => {
                       const isSelected = answers[currentQ.id] === idx;
-                      // Special pattern: Hide text if listening question requires choosing from spoken options
                       const isOptionSpokenOnly = isListening && (currentQ.category.includes("그림") || currentQ.questionText.includes("무엇입니까"));
                       const displayOption = isOptionSpokenOnly ? `보기 ${idx + 1}` : option;
-
                       return (
                           <button key={idx} onClick={() => handleAnswer(idx)} className={`w-full p-5 md:p-6 rounded-[2rem] text-left transition-all flex items-center gap-4 border-2 shadow-sm active:scale-[0.98] ${isSelected ? 'border-indigo-600 bg-indigo-600 text-white shadow-xl shadow-indigo-100' : 'border-gray-100 bg-white text-gray-700 hover:border-indigo-200'}`}>
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-black shrink-0 ${isSelected ? 'bg-white text-indigo-600' : 'bg-gray-100 text-gray-400'}`}>{idx + 1}</div>
@@ -277,7 +263,6 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
          </div>
       </div>
 
-      {/* Navigation Footer */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 p-6 pb-safe flex gap-4 max-w-2xl mx-auto z-40">
           <button onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))} disabled={currentIndex === 0} className="px-6 py-5 rounded-2xl bg-gray-100 text-gray-700 disabled:opacity-30 font-bold active:bg-gray-200"><ChevronLeft className="w-7 h-7" /></button>
           {isLast ? (
@@ -287,7 +272,6 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
           )}
       </div>
 
-      {/* Question Drawer */}
       {isDrawerOpen && (
         <div className="fixed inset-0 z-[60] flex">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsDrawerOpen(false)}></div>
