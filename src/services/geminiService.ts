@@ -1,15 +1,12 @@
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { Question, QuestionType, AnalyticsFeedback, ExamSession, ExamMode } from '../types';
+import { Question, AnalyticsFeedback, ExamSession, ExamMode, PlanType } from '../types';
 import { STATIC_EXAM_DATA } from '../data/examData';
 
-/**
- * AI 인스턴스 초기화 (API_KEY 사용)
- */
 const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // --- 오디오 처리 유틸리티 ---
 function decode(base64: string): Uint8Array {
-  const binaryString = atob(base64);
+  const binaryString = window.atob(base64);
   const len = binaryString.length;
   const bytes = new Uint8Array(len);
   for (let i = 0; i < len; i++) {
@@ -18,12 +15,7 @@ function decode(base64: string): Uint8Array {
   return bytes;
 }
 
-async function decodeAudioData(
-  data: Uint8Array,
-  ctx: AudioContext,
-  sampleRate: number,
-  numChannels: number,
-): Promise<AudioBuffer> {
+async function decodeAudioData(data: Uint8Array, ctx: AudioContext, sampleRate: number, numChannels: number): Promise<AudioBuffer> {
   const dataInt16 = new Int16Array(data.buffer);
   const frameCount = dataInt16.length / numChannels;
   const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
@@ -36,28 +28,82 @@ async function decodeAudioData(
   return buffer;
 }
 
-const cleanJson = (text: string) => text.replace(/```json/g, '').replace(/```/g, '').trim();
+const cleanJson = (text: string) => text.replace(/```json/g, '').replace(/```/g, '').replace(/\/\*.*?\*\//gs, '').trim();
 
 /**
- * 실시간 문제 생성 엔진
- * 고정된 DB 대신 Gemini 3 Pro가 EPS-TOPIK 유형에 맞는 문제를 즉석에서 생성합니다.
+ * 문제 생성 및 추출 엔진 (플랜별 DB 매핑)
  */
 export const generateQuestionsBySet = async (
   mode: ExamMode, 
   setNumber: number, 
-  _isPremium: boolean
+  plan: PlanType
 ): Promise<Question[]> => {
-  const ai = getAI();
-  const themes = ["Workplace Safety", "Health & Hospital", "Public Transport", "Traditional Market", "Banking", "Agriculture", "Manufacturing", "Daily Etiquette"];
-  const theme = themes[setNumber % themes.length];
+  const isReadingLab = mode === 'READING';
+  const isListeningLab = mode === 'LISTENING';
+  const isFullExam = mode === 'FULL';
+  const isOdd = setNumber % 2 !== 0;
 
+  let dbSetIndex = -1;
+  let useAI = false;
+
+  // 1. 모드별/플랜별 DB 인덱스 매핑
+  if (isFullExam) {
+    if (plan === '1m') {
+      const map1m = [12, 14, 16, 18, 20];
+      dbSetIndex = map1m[setNumber - 1] || -1;
+      if (dbSetIndex === -1) useAI = true;
+    } else if (plan === '3m') {
+      if (setNumber <= 15) {
+        dbSetIndex = setNumber * 2;
+      } else {
+        useAI = true;
+      }
+    } else if (plan === '6m') {
+      if (setNumber <= 30) {
+        dbSetIndex = setNumber;
+      } else {
+        useAI = true;
+      }
+    } else {
+      dbSetIndex = 1;
+      if (setNumber > 1) useAI = true;
+    }
+  } else {
+    // 랩 모드
+    if (plan === 'free') {
+      dbSetIndex = 1;
+      if (setNumber > 2) useAI = true;
+    } else {
+      dbSetIndex = Math.ceil(setNumber / 2);
+      if (dbSetIndex > 30) useAI = true;
+    }
+  }
+
+  // 2. DB 추출 로직
+  if (!useAI && dbSetIndex > 0 && dbSetIndex <= 30) {
+    const rPref = `s${dbSetIndex}_r_`;
+    const lPref = `s${dbSetIndex}_l_`;
+    
+    if (isReadingLab) {
+      const allR = STATIC_EXAM_DATA.filter(q => q.id.startsWith(rPref));
+      return isOdd ? allR.slice(0, 10) : allR.slice(10, 20);
+    } else if (isListeningLab) {
+      const allL = STATIC_EXAM_DATA.filter(q => q.id.startsWith(lPref));
+      return isOdd ? allL.slice(0, 9) : allL.slice(9, 21);
+    } else {
+      return [
+        ...STATIC_EXAM_DATA.filter(q => q.id.startsWith(rPref)),
+        ...STATIC_EXAM_DATA.filter(q => q.id.startsWith(lPref))
+      ];
+    }
+  }
+
+  // 3. AI 생성
+  const ai = getAI();
   try {
-    const prompt = `Act as an official EPS-TOPIK examiner. Create 20 unique high-quality Korean exam questions for Round ${setNumber} (Theme: ${theme}).
-    - For Reading: Provide varied workplace scenarios.
-    - For Listening: Provide clear dialogues or word recognition scripts.
-    - Every question MUST include an 'imagePrompt' for AI visualization.
-    - Explanations must be in English for the learner.
-    Return the result as a JSON array strictly following the Question type.`;
+    const prompt = `Act as an EPS-TOPIK examiner. Mode: ${mode}, Set: ${setNumber}. 
+    Create ${isFullExam ? "40" : "10"} questions. 
+    Include 'imagePrompt' for each. Return JSON.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
@@ -70,42 +116,35 @@ export const generateQuestionsBySet = async (
             type: Type.OBJECT,
             properties: {
               id: { type: Type.STRING },
-              type: { type: Type.STRING, enum: ["READING", "LISTENING"] },
+              type: { type: Type.STRING },
               category: { type: Type.STRING },
               questionText: { type: Type.STRING },
               context: { type: Type.STRING },
-              options: { type: Type.ARRAY, items: { type: Type.STRING }, minItems: 4, maxItems: 4 },
+              options: { type: Type.ARRAY, items: { type: Type.STRING } },
               correctAnswer: { type: Type.INTEGER },
               explanation: { type: Type.STRING },
-              imagePrompt: { type: Type.STRING }
+              imagePrompt: { type: Type.STRING },
+              optionImagePrompts: { type: Type.ARRAY, items: { type: Type.STRING } }
             },
-            required: ["id", "type", "category", "questionText", "options", "correctAnswer", "explanation"]
+            required: ["id", "type", "questionText", "options", "correctAnswer"]
           }
         }
       }
     });
-
     return JSON.parse(cleanJson(response.text || '[]'));
-  } catch (error) {
-    console.warn("AI generation failed, using static fallback data.");
-    // DB 데이터가 적으므로 무작위로 섞어서 반환
-    return [...STATIC_EXAM_DATA].sort(() => Math.random() - 0.5).slice(0, 20);
+  } catch (e) {
+    console.error("AI Generation Error", e);
+    return STATIC_EXAM_DATA.slice(0, 10);
   }
 };
 
-/**
- * AI 시각 자료 생성
- */
 export const generateImage = async (prompt: string): Promise<string | null> => {
   if (!prompt) return null;
   const ai = getAI();
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-image-preview',
-      contents: { 
-        parts: [{ text: `Professional EPS-TOPIK Exam Illustration. Clean, high-quality, educational graphic. Subject: ${prompt}` }] 
-      },
-      config: { imageConfig: { aspectRatio: "1:1", imageSize: "1K" } }
+      model: 'gemini-2.5-flash-image',
+      contents: { parts: [{ text: `EPS-TOPIK illustration: ${prompt}` }] }
     });
     const parts = response.candidates?.[0]?.content?.parts;
     const imgPart = parts?.find(p => p.inlineData);
@@ -113,34 +152,14 @@ export const generateImage = async (prompt: string): Promise<string | null> => {
   } catch { return null; }
 };
 
-/**
- * AI 음성 생성 (멀티 스피커 지원)
- */
 export const generateSpeech = async (text: string): Promise<AudioBuffer | null> => {
   const ai = getAI();
-  const isDialogue = text.includes("Man:") || text.includes("Woman:") || text.includes("남:") || text.includes("여:");
-  
   try {
-    const config: any = { responseModalities: [Modality.AUDIO] };
-    if (isDialogue) {
-      config.speechConfig = {
-        multiSpeakerVoiceConfig: {
-          speakerVoiceConfigs: [
-            { speaker: 'Man', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Puck' } } },
-            { speaker: 'Woman', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } }
-          ]
-        }
-      };
-    } else {
-      config.speechConfig = { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } };
-    }
-
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text: `잘 듣고 질문에 알맞은 대답을 고르십시오. ${text}` }] }],
-      config
+      contents: [{ parts: [{ text: text }] }],
+      config: { responseModalities: [Modality.AUDIO] }
     });
-    
     const base64 = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
     if (base64) {
       const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({sampleRate: 24000});
@@ -153,10 +172,9 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
 export const analyzePerformance = async (session: ExamSession): Promise<AnalyticsFeedback | null> => {
   const ai = getAI();
   try {
-    const prompt = `Analyze EPS-TOPIK results. Score: ${session.score}/${session.questions.length}. Provide feedback in English. Return JSON.`;
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: prompt,
+      contents: `Analyze score: ${session.score}. Return JSON.`,
       config: { responseMimeType: "application/json" }
     });
     return JSON.parse(cleanJson(response.text || '{}'));

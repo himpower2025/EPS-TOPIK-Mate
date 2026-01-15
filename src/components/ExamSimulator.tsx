@@ -72,16 +72,21 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
 
     const generateVisuals = async () => {
       setIsGeneratingVisuals(true);
+      
+      // 질문 이미지 생성
       if (q.imagePrompt) {
         const img = await generateImage(q.imagePrompt);
         setQuestionImage(img);
       } else if (q.context?.startsWith('http')) {
         setQuestionImage(q.context);
       }
+
+      // 옵션 이미지 생성 (있는 경우)
       if (q.optionImagePrompts && q.optionImagePrompts.length > 0) {
         const imgs = await Promise.all(q.optionImagePrompts.map(p => generateImage(p)));
         setOptionImages(imgs);
       }
+      
       setIsGeneratingVisuals(false);
     };
 
@@ -148,6 +153,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
   const currentQ = questions[currentIndex];
   const isLast = currentIndex === questions.length - 1;
   const isListening = currentQ.type === QuestionType.LISTENING;
+  const isImageOptions = optionImages.length > 0;
 
   return (
     <div className="flex flex-col h-full bg-gray-50 font-sans">
@@ -200,18 +206,33 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({
                 )}
             </div>
 
-            <div className="space-y-3">
+            {/* 옵션 렌더링: 이미지 옵션 또는 텍스트 옵션 */}
+            {isImageOptions ? (
+              <div className="grid grid-cols-2 gap-4">
+                {optionImages.map((img, idx) => {
+                  const isSelected = answers[currentQ.id] === idx;
+                  return (
+                    <button key={idx} onClick={() => handleAnswer(idx)} className={`relative aspect-square rounded-[2rem] overflow-hidden border-4 transition-all ${isSelected ? 'border-indigo-600 shadow-xl scale-95' : 'border-white'}`}>
+                      {img ? <img src={img} className="w-full h-full object-cover" alt={`Option ${idx+1}`} /> : <div className="w-full h-full bg-gray-100 animate-pulse" />}
+                      <div className={`absolute top-2 left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${isSelected ? 'bg-indigo-600 text-white' : 'bg-white text-gray-400'}`}>{idx+1}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="space-y-3">
                 {currentQ.options.map((option, idx) => {
                     const isSelected = answers[currentQ.id] === idx;
                     return (
-                        <button key={idx} onClick={() => handleAnswer(idx)} className={`w-full p-5 md:p-6 rounded-[2rem] text-left transition-all flex items-center gap-4 border-2 shadow-sm active:scale-[0.98] ${isSelected ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-gray-100 bg-white text-gray-700'}`}>
+                        <button key={idx} onClick={() => handleAnswer(idx)} className={`w-full p-5 md:p-6 rounded-[2rem] text-left transition-all flex items-center gap-4 border-2 shadow-sm active:scale-[0.98] ${isSelected ? 'border-indigo-600 bg-indigo-600 text-white shadow-lg' : 'border-gray-100 bg-white text-gray-700'}`}>
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-black shrink-0 ${isSelected ? 'bg-white text-indigo-600' : 'bg-gray-100 text-gray-400'}`}>{idx + 1}</div>
                           <span className="text-base md:text-lg font-bold">{option}</span>
                           {isSelected && <CheckCircle className="ml-auto w-6 h-6 text-indigo-200" />}
                         </button>
                     );
                 })}
-            </div>
+              </div>
+            )}
          </div>
       </div>
 
