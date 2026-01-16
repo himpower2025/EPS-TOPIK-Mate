@@ -12,8 +12,15 @@ import { InstallPwa } from './components/InstallPwa';
 import { ExamSession, User, ExamMode } from './types';
 
 import { auth, db } from './firebase';
-import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, setDoc, onSnapshot } from 'firebase/firestore';
+import { 
+  signInWithPopup, 
+  signInWithRedirect, 
+  getRedirectResult,
+  GoogleAuthProvider, 
+  onAuthStateChanged, 
+  signOut 
+} from 'firebase/auth';
+import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
 
 enum AppState { LANDING, DASHBOARD, SET_SELECTION, EXAM, ANALYTICS }
 
@@ -28,11 +35,23 @@ const App: React.FC = () => {
   const [selectedSet, setSelectedSet] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
 
+  // 리다이렉트 로그인 결과 확인 (모바일 환경 대응)
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    getRedirectResult(auth).catch((error) => {
+      console.error("Redirect login error:", error);
+    });
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setShowLoginModal(false);
-        onSnapshot(doc(db, 'users', firebaseUser.uid), (snap) => {
+        const userRef = doc(db, 'users', firebaseUser.uid);
+        
+        try {
+          // 1. 먼저 초기 데이터를 한번 가져옵니다 (로딩 단축)
+          const snap = await getDoc(userRef);
+          
           if (snap.exists()) {
             setUser(snap.data() as User);
           } else {
@@ -45,11 +64,22 @@ const App: React.FC = () => {
               subscriptionExpiry: null, 
               examsRemaining: 1 
             };
-            setDoc(doc(db, 'users', firebaseUser.uid), newUser);
+            await setDoc(userRef, newUser);
             setUser(newUser);
           }
-          if (currentState === AppState.LANDING) setCurrentState(AppState.DASHBOARD);
-        });
+
+          // 2. 실시간 감시 시작
+          onSnapshot(userRef, (s) => {
+            if (s.exists()) setUser(s.data() as User);
+          });
+
+          // 3. 상태 변경
+          if (currentState === AppState.LANDING) {
+            setCurrentState(AppState.DASHBOARD);
+          }
+        } catch (error) {
+          console.error("Firestore Error:", error);
+        }
       } else {
         setUser(null);
         setCurrentState(AppState.LANDING);
@@ -59,13 +89,29 @@ const App: React.FC = () => {
     return () => unsubscribe();
   }, [currentState]);
 
+  const handleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+    // 모바일(PWA) 여부 확인
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
+    
+    try {
+      if (isStandalone || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        await signInWithRedirect(auth, provider);
+      } else {
+        await signInWithPopup(auth, provider);
+      }
+    } catch (error) {
+      console.error("Login Error:", error);
+      alert("Login failed. Please try again or check your internet.");
+    }
+  };
+
   const handleModeSelect = (mode: ExamMode) => {
     setExamMode(mode);
     setCurrentState(AppState.SET_SELECTION);
   };
 
   const handleSetSelect = (setNum: number) => {
-    // 무료 플랜은 1, 2세트만 가능
     if (user?.plan === 'free' && setNum > 2) {
       setShowPaywall(true);
       return;
@@ -93,12 +139,12 @@ const App: React.FC = () => {
       <FaviconManager />
       <InstallPwa />
       
-      {!user && <LandingPage onLoginClick={() => setShowLoginModal(true)} />}
+      {!user && currentState === AppState.LANDING && <LandingPage onLoginClick={() => setShowLoginModal(true)} />}
       
       {showLoginModal && (
         <LoginModal 
           onClose={() => setShowLoginModal(false)} 
-          onLogin={() => signInWithPopup(auth, new GoogleAuthProvider())} 
+          onLogin={handleLogin} 
         />
       )}
       
