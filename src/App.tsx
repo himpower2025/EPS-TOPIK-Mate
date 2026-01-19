@@ -12,15 +12,8 @@ import { InstallPwa } from './components/InstallPwa';
 import { ExamSession, User, ExamMode } from './types';
 
 import { auth, db } from './firebase';
-import { 
-  signInWithPopup, 
-  signInWithRedirect, 
-  getRedirectResult,
-  GoogleAuthProvider, 
-  onAuthStateChanged, 
-  signOut 
-} from 'firebase/auth';
-import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
+import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'firebase/auth';
+import { doc, setDoc, onSnapshot, getDoc } from 'firebase/firestore';
 
 enum AppState { LANDING, DASHBOARD, SET_SELECTION, EXAM, ANALYTICS }
 
@@ -35,51 +28,39 @@ const App: React.FC = () => {
   const [selectedSet, setSelectedSet] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 리다이렉트 로그인 결과 확인 (모바일 환경 대응)
-  useEffect(() => {
-    getRedirectResult(auth).catch((error) => {
-      console.error("Redirect login error:", error);
-    });
-  }, []);
-
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setShowLoginModal(false);
         const userRef = doc(db, 'users', firebaseUser.uid);
         
-        try {
-          // 1. 먼저 초기 데이터를 한번 가져옵니다 (로딩 단축)
-          const snap = await getDoc(userRef);
-          
-          if (snap.exists()) {
-            setUser(snap.data() as User);
-          } else {
-            const newUser: User = { 
-              id: firebaseUser.uid, 
-              name: firebaseUser.displayName || 'Guest', 
-              email: firebaseUser.email || '', 
-              avatarUrl: firebaseUser.photoURL || '', 
-              plan: 'free', 
-              subscriptionExpiry: null, 
-              examsRemaining: 1 
-            };
-            await setDoc(userRef, newUser);
-            setUser(newUser);
-          }
-
-          // 2. 실시간 감시 시작
-          onSnapshot(userRef, (s) => {
-            if (s.exists()) setUser(s.data() as User);
-          });
-
-          // 3. 상태 변경
-          if (currentState === AppState.LANDING) {
-            setCurrentState(AppState.DASHBOARD);
-          }
-        } catch (error) {
-          console.error("Firestore Error:", error);
+        // 초기 데이터 로드
+        const snap = await getDoc(userRef);
+        if (snap.exists()) {
+          setUser(snap.data() as User);
+        } else {
+          const newUser: User = { 
+            id: firebaseUser.uid, 
+            name: firebaseUser.displayName || 'Learner', 
+            email: firebaseUser.email || '', 
+            avatarUrl: firebaseUser.photoURL || '', 
+            plan: 'free', 
+            subscriptionExpiry: null, 
+            examsRemaining: 3 
+          };
+          await setDoc(userRef, newUser);
+          setUser(newUser);
         }
+
+        // 실시간 업데이트 구독
+        const unsubSnapshot = onSnapshot(userRef, (s) => {
+          if (s.exists()) {
+            setUser(s.data() as User);
+          }
+        });
+
+        if (currentState === AppState.LANDING) setCurrentState(AppState.DASHBOARD);
+        return () => unsubSnapshot();
       } else {
         setUser(null);
         setCurrentState(AppState.LANDING);
@@ -89,30 +70,13 @@ const App: React.FC = () => {
     return () => unsubscribe();
   }, [currentState]);
 
-  const handleLogin = async () => {
-    const provider = new GoogleAuthProvider();
-    // 모바일(PWA) 여부 확인
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
-    
-    try {
-      if (isStandalone || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        await signInWithRedirect(auth, provider);
-      } else {
-        await signInWithPopup(auth, provider);
-      }
-    } catch (error) {
-      console.error("Login Error:", error);
-      alert("Login failed. Please try again or check your internet.");
-    }
-  };
-
   const handleModeSelect = (mode: ExamMode) => {
     setExamMode(mode);
     setCurrentState(AppState.SET_SELECTION);
   };
 
   const handleSetSelect = (setNum: number) => {
-    if (user?.plan === 'free' && setNum > 2) {
+    if (user?.plan === 'free' && setNum > 1) {
       setShowPaywall(true);
       return;
     }
@@ -122,29 +86,36 @@ const App: React.FC = () => {
 
   const handleExamComplete = (session: ExamSession) => {
     if (!user) return;
-    setDoc(doc(db, 'exams', session.id), { ...session, userId: user.id });
+    setLastSession(session);
+    setCurrentState(AppState.ANALYTICS);
     
+    // 무료 사용자 남은 횟수 차감
     if (user.plan === 'free') {
-      setDoc(doc(db, 'users', user.id), { examsRemaining: Math.max(0, user.examsRemaining - 1) }, { merge: true });
+      const userRef = doc(db, 'users', user.id);
+      setDoc(userRef, { examsRemaining: Math.max(0, user.examsRemaining - 1) }, { merge: true });
     }
-    
-    setLastSession(session); 
-    setCurrentState(AppState.ANALYTICS); 
   };
 
-  if (isLoading) return <div className="h-screen flex items-center justify-center bg-indigo-900 text-white font-black animate-pulse uppercase tracking-widest text-center px-6">Preparing Your Success...</div>;
+  const handleBackToDashboard = () => setCurrentState(AppState.DASHBOARD);
+
+  if (isLoading) return (
+    <div className="h-screen flex flex-col items-center justify-center bg-indigo-900 text-white font-black text-center p-10">
+      <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin mb-6"></div>
+      <p className="animate-pulse tracking-widest uppercase text-sm">준비 중입니다...</p>
+    </div>
+  );
 
   return (
-    <div className="h-[100dvh] w-full bg-gray-100 overflow-hidden flex flex-col relative">
+    <div className="h-[100dvh] w-full bg-gray-100 overflow-hidden flex flex-col relative font-sans">
       <FaviconManager />
       <InstallPwa />
       
-      {!user && currentState === AppState.LANDING && <LandingPage onLoginClick={() => setShowLoginModal(true)} />}
+      {!user && <LandingPage onLoginClick={() => setShowLoginModal(true)} />}
       
       {showLoginModal && (
         <LoginModal 
           onClose={() => setShowLoginModal(false)} 
-          onLogin={handleLogin} 
+          onLogin={() => signInWithPopup(auth, new GoogleAuthProvider())} 
         />
       )}
       
@@ -154,16 +125,16 @@ const App: React.FC = () => {
           onModeSelect={handleModeSelect} 
           onUpgrade={() => setShowPaywall(true)} 
           onProfileClick={() => setShowProfile(true)} 
-          onViewAnalysis={() => { if (lastSession) setCurrentState(AppState.ANALYTICS); }} 
+          onViewAnalysis={() => { if(lastSession) setCurrentState(AppState.ANALYTICS); }} 
         />
       )}
 
       {currentState === AppState.SET_SELECTION && user && (
         <SetSelector 
           mode={examMode} 
-          plan={user.plan} 
+          plan={user.plan}
           onSelect={handleSetSelect} 
-          onBack={() => setCurrentState(AppState.DASHBOARD)} 
+          onBack={handleBackToDashboard} 
         />
       )}
       
@@ -172,13 +143,14 @@ const App: React.FC = () => {
           mode={examMode}
           setNumber={selectedSet}
           onComplete={handleExamComplete} 
-          onExit={() => setCurrentState(AppState.SET_SELECTION)} 
+          onExit={handleBackToDashboard} 
+          /* [Fix] plan 프로퍼티로 전달하여 컴포넌트 인터페이스와 일치시킴 */
           plan={user.plan} 
         />
       )}
       
       {currentState === AppState.ANALYTICS && lastSession && (
-        <Analytics session={lastSession} onBack={() => setCurrentState(AppState.DASHBOARD)} />
+        <Analytics session={lastSession} onBack={handleBackToDashboard} />
       )}
 
       {showPaywall && user && <PaywallModal user={user} onClose={() => setShowPaywall(false)} />}

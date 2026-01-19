@@ -1,58 +1,75 @@
-import React from 'react';
+import React, { Component, ReactNode, ErrorInfo } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
-// [중요] 에러 발생 시 흰 화면 대신 에러 메시지를 보여주는 안전장치
-class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: Error | null}> {
-  constructor(props: {children: React.ReactNode}) {
+interface ErrorBoundaryProps {
+  children?: ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+/**
+ * 전역 에러 바운더리: 애플리케이션의 치명적 오류를 포착하여 사용자에게 안내합니다.
+ */
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = {
+      hasError: false,
+      error: null
+    };
   }
 
-  static getDerivedStateFromError(error: Error) {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("Uncaught error:", error, errorInfo);
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("Critical Runtime Error:", error, errorInfo);
   }
 
   render() {
-    if (this.state.hasError) {
+    const { hasError, error } = this.state;
+    const { children } = this.props;
+
+    if (hasError) {
       return (
-        <div style={{ padding: '2rem', color: '#dc2626', fontFamily: 'sans-serif', maxWidth: '800px', margin: '0 auto' }}>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>⚠️ Something went wrong</h1>
-          <p style={{ marginBottom: '1rem' }}>The application crashed with the following error:</p>
-          <pre style={{ backgroundColor: '#f3f4f6', padding: '1rem', borderRadius: '0.5rem', overflowX: 'auto', border: '1px solid #e5e7eb' }}>
-            {this.state.error?.toString()}
-          </pre>
-          <p style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#6b7280' }}>
-            Please check the console (F12) for more details.
+        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-red-50 text-center font-sans">
+          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6">
+            <span className="text-4xl text-red-600">⚠️</span>
+          </div>
+          <h1 className="text-2xl font-black text-gray-900 mb-2">앱 실행 중 오류가 발생했습니다</h1>
+          <p className="text-gray-600 mb-6 max-w-md">
+            페이지를 새로고침하거나 잠시 후 다시 시도해 주세요.
           </p>
+          <div className="bg-white p-4 rounded-xl border border-red-100 text-left text-[10px] text-red-400 mb-8 max-w-lg overflow-auto w-full font-mono shadow-inner">
+            {error?.stack || error?.toString()}
+          </div>
           <button 
             onClick={() => window.location.reload()}
-            style={{ marginTop: '1.5rem', padding: '0.75rem 1.5rem', backgroundColor: '#4f46e5', color: 'white', border: 'none', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: 'bold' }}
+            className="bg-indigo-600 text-white px-10 py-4 rounded-2xl font-black text-lg shadow-xl hover:bg-indigo-700 transition-all active:scale-95"
           >
-            Reload App
+            앱 새로고침
           </button>
         </div>
       );
     }
 
-    return this.props.children;
+    return children;
   }
 }
 
 const rootElement = document.getElementById('root');
-if (!rootElement) {
-  throw new Error("Could not find root element to mount to");
+if (rootElement) {
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
+    <React.StrictMode>
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </React.StrictMode>
+  );
 }
-
-const root = ReactDOM.createRoot(rootElement);
-root.render(
-  <React.StrictMode>
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
-  </React.StrictMode>
-);
