@@ -1,6 +1,5 @@
-
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { Question, QuestionType, AnalyticsFeedback, ExamSession, ExamMode } from '../types';
+import { Question, AnalyticsFeedback, ExamSession, ExamMode, PlanType } from '../types';
 import { STATIC_EXAM_DATA } from '../data/examData';
 
 const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -35,9 +34,9 @@ const cleanJson = (text: string) => text.replace(/```json/g, '').replace(/```/g,
  * 무한 문제 생성 엔진 (Gemini 3 Pro)
  */
 export const generateQuestionsBySet = async (
-  mode: ExamMode, 
+  _mode: ExamMode, 
   setNumber: number, 
-  _isPremium: boolean
+  plan: PlanType
 ): Promise<Question[]> => {
   const ai = getAI();
   const categories = ["Workplace Safety", "Industrial Tools", "Daily Life in Korea", "Public Signs", "Transportation", "Shopping & Prices"];
@@ -45,7 +44,7 @@ export const generateQuestionsBySet = async (
 
   try {
     const prompt = `당신은 대한민국 산업인력공단 EPS-TOPIK 출제 위원입니다. 
-    Round ${setNumber}를 위한 고퀄리티 문항 10개를 생성하십시오. (주제: ${category})
+    Round ${setNumber}를 위한 고퀄리티 문항 10개를 생성하십시오. (주제: ${category}, 플랜: ${plan})
     
     [필수 규칙]
     1. 읽기(READING)와 듣기(LISTENING)를 5:5 비율로 섞으십시오.
@@ -98,16 +97,20 @@ export const generateImage = async (prompt: string): Promise<string | null> => {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: { 
-        parts: [{ text: `EPS-TOPIK educational illustration for foreign workers: ${prompt}. Clean, 2D vector style, bright lighting, high quality.` }] 
+        parts: [{ text: `EPS-TOPIK educational illustration: ${prompt}. Clean, 2D vector style, bright lighting.` }] 
       },
       config: {
         imageConfig: { aspectRatio: "1:1" }
       }
     });
     
-    for (const part of response.candidates[0].content.parts) {
-      if (part.inlineData) {
-        return `data:image/png;base64,${part.inlineData.data}`;
+    // [Fix] Optional Chaining(?.)을 사용하여 candidates와 parts 접근 시 발생하던 타입 에러를 완전히 해결했습니다.
+    const parts = response.candidates?.[0]?.content?.parts;
+    if (parts) {
+      for (const part of parts) {
+        if (part.inlineData) {
+          return `data:image/png;base64,${part.inlineData.data}`;
+        }
       }
     }
     return null;
@@ -132,7 +135,6 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
       }
     };
 
-    // 대화형 문제일 경우 멀티 스피커 설정 시도
     if (isDialogue) {
       config.speechConfig = {
         multiSpeakerVoiceConfig: {

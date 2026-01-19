@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Crown, X, Smartphone, Info, ShieldCheck, Zap, CheckCircle2, ArrowRight } from 'lucide-react';
 import { db } from '../firebase';
@@ -112,7 +111,16 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
               <div className="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100 mb-6 w-full max-w-[280px] text-center">
                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Scan QR with Bank App</p>
                  <div className="aspect-square bg-white rounded-2xl overflow-hidden flex items-center justify-center relative border-4 border-gray-50 p-2 mb-4">
-                    <img src="./fonepay-qr.png" alt="Merchant QR" className="w-full h-full object-contain" onError={(e) => (e.target as any).src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=fonepay-merchant-${selectedPlan}`} />
+                    {/* 루트 폴더의 fonepay-qr.png를 정확히 참조합니다 */}
+                    <img 
+                      src="./fonepay-qr.png" 
+                      alt="Fonepay Merchant QR" 
+                      className="w-full h-full object-contain" 
+                      onError={(e) => {
+                        console.error("Fonepay QR image failed to load from local root.");
+                        (e.target as any).src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=fonepay-fallback-${selectedPlan}`;
+                      }} 
+                    />
                  </div>
                  <div className="bg-indigo-900 p-4 rounded-2xl text-white shadow-lg flex justify-between items-center w-full">
                     <div className="text-left">
@@ -123,7 +131,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
                  </div>
               </div>
 
-              <div className="w-full bg-amber-50 border border-amber-100 p-5 rounded-2xl mb-6">
+              <div className="w-full bg-amber-50 border border-amber-100 p-5 rounded-2xl mb-6 text-left">
                  <div className="flex items-center gap-2 text-amber-800 font-black text-[10px] uppercase mb-2"><Info className="w-4 h-4"/> Notice</div>
                  <p className="text-[11px] text-amber-700 leading-relaxed font-medium">
                    1. Scan and pay exactly <strong>{currentPlan.price}</strong>.<br/>
