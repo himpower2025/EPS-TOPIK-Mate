@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Question, QuestionType, ExamSession, ExamMode, PlanType } from '../types';
 import { generateQuestionsBySet, generateSpeech, generateImage } from '../services/geminiService';
@@ -35,17 +36,18 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     const loadData = async () => {
       setLoading(true);
       try {
+        // [강화] 제미나이가 정적 데이터를 기반으로 완전히 새로운 세트를 생성합니다.
         const data = await generateQuestionsBySet(mode, setNumber, plan);
         setQuestions(data);
       } catch (error) {
-        console.error("Failed to load questions:", error);
+        console.error("Critical error in question generation:", error);
         onExit();
       } finally {
         setLoading(false);
       }
     };
     loadData();
-  }, [mode, setNumber, plan, onExit]);
+  }, [mode, setNumber, plan]);
 
   const initAudio = async () => {
     if (!audioContextRef.current) {
@@ -68,23 +70,23 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     const generateVisuals = async () => {
       setIsGeneratingVisuals(true);
       try {
+        // 초사실적 메인 이미지 생성
         if (q.imagePrompt) {
-          const img = await generateImage(q.imagePrompt);
-          setQuestionImage(img);
+          generateImage(q.imagePrompt).then(setQuestionImage);
         }
+        // 보기가 이미지인 경우 (4개 동시 생성)
         if (q.optionImagePrompts && q.optionImagePrompts.length === 4) {
           const promises = q.optionImagePrompts.map(p => generateImage(p));
-          const imgs = await Promise.all(promises);
-          setOptionImages(imgs);
+          Promise.all(promises).then(setOptionImages);
         }
-      } catch (err) {
-        console.error("Visual generation error:", err);
       } finally {
         setIsGeneratingVisuals(false);
       }
     };
 
     generateVisuals();
+    
+    // 듣기 문제일 경우 자동 재생 시도
     if (q.type === QuestionType.LISTENING && audioContextReady) {
       handlePlayAudio();
     }
@@ -117,8 +119,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
         setIsPlaying(true);
         source.onended = () => { setIsPlaying(false); setLoadingAudio(false); };
       }
-    } catch (err) { 
-      console.error("Audio playback error:", err);
+    } catch { 
       setIsPlaying(false); 
       setLoadingAudio(false); 
     }
@@ -142,15 +143,19 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     });
   };
 
-  if (loading) return <div className="h-full flex items-center justify-center p-12 bg-white"><LoadingSpinner message="AI가 고퀄리티 문제를 생성 중입니다..." /></div>;
+  if (loading) return (
+    <div className="h-full flex items-center justify-center p-12 bg-white">
+      <LoadingSpinner message="Gemini 3 Pro가 고유한 시험 세트를 설계 중입니다..." />
+    </div>
+  );
 
   if (!audioContextReady && mode !== 'READING') {
     return (
       <div className="flex flex-col items-center justify-center h-full bg-indigo-950 text-white p-10 text-center pt-safe">
         <Headphones className="w-20 h-20 mb-8 text-indigo-300 animate-pulse" />
-        <h2 className="text-3xl font-black mb-4">듣기 평가 준비</h2>
-        <p className="mb-12 text-indigo-200/70 font-medium">실제 한국인 음성이 제공됩니다. 스피커를 켜주세요.</p>
-        <button onClick={initAudio} className="bg-white text-indigo-900 px-12 py-5 rounded-[2rem] font-black text-xl shadow-2xl active:scale-95 flex items-center gap-3">시작하기</button>
+        <h2 className="text-3xl font-black mb-4">듣기 평가 준비 완료</h2>
+        <p className="mb-12 text-indigo-200/70 font-medium">실제 한국인 음성이 생성됩니다. 스피커를 켜주세요.</p>
+        <button onClick={initAudio} className="bg-white text-indigo-900 px-12 py-5 rounded-[2.5rem] font-black text-xl shadow-2xl active:scale-95 flex items-center gap-3">시작하기</button>
       </div>
     );
   }
@@ -162,11 +167,12 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
 
   return (
     <div className="flex flex-col h-full bg-gray-50 font-sans overflow-hidden">
+      {/* 상단바 */}
       <div className="bg-white border-b border-gray-200 pt-safe shrink-0 shadow-sm z-30">
         <div className="px-4 py-3 flex justify-between items-center">
             <div className="flex items-center gap-3">
               <button onClick={() => setIsDrawerOpen(true)} className="p-2 -ml-2 text-gray-600 active:bg-gray-100 rounded-full"><Menu className="w-6 h-6" /></button>
-              <span className="text-sm font-black uppercase">Q {currentIndex + 1} / {questions.length}</span>
+              <span className="text-sm font-black uppercase tracking-tight">ROUND {setNumber} • Q {currentIndex + 1}/{questions.length}</span>
             </div>
             <div className="flex items-center gap-2 bg-indigo-50 px-4 py-2 rounded-2xl border border-indigo-100">
               <Clock className="w-4 h-4 text-indigo-400" />
@@ -175,6 +181,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
         </div>
       </div>
 
+      {/* 문제 영역 */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-8 pb-40">
          <div className="max-w-2xl mx-auto space-y-6">
             <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100">
@@ -184,16 +191,17 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                 <h2 className="text-xl md:text-2xl font-bold text-gray-900 leading-snug">{currentQ.questionText}</h2>
             </div>
 
+            {/* AI 시각화 엔진 영역 */}
             <div className="bg-white rounded-[2.5rem] border-2 border-dashed border-gray-200 overflow-hidden relative shadow-sm min-h-[300px] flex flex-col items-center justify-center p-6 transition-all">
                 {isGeneratingVisuals && !questionImage ? (
-                  <div className="flex flex-col items-center gap-4 py-12 animate-pulse text-center">
-                    <Sparkles className="w-12 h-12 text-indigo-400 mb-2" />
-                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest animate-bounce">AI Illustrator Drawing...</span>
+                  <div className="flex flex-col items-center gap-4 py-12 text-center">
+                    <Sparkles className="w-12 h-12 text-indigo-400 animate-spin" />
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest animate-pulse">Gemini Drawing Realistic Scenes...</span>
                   </div>
                 ) : (
                   <>
                     {questionImage ? (
-                      <img src={questionImage} className="max-h-[380px] object-contain w-full mb-4 rounded-3xl shadow-lg animate-fade-in" alt="Visual Aid" />
+                      <img src={questionImage} className="max-h-[380px] object-cover w-full mb-4 rounded-3xl shadow-lg animate-fade-in" alt="Visual Aid" />
                     ) : (
                       !isListening && currentQ.context && (
                         <div className="p-8 text-lg font-serif leading-loose text-gray-800 bg-indigo-50/20 rounded-[2rem] w-full whitespace-pre-wrap italic">"{currentQ.context}"</div>
@@ -204,13 +212,14 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                          <button onClick={handlePlayAudio} className={`relative w-28 h-28 rounded-full flex items-center justify-center shadow-2xl transition-all ${isPlaying ? 'bg-indigo-600 text-white scale-110' : 'bg-white text-indigo-600 border border-indigo-100'}`}>
                             {loadingAudio ? <div className="w-10 h-10 border-4 border-current border-t-transparent rounded-full animate-spin"/> : <Volume2 className="w-12 h-12" />}
                          </button>
-                         <span className="text-[10px] font-black text-indigo-900 uppercase tracking-widest">{isPlaying ? "AI Playing..." : "Tap to Play Audio"}</span>
+                         <span className="text-[10px] font-black text-indigo-900 uppercase tracking-widest">{isPlaying ? "AI Multi-Speaker Dialogue Playing..." : "Tap to Play Listening Audio"}</span>
                       </div>
                     )}
                   </>
                 )}
             </div>
 
+            {/* 선택지 영역 */}
             {isImageOptions ? (
               <div className="grid grid-cols-2 gap-4 animate-fade-in">
                 {optionImages.map((img, idx) => {
@@ -240,11 +249,13 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
          </div>
       </div>
 
+      {/* 하단 내비게이션 */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-gray-100 p-6 pb-safe flex gap-4 max-w-2xl mx-auto z-40">
           <button onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))} disabled={currentIndex === 0} className="px-8 py-5 rounded-2xl bg-gray-100 text-gray-700 disabled:opacity-30 font-bold active:bg-gray-200"><ChevronLeft className="w-8 h-8" /></button>
-          <button onClick={isLast ? handleSubmit : () => setCurrentIndex(p => p + 1)} className={`flex-1 ${isLast ? 'bg-green-600' : 'bg-indigo-600'} text-white font-black rounded-2xl shadow-xl active:scale-95 text-xl uppercase tracking-tight`}>{isLast ? 'Finish' : 'Next'}</button>
+          <button onClick={isLast ? handleSubmit : () => setCurrentIndex(p => p + 1)} className={`flex-1 ${isLast ? 'bg-green-600' : 'bg-indigo-600'} text-white font-black rounded-2xl shadow-xl active:scale-95 text-xl uppercase tracking-tight`}>{isLast ? 'Finish' : 'Next Question'}</button>
       </div>
 
+      {/* 시험 현황 드로어 */}
       {isDrawerOpen && (
         <div className="fixed inset-0 z-[60] flex">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setIsDrawerOpen(false)}></div>
