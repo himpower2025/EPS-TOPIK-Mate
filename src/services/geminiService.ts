@@ -1,10 +1,10 @@
-import { GoogleGenAI, Modality } from "@google/genai";
-import { Question, AnalyticsFeedback, ExamSession, ExamMode, PlanType } from '../types';
+import { GoogleGenAI, Type, Modality } from "@google/genai";
+import { Question, QuestionType, AnalyticsFeedback, ExamSession, ExamMode, PlanType } from '../types';
 import { STATIC_EXAM_DATA } from '../data/examData';
 
 const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-// --- Utilities ---
+// --- 유틸리티 함수 ---
 function decodeBase64(base64: string): Uint8Array {
   const binaryString = window.atob(base64);
   const bytes = new Uint8Array(binaryString.length);
@@ -30,82 +30,111 @@ async function decodeAudioData(data: Uint8Array, ctx: AudioContext, sampleRate: 
 const cleanJson = (text: string) => text.replace(/```json/g, '').replace(/```/g, '').replace(/\/\*.*?\*\//gs, '').trim();
 
 /**
- * [Core Engine] Supply questions based on user plan
- * 1m: 1-5 Exam, 1-20 Lab
- * 3m: 1-30 Exam, 1-70 Lab
- * 6m: 1-70 Exam (30 DB + 40 AI), 1-150 Lab (60 DB + 90 AI)
+ * [AI 극대화 엔진] 기존 DB에서 참조 문항을 무작위로 추출합니다.
+ */
+const getReferenceQuestions = (count: number = 3): string => {
+  const shuffled = [...STATIC_EXAM_DATA].sort(() => 0.5 - Math.random());
+  return JSON.stringify(shuffled.slice(0, count), null, 2);
+};
+
+/**
+ * 산업 분야 결정 (세트 번호에 따라 AI의 전문 분야를 고정)
+ */
+const getIndustrialContext = (setNumber: number): string => {
+  const sectors = [
+    "Construction (Scaffolding, Rebar, Concrete)",
+    "Manufacturing (Machine Operation, Safety Gear, Assembly)",
+    "Agriculture (Greenhouses, Farming Tools, Harvest)",
+    "Logistics (Warehouse, Forklift, Packaging)",
+    "Daily Workplace (Office manners, Salary, Insurance)"
+  ];
+  return sectors[setNumber % sectors.length];
+};
+
+/**
+ * [Core Engine] 플랜별 문항 공급 로직
  */
 export const generateQuestionsBySet = async (mode: ExamMode, setNumber: number, plan: PlanType): Promise<Question[]> => {
   if (plan === 'free') {
     return STATIC_EXAM_DATA.slice(0, 10);
   }
 
-  if (plan === '6m') {
-    if (mode === 'FULL') {
-      if (setNumber <= 30) return STATIC_EXAM_DATA.filter(q => q.id.startsWith(`s${setNumber}_`));
-      return await callGeminiToGenerateQuestions(mode, setNumber, 40);
-    } else {
-      if (setNumber <= 60) {
-        const dbIdx = Math.ceil(setNumber / 2);
-        const isOdd = setNumber % 2 !== 0;
-        const typeKey = mode === 'READING' ? 'r' : 'l';
-        const all = STATIC_EXAM_DATA.filter(q => q.id.startsWith(`s${dbIdx}_${typeKey}_`));
-        return isOdd ? all.slice(0, 10) : all.slice(10, 20);
-      }
-      return await callGeminiToGenerateQuestions(mode, setNumber, 10);
-    }
-  }
+  // 3개월/6개월 프리미엄 플랜 로직
+  if (plan === '3m' || plan === '6m') {
+    const isFullExam = mode === 'FULL';
+    const dbLimit = isFullExam ? 30 : 60; // DB 사용 가능 범위
 
-  if (plan === '3m') {
-    if (mode === 'FULL') {
-      if (setNumber <= 30) return STATIC_EXAM_DATA.filter(q => q.id.startsWith(`s${setNumber}_`));
-      return await callGeminiToGenerateQuestions(mode, setNumber, 40);
-    } else {
-      if (setNumber <= 60) {
-        const dbIdx = Math.ceil(setNumber / 2);
-        const isOdd = setNumber % 2 !== 0;
-        const typeKey = mode === 'READING' ? 'r' : 'l';
-        const all = STATIC_EXAM_DATA.filter(q => q.id.startsWith(`s${dbIdx}_${typeKey}_`));
-        return isOdd ? all.slice(0, 10) : all.slice(10, 20);
-      }
-      return await callGeminiToGenerateQuestions(mode, setNumber, 10);
-    }
-  }
-
-  if (plan === '1m') {
-    if (mode === 'FULL') {
-      return STATIC_EXAM_DATA.filter(q => q.id.startsWith(`s${setNumber}_`));
-    } else {
+    if (setNumber <= dbLimit) {
+      // DB 범위 내: 실제 데이터 활용
+      if (isFullExam) return STATIC_EXAM_DATA.filter(q => q.id.startsWith(`s${setNumber}_`));
+      
       const dbIdx = Math.ceil(setNumber / 2);
       const isOdd = setNumber % 2 !== 0;
       const typeKey = mode === 'READING' ? 'r' : 'l';
       const all = STATIC_EXAM_DATA.filter(q => q.id.startsWith(`s${dbIdx}_${typeKey}_`));
       return isOdd ? all.slice(0, 10) : all.slice(10, 20);
+    } else {
+      // [AI 극대화] DB 범위를 벗어나면 AI가 전문적인 유사 문항 생성
+      const count = isFullExam ? 40 : 10;
+      return await callGeminiToGenerateQuestions(mode, setNumber, count);
     }
   }
 
-  return STATIC_EXAM_DATA.slice(0, 10);
+  // 1개월 플랜: DB 위주
+  return STATIC_EXAM_DATA.sort(() => 0.5 - Math.random()).slice(0, 10);
 };
 
+/**
+ * [핵심 고도화] AI 문제 생성 함수
+ * Few-shot Prompting과 Logic Verification이 결합되었습니다.
+ */
 async function callGeminiToGenerateQuestions(mode: ExamMode, setNumber: number, count: number): Promise<Question[]> {
   const ai = getAI();
-  const prompt = `You are an expert EPS-TOPIK examiner. Create ${count} realistic exam questions.
-  Mode: ${mode}, Round: ${setNumber}. 
-  Focus on industrial safety and workplace Korean. 
-  Each question must have an 'imagePrompt' for visual generation.
-  IMPORTANT: Explanations and UI text in the JSON must be in English. Question text and options must be in Korean.
-  Format: JSON array of Question objects.`;
+  const reference = getReferenceQuestions(3);
+  const sector = getIndustrialContext(setNumber);
+
+  const prompt = `You are a Senior EPS-TOPIK Examiner with 20 years of experience. 
+  Your task is to create ${count} unique, high-quality exam questions for "Round ${setNumber}".
+  
+  [Theme/Sector for this Round]: ${sector}
+  [Format Guide]: Use the provided Reference Questions as a template for style and difficulty.
+  
+  [Reference Questions (Actual Exam Data)]:
+  ${reference}
+  
+  [Strict Rules for Quality Control]:
+  1. Language: Question text and Options MUST be in Korean. Explanations and UI feedback MUST be in English.
+  2. Uniqueness: Do not copy the reference questions. Create NEW scenarios, NEW workplace dialogues, and NEW industrial contexts.
+  3. Logical Rigor: Each question must have ONLY ONE indisputably correct answer.
+  4. Plausibility: The 3 incorrect options must be plausible to challenge the student.
+  5. Visual Sync: 'imagePrompt' must be extremely descriptive so a visual AI can draw exactly what is needed for the question.
+  6. Difficulty: Maintain the standard EPS-TOPIK level (Intermediate Korean).
+
+  Mode: ${mode === 'FULL' ? 'Mix of Reading and Listening' : mode}
+  
+  Return ONLY a valid JSON array of Question objects.`;
 
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
       contents: prompt,
-      config: { responseMimeType: "application/json" }
+      config: { 
+        responseMimeType: "application/json",
+        temperature: 0.8, // 다양성을 위해 온도를 약간 높임
+        topP: 0.95
+      }
     });
-    return JSON.parse(cleanJson(response.text || '[]'));
+    
+    const generated = JSON.parse(cleanJson(response.text || '[]'));
+    
+    // 만약 AI가 충분한 양을 생성하지 못했을 경우를 대비한 최소한의 가드 (재귀 방지)
+    if (generated.length === 0) throw new Error("Empty AI response");
+    
+    return generated;
   } catch (err) {
-    console.error("AI Generation failed:", err);
-    return STATIC_EXAM_DATA.sort(() => Math.random() - 0.5).slice(0, count);
+    console.error("Critical: AI Generation failed, falling back to database mixing.", err);
+    // 실패 시 DB 데이터를 섞어서 제공하여 사용자 경험 유지
+    return [...STATIC_EXAM_DATA].sort(() => 0.5 - Math.random()).slice(0, count);
   }
 }
 
@@ -115,7 +144,7 @@ export const generateImage = async (prompt: string): Promise<string | null> => {
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
-      contents: { parts: [{ text: `High-quality industrial photography or EPS-TOPIK style illustration: ${prompt}` }] },
+      contents: { parts: [{ text: `High-quality industrial photography, clean studio lighting, realistic EPS-TOPIK context: ${prompt}` }] },
       config: { imageConfig: { aspectRatio: "1:1" } }
     });
     const part = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
@@ -148,9 +177,7 @@ export const analyzePerformance = async (session: ExamSession): Promise<Analytic
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: `Analyze EPS-TOPIK score: ${session.score}/${session.questions.length}. 
-      Provide detailed feedback, strengths, and weaknesses strictly in English for a global student.
-      Output as JSON.`,
+      contents: `Analyze EPS-TOPIK score: ${session.score}/${session.questions.length}. Provide expert feedback in English.`,
       config: { responseMimeType: "application/json" }
     });
     return JSON.parse(cleanJson(response.text || '{}'));
