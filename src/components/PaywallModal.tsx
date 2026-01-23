@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Crown, X, Smartphone, Info, Star, CheckCircle2, ArrowRight, BookOpen, Headphones, Trophy } from 'lucide-react';
+import { Crown, X, Smartphone, Star, CheckCircle2, ArrowRight, Trophy } from 'lucide-react';
 import { db } from '../firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { User } from '../types';
