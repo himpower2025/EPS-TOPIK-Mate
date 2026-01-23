@@ -18,7 +18,9 @@ import {
   getRedirectResult,
   GoogleAuthProvider, 
   onAuthStateChanged, 
-  signOut 
+  signOut,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
 
@@ -35,12 +37,14 @@ const App: React.FC = () => {
   const [selectedSet, setSelectedSet] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
 
+  // 리다이렉트 로그인 결과 처리
   useEffect(() => {
     getRedirectResult(auth).catch((error) => {
       console.error("Redirect login error:", error);
     });
   }, []);
 
+  // 인증 상태 실시간 감지 및 대시보드 전환 보장
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
@@ -55,26 +59,26 @@ const App: React.FC = () => {
           } else {
             const newUser: User = { 
               id: firebaseUser.uid, 
-              name: firebaseUser.displayName || 'Guest', 
+              name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Learner', 
               email: firebaseUser.email || '', 
               avatarUrl: firebaseUser.photoURL || '', 
               plan: 'free', 
               subscriptionExpiry: null, 
-              examsRemaining: 1 
+              examsRemaining: 3 
             };
             await setDoc(userRef, newUser);
             setUser(newUser);
           }
 
+          // 실시간 데이터 동기화
           onSnapshot(userRef, (s) => {
             if (s.exists()) setUser(s.data() as User);
           });
 
-          if (currentState === AppState.LANDING) {
-            setCurrentState(AppState.DASHBOARD);
-          }
+          // 로그인 성공 시 강제로 대시보드로 이동
+          setCurrentState(AppState.DASHBOARD);
         } catch (error) {
-          console.error("Firestore Error:", error);
+          console.error("User Data Loading Error:", error);
         }
       } else {
         setUser(null);
@@ -83,9 +87,9 @@ const App: React.FC = () => {
       setIsLoading(false);
     });
     return () => unsubscribe();
-  }, [currentState]);
+  }, []);
 
-  const handleLogin = async () => {
+  const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
     
@@ -96,7 +100,23 @@ const App: React.FC = () => {
         await signInWithPopup(auth, provider);
       }
     } catch (error) {
-      console.error("Login Error:", error);
+      console.error("Google Login Error:", error);
+    }
+  };
+
+  const handleEmailAuth = async (email: string, pass: string, isSignUp: boolean) => {
+    try {
+      if (isSignUp) {
+        await createUserWithEmailAndPassword(auth, email, pass);
+      } else {
+        await signInWithEmailAndPassword(auth, email, pass);
+      }
+    } catch (error: any) {
+      let msg = "Auth failed.";
+      if (error.code === 'auth/user-not-found') msg = "User not found.";
+      if (error.code === 'auth/wrong-password') msg = "Wrong password.";
+      if (error.code === 'auth/email-already-in-use') msg = "ID already exists.";
+      throw new Error(msg);
     }
   };
 
@@ -143,7 +163,8 @@ const App: React.FC = () => {
       {showLoginModal && (
         <LoginModal 
           onClose={() => setShowLoginModal(false)} 
-          onLogin={handleLogin} 
+          onLogin={handleGoogleLogin} 
+          onEmailAuth={handleEmailAuth}
         />
       )}
       
