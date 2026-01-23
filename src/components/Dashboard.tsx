@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { PlayCircle, Target, BookOpen, Globe, Lock, Star, User as UserIcon, ArrowRight } from 'lucide-react';
 import { User, ExamMode } from '../types';
@@ -21,8 +20,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgr
          <div className="px-5 py-5 flex justify-between items-center">
             <div className="flex items-center gap-3">
                 <div className="relative w-10 h-10">
-                    <div className="absolute top-0 left-0 bg-white rounded-lg text-indigo-900 text-[11px] font-black w-7 h-7 flex items-center justify-center z-10 shadow-md">가</div>
-                    <div className="absolute bottom-0 right-0 bg-purple-500 rounded-lg text-white text-[11px] font-black w-7 h-7 flex items-center justify-center shadow-md">A</div>
+                    <div className="absolute top-0 left-0 bg-white rounded-lg text-indigo-900 text-[10px] font-black w-7 h-7 flex items-center justify-center z-10 shadow-md">Kor</div>
+                    <div className="absolute bottom-0 right-0 bg-purple-500 rounded-lg text-white text-[10px] font-black w-7 h-7 flex items-center justify-center shadow-md">A</div>
                 </div>
                 <div className="font-black text-xl tracking-tighter uppercase">EPS Mate</div>
             </div>

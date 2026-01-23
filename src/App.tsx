@@ -126,7 +126,12 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
-  if (isLoading) return <div className="h-screen flex items-center justify-center bg-indigo-900 text-white font-black animate-pulse uppercase tracking-widest text-center px-6">Preparing Your Success...</div>;
+  if (isLoading) return (
+    <div className="h-screen flex flex-col items-center justify-center bg-indigo-900 text-white font-black text-center px-6">
+      <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin mb-6"></div>
+      <p className="animate-pulse tracking-widest uppercase text-sm">Preparing Your Success...</p>
+    </div>
+  );
 
   return (
     <div className="h-[100dvh] w-full bg-gray-100 overflow-hidden flex flex-col relative">
@@ -167,7 +172,7 @@ const App: React.FC = () => {
           setNumber={selectedSet}
           onComplete={handleExamComplete} 
           onExit={() => setCurrentState(AppState.SET_SELECTION)} 
-          plan={user.plan} // [Fix] isPremium 대신 plan을 전달하도록 통일
+          plan={user.plan}
         />
       )}
       

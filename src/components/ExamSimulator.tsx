@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Question, QuestionType, ExamSession, ExamMode, PlanType } from '../types';
 import { generateQuestionsBySet, generateSpeech, generateImage } from '../services/geminiService';
@@ -19,7 +18,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(mode === 'FULL' ? 50 * 60 : 30 * 60); 
+  const [timeLeft, setTimeLeft] = useState(mode === 'FULL' ? 50 * 60 : 25 * 60); 
   const [loadingAudio, setLoadingAudio] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
@@ -36,11 +35,9 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     const loadData = async () => {
       setLoading(true);
       try {
-        // [강화] 제미나이가 정적 데이터를 기반으로 완전히 새로운 세트를 생성합니다.
         const data = await generateQuestionsBySet(mode, setNumber, plan);
         setQuestions(data);
       } catch (error) {
-        console.error("Critical error in question generation:", error);
         onExit();
       } finally {
         setLoading(false);
@@ -70,14 +67,14 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     const generateVisuals = async () => {
       setIsGeneratingVisuals(true);
       try {
-        // 초사실적 메인 이미지 생성
         if (q.imagePrompt) {
-          generateImage(q.imagePrompt).then(setQuestionImage);
+          const img = await generateImage(q.imagePrompt);
+          setQuestionImage(img);
         }
-        // 보기가 이미지인 경우 (4개 동시 생성)
         if (q.optionImagePrompts && q.optionImagePrompts.length === 4) {
           const promises = q.optionImagePrompts.map(p => generateImage(p));
-          Promise.all(promises).then(setOptionImages);
+          const imgs = await Promise.all(promises);
+          setOptionImages(imgs);
         }
       } finally {
         setIsGeneratingVisuals(false);
@@ -86,7 +83,6 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
 
     generateVisuals();
     
-    // 듣기 문제일 경우 자동 재생 시도
     if (q.type === QuestionType.LISTENING && audioContextReady) {
       handlePlayAudio();
     }
@@ -145,34 +141,39 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
 
   if (loading) return (
     <div className="h-full flex items-center justify-center p-12 bg-white">
-      <LoadingSpinner message="Gemini 3 Pro가 고유한 시험 세트를 설계 중입니다..." />
+      <LoadingSpinner message="Preparing high-quality EPS-TOPIK questions..." />
     </div>
   );
 
-  if (!audioContextReady && mode !== 'READING') {
+  const currentQ = questions[currentIndex];
+  const isListening = currentQ.type === QuestionType.LISTENING;
+
+  if (!audioContextReady && isListening) {
     return (
       <div className="flex flex-col items-center justify-center h-full bg-indigo-950 text-white p-10 text-center pt-safe">
         <Headphones className="w-20 h-20 mb-8 text-indigo-300 animate-pulse" />
-        <h2 className="text-3xl font-black mb-4">듣기 평가 준비 완료</h2>
-        <p className="mb-12 text-indigo-200/70 font-medium">실제 한국인 음성이 생성됩니다. 스피커를 켜주세요.</p>
-        <button onClick={initAudio} className="bg-white text-indigo-900 px-12 py-5 rounded-[2.5rem] font-black text-xl shadow-2xl active:scale-95 flex items-center gap-3">시작하기</button>
+        <div className="bg-indigo-900/50 px-6 py-2 rounded-full text-[10px] font-black tracking-widest uppercase mb-4 border border-indigo-700">Part 2: Listening</div>
+        <h2 className="text-3xl font-black mb-4">Listening Test Starting</h2>
+        <p className="mb-12 text-indigo-200/70 font-medium leading-relaxed">
+          Questions 21–40 are listening evaluations.<br/>
+          Natural AI Korean voices will play. Please turn on your speakers.
+        </p>
+        <button onClick={initAudio} className="bg-white text-indigo-900 px-12 py-5 rounded-[2.5rem] font-black text-xl shadow-2xl active:scale-95 flex items-center gap-3">Start Listening</button>
       </div>
     );
   }
 
-  const currentQ = questions[currentIndex];
   const isLast = currentIndex === questions.length - 1;
-  const isListening = currentQ.type === QuestionType.LISTENING;
   const isImageOptions = optionImages.length === 4;
 
   return (
     <div className="flex flex-col h-full bg-gray-50 font-sans overflow-hidden">
-      {/* 상단바 */}
+      {/* Header */}
       <div className="bg-white border-b border-gray-200 pt-safe shrink-0 shadow-sm z-30">
         <div className="px-4 py-3 flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <button onClick={() => setIsDrawerOpen(true)} className="p-2 -ml-2 text-gray-600 active:bg-gray-100 rounded-full"><Menu className="w-6 h-6" /></button>
-              <span className="text-sm font-black uppercase tracking-tight">ROUND {setNumber} • Q {currentIndex + 1}/{questions.length}</span>
+              <button onClick={() => setIsDrawerOpen(true)} className="p-2 -ml-2 text-gray-600 active:bg-gray-100 rounded-full transition-colors"><Menu className="w-6 h-6" /></button>
+              <span className="text-sm font-black uppercase tracking-tight text-indigo-900">Question {currentIndex + 1}</span>
             </div>
             <div className="flex items-center gap-2 bg-indigo-50 px-4 py-2 rounded-2xl border border-indigo-100">
               <Clock className="w-4 h-4 text-indigo-400" />
@@ -181,27 +182,27 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
         </div>
       </div>
 
-      {/* 문제 영역 */}
+      {/* Main Content */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-8 pb-40">
          <div className="max-w-2xl mx-auto space-y-6">
             <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100">
-                <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 border ${isListening ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'}`}>
-                    {currentQ.type}
+                <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 border ${isListening ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-green-50 text-green-700 border-green-100'}`}>
+                    {currentQ.type} SECTION
                 </span>
                 <h2 className="text-xl md:text-2xl font-bold text-gray-900 leading-snug">{currentQ.questionText}</h2>
             </div>
 
-            {/* AI 시각화 엔진 영역 */}
-            <div className="bg-white rounded-[2.5rem] border-2 border-dashed border-gray-200 overflow-hidden relative shadow-sm min-h-[300px] flex flex-col items-center justify-center p-6 transition-all">
+            {/* AI Image/Context Area */}
+            <div className="bg-white rounded-[2.5rem] border-2 border-dashed border-gray-200 overflow-hidden relative shadow-sm min-h-[340px] flex flex-col items-center justify-center p-6">
                 {isGeneratingVisuals && !questionImage ? (
                   <div className="flex flex-col items-center gap-4 py-12 text-center">
                     <Sparkles className="w-12 h-12 text-indigo-400 animate-spin" />
-                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest animate-pulse">Gemini Drawing Realistic Scenes...</span>
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest animate-pulse">AI Illustrator Drawing Context...</span>
                   </div>
                 ) : (
                   <>
                     {questionImage ? (
-                      <img src={questionImage} className="max-h-[380px] object-cover w-full mb-4 rounded-3xl shadow-lg animate-fade-in" alt="Visual Aid" />
+                      <img src={questionImage} className="max-h-[400px] object-cover w-full mb-4 rounded-3xl shadow-lg animate-fade-in" alt="Exam Visual" />
                     ) : (
                       !isListening && currentQ.context && (
                         <div className="p-8 text-lg font-serif leading-loose text-gray-800 bg-indigo-50/20 rounded-[2rem] w-full whitespace-pre-wrap italic">"{currentQ.context}"</div>
@@ -209,23 +210,30 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                     )}
                     {isListening && (
                       <div className="flex flex-col items-center justify-center gap-6 py-10 w-full">
-                         <button onClick={handlePlayAudio} className={`relative w-28 h-28 rounded-full flex items-center justify-center shadow-2xl transition-all ${isPlaying ? 'bg-indigo-600 text-white scale-110' : 'bg-white text-indigo-600 border border-indigo-100'}`}>
-                            {loadingAudio ? <div className="w-10 h-10 border-4 border-current border-t-transparent rounded-full animate-spin"/> : <Volume2 className="w-12 h-12" />}
+                         <button 
+                           onClick={handlePlayAudio} 
+                           className={`relative w-32 h-32 rounded-full flex items-center justify-center shadow-2xl transition-all active:scale-90 ${isPlaying ? 'bg-indigo-600 text-white' : 'bg-white text-indigo-600 border border-indigo-100'}`}
+                         >
+                            {loadingAudio ? <div className="w-10 h-10 border-4 border-current border-t-transparent rounded-full animate-spin"/> : <Volume2 className="w-14 h-14" />}
+                            {isPlaying && <div className="absolute inset-0 rounded-full border-4 border-white/30 animate-ping" />}
                          </button>
-                         <span className="text-[10px] font-black text-indigo-900 uppercase tracking-widest">{isPlaying ? "AI Multi-Speaker Dialogue Playing..." : "Tap to Play Listening Audio"}</span>
+                         <div className="flex flex-col items-center gap-1">
+                            <span className="text-[10px] font-black text-indigo-900 uppercase tracking-widest">{isPlaying ? "Audio Playing..." : "Tap to Play Listening Audio"}</span>
+                            <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Multi-Speaker AI Voice</span>
+                         </div>
                       </div>
                     )}
                   </>
                 )}
             </div>
 
-            {/* 선택지 영역 */}
+            {/* Options */}
             {isImageOptions ? (
               <div className="grid grid-cols-2 gap-4 animate-fade-in">
                 {optionImages.map((img, idx) => {
                   const isSelected = answers[currentQ.id] === idx;
                   return (
-                    <button key={idx} onClick={() => handleAnswer(idx)} className={`relative aspect-square rounded-[2.5rem] overflow-hidden border-4 transition-all shadow-sm ${isSelected ? 'border-indigo-600 ring-8 ring-indigo-50 shadow-xl' : 'border-white bg-white'}`}>
+                    <button key={idx} onClick={() => handleAnswer(idx)} className={`relative aspect-square rounded-[2.5rem] overflow-hidden border-4 transition-all shadow-sm ${isSelected ? 'border-indigo-600 ring-8 ring-indigo-50' : 'border-white bg-white'}`}>
                        {img ? <img src={img} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-gray-50 flex items-center justify-center animate-pulse"><ImageIcon className="w-8 h-8 text-gray-200" /></div>}
                        <div className={`absolute top-4 left-4 w-10 h-10 rounded-full flex items-center justify-center font-black text-lg ${isSelected ? 'bg-indigo-600 text-white' : 'bg-white/90 text-gray-500'}`}>{idx + 1}</div>
                     </button>
@@ -237,7 +245,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                   {currentQ.options.map((option, idx) => {
                       const isSelected = answers[currentQ.id] === idx;
                       return (
-                          <button key={idx} onClick={() => handleAnswer(idx)} className={`w-full p-6 md:p-8 rounded-[2rem] text-left transition-all flex items-center gap-6 border-2 shadow-sm active:scale-[0.98] ${isSelected ? 'border-indigo-600 bg-indigo-600 text-white shadow-xl' : 'border-gray-100 bg-white text-gray-700 hover:border-indigo-100'}`}>
+                          <button key={idx} onClick={() => handleAnswer(idx)} className={`w-full p-6 md:p-8 rounded-[2rem] text-left transition-all flex items-center gap-6 border-2 shadow-sm active:scale-[0.98] ${isSelected ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-gray-100 bg-white text-gray-700 hover:border-indigo-100'}`}>
                             <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-black shrink-0 ${isSelected ? 'bg-white text-indigo-600' : 'bg-gray-100 text-gray-400'}`}>{idx + 1}</div>
                             <span className="text-lg md:text-xl font-bold flex-1">{option}</span>
                             {isSelected && <CheckCircle className="w-8 h-8 text-indigo-200" />}
@@ -249,22 +257,31 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
          </div>
       </div>
 
-      {/* 하단 내비게이션 */}
+      {/* Navigation Footer */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-gray-100 p-6 pb-safe flex gap-4 max-w-2xl mx-auto z-40">
-          <button onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))} disabled={currentIndex === 0} className="px-8 py-5 rounded-2xl bg-gray-100 text-gray-700 disabled:opacity-30 font-bold active:bg-gray-200"><ChevronLeft className="w-8 h-8" /></button>
-          <button onClick={isLast ? handleSubmit : () => setCurrentIndex(p => p + 1)} className={`flex-1 ${isLast ? 'bg-green-600' : 'bg-indigo-600'} text-white font-black rounded-2xl shadow-xl active:scale-95 text-xl uppercase tracking-tight`}>{isLast ? 'Finish' : 'Next Question'}</button>
+          <button onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))} disabled={currentIndex === 0} className="px-8 py-5 rounded-2xl bg-gray-100 text-gray-700 disabled:opacity-30 font-bold active:bg-gray-200 transition-colors"><ChevronLeft className="w-8 h-8" /></button>
+          <button onClick={isLast ? handleSubmit : () => setCurrentIndex(p => p + 1)} className={`flex-1 ${isLast ? 'bg-green-600 shadow-green-100' : 'bg-indigo-600 shadow-indigo-100'} text-white font-black rounded-2xl shadow-xl active:scale-95 text-xl uppercase tracking-tight transition-all`}>{isLast ? 'Complete Exam' : 'Next Question'}</button>
       </div>
 
-      {/* 시험 현황 드로어 */}
+      {/* Side Drawer (Status) */}
       {isDrawerOpen && (
         <div className="fixed inset-0 z-[60] flex">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setIsDrawerOpen(false)}></div>
           <div className="relative w-80 bg-white h-full shadow-2xl flex flex-col pt-safe animate-slide-in-right">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center font-black text-xl">시험 현황<button onClick={() => setIsDrawerOpen(false)}><X className="w-6 h-6" /></button></div>
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center font-black text-xl">Question Progress<button onClick={() => setIsDrawerOpen(false)}><X className="w-6 h-6" /></button></div>
             <div className="flex-1 overflow-y-auto p-5 grid grid-cols-4 gap-4">
                {questions.map((q, idx) => (
-                  <button key={q.id} onClick={() => { setCurrentIndex(idx); setIsDrawerOpen(false); }} className={`aspect-square rounded-2xl font-black text-sm border-2 flex items-center justify-center transition-all ${idx === currentIndex ? 'bg-indigo-600 border-indigo-600 text-white' : answers[q.id] !== undefined ? 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-inner' : 'bg-white border-gray-100 text-gray-300'}`}>{idx + 1}</button>
+                  <button key={q.id} onClick={() => { setCurrentIndex(idx); setIsDrawerOpen(false); }} className={`aspect-square rounded-2xl font-black text-sm border-2 flex items-center justify-center transition-all ${idx === currentIndex ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : answers[q.id] !== undefined ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-gray-100 text-gray-300'}`}>{idx + 1}</button>
                ))}
+            </div>
+            <div className="p-6 bg-gray-50 border-t border-gray-100">
+               <div className="flex justify-between text-xs font-bold text-gray-400 uppercase tracking-widest">
+                  <span>Completed</span>
+                  <span>{Object.keys(answers).length} / {questions.length}</span>
+               </div>
+               <div className="w-full bg-gray-200 h-2 rounded-full mt-2 overflow-hidden">
+                  <div className="bg-indigo-600 h-full transition-all duration-500" style={{ width: `${(Object.keys(answers).length / questions.length) * 100}%` }} />
+               </div>
             </div>
           </div>
         </div>
