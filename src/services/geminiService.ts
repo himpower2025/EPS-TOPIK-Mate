@@ -1,5 +1,5 @@
-import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { Question, QuestionType, AnalyticsFeedback, ExamSession, ExamMode, PlanType } from '../types';
+import { GoogleGenAI, Modality } from "@google/genai";
+import { Question, AnalyticsFeedback, ExamSession, ExamMode, PlanType } from '../types';
 import { STATIC_EXAM_DATA } from '../data/examData';
 
 const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -59,13 +59,11 @@ export const generateQuestionsBySet = async (mode: ExamMode, setNumber: number, 
     return STATIC_EXAM_DATA.slice(0, 10);
   }
 
-  // 3개월/6개월 프리미엄 플랜 로직
   if (plan === '3m' || plan === '6m') {
     const isFullExam = mode === 'FULL';
-    const dbLimit = isFullExam ? 30 : 60; // DB 사용 가능 범위
+    const dbLimit = isFullExam ? 30 : 60;
 
     if (setNumber <= dbLimit) {
-      // DB 범위 내: 실제 데이터 활용
       if (isFullExam) return STATIC_EXAM_DATA.filter(q => q.id.startsWith(`s${setNumber}_`));
       
       const dbIdx = Math.ceil(setNumber / 2);
@@ -74,19 +72,16 @@ export const generateQuestionsBySet = async (mode: ExamMode, setNumber: number, 
       const all = STATIC_EXAM_DATA.filter(q => q.id.startsWith(`s${dbIdx}_${typeKey}_`));
       return isOdd ? all.slice(0, 10) : all.slice(10, 20);
     } else {
-      // [AI 극대화] DB 범위를 벗어나면 AI가 전문적인 유사 문항 생성
       const count = isFullExam ? 40 : 10;
       return await callGeminiToGenerateQuestions(mode, setNumber, count);
     }
   }
 
-  // 1개월 플랜: DB 위주
   return STATIC_EXAM_DATA.sort(() => 0.5 - Math.random()).slice(0, 10);
 };
 
 /**
  * [핵심 고도화] AI 문제 생성 함수
- * Few-shot Prompting과 Logic Verification이 결합되었습니다.
  */
 async function callGeminiToGenerateQuestions(mode: ExamMode, setNumber: number, count: number): Promise<Question[]> {
   const ai = getAI();
@@ -120,20 +115,16 @@ async function callGeminiToGenerateQuestions(mode: ExamMode, setNumber: number, 
       contents: prompt,
       config: { 
         responseMimeType: "application/json",
-        temperature: 0.8, // 다양성을 위해 온도를 약간 높임
+        temperature: 0.8,
         topP: 0.95
       }
     });
     
     const generated = JSON.parse(cleanJson(response.text || '[]'));
-    
-    // 만약 AI가 충분한 양을 생성하지 못했을 경우를 대비한 최소한의 가드 (재귀 방지)
     if (generated.length === 0) throw new Error("Empty AI response");
-    
     return generated;
   } catch (err) {
     console.error("Critical: AI Generation failed, falling back to database mixing.", err);
-    // 실패 시 DB 데이터를 섞어서 제공하여 사용자 경험 유지
     return [...STATIC_EXAM_DATA].sort(() => 0.5 - Math.random()).slice(0, count);
   }
 }
