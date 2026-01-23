@@ -37,12 +37,13 @@ const App: React.FC = () => {
   const [selectedSet, setSelectedSet] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 인증 상태 실시간 감지 (최우선 순위)
+  // 인증 상태 실시간 감지 및 대시보드 강제 이동 로직
   useEffect(() => {
     let unsubSnapshot: (() => void) | null = null;
 
     const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        // 1. 유저 정보가 있으면 모달을 닫음
         setShowLoginModal(false);
         const userRef = doc(db, 'users', firebaseUser.uid);
         
@@ -53,6 +54,7 @@ const App: React.FC = () => {
           if (snap.exists()) {
             userData = snap.data() as User;
           } else {
+            // 신규 유저 생성
             userData = { 
               id: firebaseUser.uid, 
               name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Learner', 
@@ -66,35 +68,36 @@ const App: React.FC = () => {
           }
           
           setUser(userData);
+          // 2. 중요: 유저 데이터 로드 완료 후 대시보드로 상태 변경
           setCurrentState(AppState.DASHBOARD);
 
-          // 실시간 데이터 구독
+          // 3. 실시간 업데이트 구독
           unsubSnapshot = onSnapshot(userRef, (s) => {
             if (s.exists()) setUser(s.data() as User);
           });
         } catch (error) {
-          console.error("Auth Success but Data Load Error:", error);
+          console.error("Firestore Loading Error:", error);
         }
       } else {
         if (unsubSnapshot) unsubSnapshot();
         setUser(null);
         setCurrentState(AppState.LANDING);
       }
+      // 모든 처리가 끝나면 로딩 상태 해제
       setIsLoading(false);
     });
 
-    // 리다이렉트 결과 체크 (로그인 시도 후 돌아온 경우)
-    getRedirectResult(auth).catch(err => console.error("Redirect Error:", err));
+    // 리다이렉트 로그인 결과 처리 (모바일/PWA)
+    getRedirectResult(auth).catch(err => console.error("Redirect Login Result Error:", err));
 
     return () => {
       unsubscribeAuth();
       if (unsubSnapshot) unsubSnapshot();
     };
-  }, []);
+  }, []); // currentState를 의존성에서 제거하여 루프 방지
 
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
-    // 구글 계정 선택창이 항상 뜨도록 설정
     provider.setCustomParameters({ prompt: 'select_account' });
     
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -107,7 +110,7 @@ const App: React.FC = () => {
         await signInWithPopup(auth, provider);
       }
     } catch (error) {
-      console.error("Google Login Error:", error);
+      console.error("Google Login Initiation Error:", error);
     }
   };
 
@@ -119,10 +122,10 @@ const App: React.FC = () => {
         await signInWithEmailAndPassword(auth, email, pass);
       }
     } catch (error: any) {
-      let msg = "Authentication failed.";
-      if (error.code === 'auth/user-not-found') msg = "User not found.";
-      if (error.code === 'auth/wrong-password') msg = "Invalid password.";
-      if (error.code === 'auth/email-already-in-use') msg = "ID already taken.";
+      let msg = "Login failed.";
+      if (error.code === 'auth/user-not-found') msg = "User ID not found.";
+      if (error.code === 'auth/wrong-password') msg = "Check your password.";
+      if (error.code === 'auth/email-already-in-use') msg = "ID already exists.";
       throw new Error(msg);
     }
   };
@@ -144,11 +147,9 @@ const App: React.FC = () => {
   const handleExamComplete = (session: ExamSession) => {
     if (!user) return;
     setDoc(doc(db, 'exams', session.id), { ...session, userId: user.id });
-    
     if (user.plan === 'free') {
       setDoc(doc(db, 'users', user.id), { examsRemaining: Math.max(0, user.examsRemaining - 1) }, { merge: true });
     }
-    
     setLastSession(session); 
     setCurrentState(AppState.ANALYTICS); 
   };
@@ -156,7 +157,7 @@ const App: React.FC = () => {
   if (isLoading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-indigo-900 text-white font-black text-center px-6">
       <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin mb-6"></div>
-      <p className="animate-pulse tracking-widest uppercase text-sm">Initializing EPS Mate...</p>
+      <p className="animate-pulse tracking-widest uppercase text-sm">Authenticating...</p>
     </div>
   );
 
