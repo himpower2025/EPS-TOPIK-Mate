@@ -37,27 +37,23 @@ const App: React.FC = () => {
   const [selectedSet, setSelectedSet] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 리다이렉트 로그인 결과 처리
+  // 인증 상태 실시간 감지 (최우선 순위)
   useEffect(() => {
-    getRedirectResult(auth).catch((error) => {
-      console.error("Redirect login error:", error);
-    });
-  }, []);
+    let unsubSnapshot: (() => void) | null = null;
 
-  // 인증 상태 실시간 감지 및 대시보드 전환 보장
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setShowLoginModal(false);
         const userRef = doc(db, 'users', firebaseUser.uid);
         
         try {
           const snap = await getDoc(userRef);
+          let userData: User;
           
           if (snap.exists()) {
-            setUser(snap.data() as User);
+            userData = snap.data() as User;
           } else {
-            const newUser: User = { 
+            userData = { 
               id: firebaseUser.uid, 
               name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Learner', 
               email: firebaseUser.email || '', 
@@ -66,35 +62,46 @@ const App: React.FC = () => {
               subscriptionExpiry: null, 
               examsRemaining: 3 
             };
-            await setDoc(userRef, newUser);
-            setUser(newUser);
+            await setDoc(userRef, userData);
           }
+          
+          setUser(userData);
+          setCurrentState(AppState.DASHBOARD);
 
-          // 실시간 데이터 동기화
-          onSnapshot(userRef, (s) => {
+          // 실시간 데이터 구독
+          unsubSnapshot = onSnapshot(userRef, (s) => {
             if (s.exists()) setUser(s.data() as User);
           });
-
-          // 로그인 성공 시 강제로 대시보드로 이동
-          setCurrentState(AppState.DASHBOARD);
         } catch (error) {
-          console.error("User Data Loading Error:", error);
+          console.error("Auth Success but Data Load Error:", error);
         }
       } else {
+        if (unsubSnapshot) unsubSnapshot();
         setUser(null);
         setCurrentState(AppState.LANDING);
       }
       setIsLoading(false);
     });
-    return () => unsubscribe();
+
+    // 리다이렉트 결과 체크 (로그인 시도 후 돌아온 경우)
+    getRedirectResult(auth).catch(err => console.error("Redirect Error:", err));
+
+    return () => {
+      unsubscribeAuth();
+      if (unsubSnapshot) unsubSnapshot();
+    };
   }, []);
 
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
+    // 구글 계정 선택창이 항상 뜨도록 설정
+    provider.setCustomParameters({ prompt: 'select_account' });
+    
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
     
     try {
-      if (isStandalone || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      if (isMobile || isStandalone) {
         await signInWithRedirect(auth, provider);
       } else {
         await signInWithPopup(auth, provider);
@@ -112,10 +119,10 @@ const App: React.FC = () => {
         await signInWithEmailAndPassword(auth, email, pass);
       }
     } catch (error: any) {
-      let msg = "Auth failed.";
+      let msg = "Authentication failed.";
       if (error.code === 'auth/user-not-found') msg = "User not found.";
-      if (error.code === 'auth/wrong-password') msg = "Wrong password.";
-      if (error.code === 'auth/email-already-in-use') msg = "ID already exists.";
+      if (error.code === 'auth/wrong-password') msg = "Invalid password.";
+      if (error.code === 'auth/email-already-in-use') msg = "ID already taken.";
       throw new Error(msg);
     }
   };
@@ -149,7 +156,7 @@ const App: React.FC = () => {
   if (isLoading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-indigo-900 text-white font-black text-center px-6">
       <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin mb-6"></div>
-      <p className="animate-pulse tracking-widest uppercase text-sm">Preparing Your Success...</p>
+      <p className="animate-pulse tracking-widest uppercase text-sm">Initializing EPS Mate...</p>
     </div>
   );
 
@@ -158,7 +165,7 @@ const App: React.FC = () => {
       <FaviconManager />
       <InstallPwa />
       
-      {!user && currentState === AppState.LANDING && <LandingPage onLoginClick={() => setShowLoginModal(true)} />}
+      {currentState === AppState.LANDING && !user && <LandingPage onLoginClick={() => setShowLoginModal(true)} />}
       
       {showLoginModal && (
         <LoginModal 
@@ -207,7 +214,7 @@ const App: React.FC = () => {
         <ProfileModal 
           user={user} 
           onClose={() => setShowProfile(false)} 
-          onLogout={() => signOut(auth)} 
+          onLogout={() => { signOut(auth); setUser(null); setCurrentState(AppState.LANDING); }} 
           onRenew={() => { setShowProfile(false); setShowPaywall(true); }} 
         />
       )}
