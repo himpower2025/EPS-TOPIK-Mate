@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { X, Mail, Lock, UserPlus, LogIn } from 'lucide-react';
 
 interface LoginModalProps {
   onClose: () => void;
-  onLogin: () => void; // 구글 로그인 실행함수
+  onLogin: () => void;
   onEmailAuth: (email: string, pass: string, isSignUp: boolean) => Promise<void>;
 }
 
@@ -45,7 +46,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLogin, onEmai
 
         <div className="p-8 pb-4 text-center">
           <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-100 shadow-sm overflow-hidden">
-             {/* 고화질 공식 구글 로고 */}
              <img src="https://www.gstatic.com/images/branding/product/2x/googleg_48dp.png" alt="Google" className="w-10 h-10" />
           </div>
           <h2 className="text-2xl font-black text-gray-900 tracking-tight">{isSignUp ? 'Create Account' : 'Welcome Back'}</h2>
@@ -106,10 +106,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLogin, onEmai
           </div>
 
           <button 
-            onClick={() => {
-              setIsLoading(true);
-              onLogin();
-            }}
+            onClick={onLogin}
             type="button"
             className="w-full bg-white border border-gray-200 text-gray-700 font-bold py-4 rounded-2xl flex items-center justify-center gap-3 active:scale-95 transition-all shadow-sm hover:bg-gray-50"
           >

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dashboard } from './components/Dashboard';
 import { SetSelector } from './components/SetSelector';
@@ -41,105 +42,106 @@ const App: React.FC = () => {
   useEffect(() => {
     let unsubSnapshot: (() => void) | null = null;
 
-    // 리다이렉트 로그인 결과 처리 (모바일/PWA에서 돌아온 경우)
-    // 이 처리를 onAuthStateChanged 외부에서 먼저 시도하여 결과를 기다립니다.
-    const checkRedirect = async () => {
+    const initializeAuth = async () => {
+      // 1. 리다이렉트 결과 처리 (PWA/모바일 대응)
       try {
         await getRedirectResult(auth);
       } catch (err) {
-        console.error("Redirect Login Result Error:", err);
+        console.error("Redirect Auth Error:", err);
       }
-    };
-    checkRedirect();
 
-    const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        setShowLoginModal(false);
-        const userRef = doc(db, 'users', firebaseUser.uid);
-        
-        try {
-          const snap = await getDoc(userRef);
-          let userData: User;
-          
-          if (snap.exists()) {
-            userData = snap.data() as User;
-          } else {
-            userData = { 
-              id: firebaseUser.uid, 
-              name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Learner', 
-              email: firebaseUser.email || '', 
-              avatarUrl: firebaseUser.photoURL || '', 
-              plan: 'free', 
-              subscriptionExpiry: null, 
-              examsRemaining: 3 
-            };
-            await setDoc(userRef, userData);
+      // 2. 인증 옵저버 등록
+      const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+          const userRef = doc(db, 'users', firebaseUser.uid);
+          try {
+            const snap = await getDoc(userRef);
+            let userData: User;
+            
+            if (snap.exists()) {
+              userData = snap.data() as User;
+            } else {
+              // 신규 유저 생성
+              userData = { 
+                id: firebaseUser.uid, 
+                name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Learner', 
+                email: firebaseUser.email || '', 
+                avatarUrl: firebaseUser.photoURL || '', 
+                plan: 'free', 
+                subscriptionExpiry: null, 
+                examsRemaining: 3 
+              };
+              await setDoc(userRef, userData);
+            }
+            
+            setUser(userData);
+            setCurrentState(AppState.DASHBOARD);
+            setShowLoginModal(false);
+
+            // 실시간 업데이트 구독
+            if (unsubSnapshot) unsubSnapshot();
+            unsubSnapshot = onSnapshot(userRef, (s) => {
+              if (s.exists()) setUser(s.data() as User);
+            });
+          } catch (error) {
+            console.error("User Data Loading Error:", error);
+          } finally {
+            setIsLoading(false);
           }
-          
-          setUser(userData);
-          // 유저가 확인되면 항상 대시보드로 이동
-          setCurrentState(AppState.DASHBOARD);
-
-          // 실시간 업데이트 구독
-          unsubSnapshot = onSnapshot(userRef, (s) => {
-            if (s.exists()) setUser(s.data() as User);
-          });
-        } catch (error) {
-          console.error("Firestore Loading Error:", error);
-        } finally {
+        } else {
+          if (unsubSnapshot) {
+            unsubSnapshot();
+            unsubSnapshot = null;
+          }
+          setUser(null);
+          setCurrentState(AppState.LANDING);
           setIsLoading(false);
         }
-      } else {
-        if (unsubSnapshot) unsubSnapshot();
-        setUser(null);
-        setCurrentState(AppState.LANDING);
-        setIsLoading(false);
-      }
-    });
+      });
+
+      return unsubscribeAuth;
+    };
+
+    const unsubAuthPromise = initializeAuth();
 
     return () => {
-      unsubscribeAuth();
+      unsubAuthPromise.then(unsub => unsub());
       if (unsubSnapshot) unsubSnapshot();
     };
   }, []);
 
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
-    // 'select_account'를 제거하여 이미 로그인된 경우 자연스럽게 넘어가도록 함 (사용자가 요청한 '자연스러운' 방식)
-    // 단, 여러 계정 중 선택이 필요한 경우를 위해 기본 설정 유지
+    // prompt를 'select_account'로 설정하면 계정 선택창이 뜨지만, 
+    // 이미 로그인된 상태에서 루프가 돌면 제거하고 테스트가 필요할 수 있습니다.
     provider.setCustomParameters({ prompt: 'select_account' });
     
-    // 환경 감지
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
     
+    setIsLoading(true); // 로그인 시작 시 즉시 로딩 표시
     try {
       if (isMobile || isStandalone) {
-        // PWA나 모바일 브라우저에서는 리다이렉트 방식 권장
         await signInWithRedirect(auth, provider);
       } else {
-        // 데스크탑에서는 팝업 방식 사용
-        const result = await signInWithPopup(auth, provider);
-        if (result.user) {
-          setShowLoginModal(false);
-          setCurrentState(AppState.DASHBOARD);
-        }
+        await signInWithPopup(auth, provider);
       }
     } catch (error) {
       console.error("Google Login Initiation Error:", error);
+      setIsLoading(false);
     }
   };
 
   const handleEmailAuth = async (email: string, pass: string, isSignUp: boolean) => {
+    setIsLoading(true);
     try {
       if (isSignUp) {
         await createUserWithEmailAndPassword(auth, email, pass);
       } else {
         await signInWithEmailAndPassword(auth, email, pass);
       }
-      setShowLoginModal(false);
-      setCurrentState(AppState.DASHBOARD);
     } catch (error: any) {
+      setIsLoading(false);
       let msg = "Login failed.";
       if (error.code === 'auth/user-not-found') msg = "User ID not found.";
       if (error.code === 'auth/wrong-password') msg = "Check your password.";
@@ -172,6 +174,7 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
+  // 치명적 무한루프 방지: isLoading일 때 LandingPage를 띄우지 않음
   if (isLoading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-indigo-900 text-white font-black text-center px-6">
       <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin mb-6"></div>
@@ -180,7 +183,7 @@ const App: React.FC = () => {
   );
 
   return (
-    <div className="h-[100dvh] w-full bg-gray-100 overflow-hidden flex flex-col relative">
+    <div className="h-[100dvh] w-full bg-gray-100 overflow-hidden flex flex-col relative font-sans">
       <FaviconManager />
       <InstallPwa />
       
@@ -218,7 +221,7 @@ const App: React.FC = () => {
           mode={examMode}
           setNumber={selectedSet}
           onComplete={handleExamComplete} 
-          onExit={() => setCurrentState(AppState.SET_SELECTION)} 
+          onExit={() => setCurrentState(AppState.DASHBOARD)} 
           plan={user.plan}
         />
       )}
