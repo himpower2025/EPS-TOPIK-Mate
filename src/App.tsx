@@ -38,10 +38,14 @@ const App: React.FC = () => {
   const [selectedSet, setSelectedSet] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   
-  // 리다이렉트 처리 중임을 나타내는 Ref (상태 업데이트로 인한 재렌더링 방지)
+  // 상태 동기화 중임을 나타내는 Ref (Race Condition 방지)
+  const isSyncing = useRef(false);
   const isHandlingRedirect = useRef(false);
 
   const syncUserWithFirestore = useCallback(async (firebaseUser: any) => {
+    if (isSyncing.current) return;
+    isSyncing.current = true;
+    
     const userRef = doc(db, 'users', firebaseUser.uid);
     try {
       const snap = await getDoc(userRef);
@@ -67,6 +71,8 @@ const App: React.FC = () => {
       setShowLoginModal(false);
     } catch (error) {
       console.error("Firestore Sync Error:", error);
+    } finally {
+      isSyncing.current = false;
     }
   }, []);
 
@@ -75,7 +81,7 @@ const App: React.FC = () => {
     let isMounted = true;
 
     const initAuth = async () => {
-      // 1. 리다이렉트 결과 처리 시작 (PWA/모바일 최우선)
+      // 1. 리다이렉트 처리 감지
       isHandlingRedirect.current = true;
       try {
         const result = await getRedirectResult(auth);
@@ -86,28 +92,31 @@ const App: React.FC = () => {
         console.error("Redirect Error:", err);
       } finally {
         isHandlingRedirect.current = false;
-        // 리다이렉트 결과 확인이 끝나면 최소한의 인증 관찰 준비 완료
       }
 
-      // 2. 인증 상태 실시간 관찰
+      // 2. 인증 감시자 설정 (모든 로그인 방식의 중심)
       const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
         if (!isMounted) return;
 
         if (firebaseUser) {
-          // 이미 리다이렉트로 처리되지 않았을 때만 싱크
+          // Firebase 유저는 있는데 앱 상태 유저가 없거나 ID가 다를 때만 동기화
           if (!user || user.id !== firebaseUser.uid) {
+            setIsLoading(true);
             await syncUserWithFirestore(firebaseUser);
           }
-
+          
+          // 실시간 Firestore 구독
           if (unsubSnapshot) unsubSnapshot();
           unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
-            if (s.exists() && isMounted) setUser(s.data() as User);
+            if (s.exists() && isMounted) {
+              setUser(s.data() as User);
+            }
           });
           
           setIsLoading(false);
         } else {
-          // 리다이렉트 처리 중일 때는 LandingPage로 보내지 않음
-          if (!isHandlingRedirect.current) {
+          // 리다이렉트 중이 아닐 때만 로그아웃 상태로 전환
+          if (!isHandlingRedirect.current && !isSyncing.current) {
             if (unsubSnapshot) unsubSnapshot();
             setUser(null);
             setCurrentState(AppState.LANDING);
@@ -140,11 +149,8 @@ const App: React.FC = () => {
       if (isMobile || isStandalone) {
         await signInWithRedirect(auth, provider);
       } else {
-        const result = await signInWithPopup(auth, provider);
-        if (result.user) {
-          await syncUserWithFirestore(result.user);
-          setIsLoading(false);
-        }
+        await signInWithPopup(auth, provider);
+        // Popup은 onAuthStateChanged에서 감지하여 처리함
       }
     } catch (error) {
       console.error("Login Error:", error);
@@ -155,15 +161,13 @@ const App: React.FC = () => {
   const handleEmailAuth = async (email: string, pass: string, isSignUp: boolean) => {
     setIsLoading(true);
     try {
-      let result;
       if (isSignUp) {
-        result = await createUserWithEmailAndPassword(auth, email, pass);
+        await createUserWithEmailAndPassword(auth, email, pass);
       } else {
-        result = await signInWithEmailAndPassword(auth, email, pass);
+        await signInWithEmailAndPassword(auth, email, pass);
       }
-      if (result.user) {
-        await syncUserWithFirestore(result.user);
-      }
+      // 직접 syncUserWithFirestore를 호출하지 않습니다. 
+      // onAuthStateChanged가 즉시 감지하여 안전하게 처리할 것입니다.
     } catch (error: any) {
       setIsLoading(false);
       throw error;
@@ -194,12 +198,13 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
+  // 로딩 중이거나 동기화 중일 때는 절대로 LandingPage를 보여주지 않습니다.
   if (isLoading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-indigo-950 text-white font-black text-center px-6">
       <div className="w-16 h-16 border-4 border-white/10 border-t-white rounded-full animate-spin mb-8"></div>
       <div className="space-y-2">
         <p className="animate-pulse tracking-[0.3em] uppercase text-[10px] text-indigo-300">EPS-TOPIK Mate</p>
-        <p className="text-sm font-bold">Synchronizing Session...</p>
+        <p className="text-sm font-bold">Synchronizing Security Session...</p>
       </div>
     </div>
   );
@@ -209,7 +214,10 @@ const App: React.FC = () => {
       <FaviconManager />
       <InstallPwa />
       
-      {currentState === AppState.LANDING && !user && <LandingPage onLoginClick={() => setShowLoginModal(true)} />}
+      {/* user가 null이고 로딩이 끝났을 때만 LandingPage 렌더링 */}
+      {currentState === AppState.LANDING && !user && !isLoading && (
+        <LandingPage onLoginClick={() => setShowLoginModal(true)} />
+      )}
       
       {showLoginModal && (
         <LoginModal 
