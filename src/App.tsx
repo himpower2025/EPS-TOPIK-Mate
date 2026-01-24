@@ -41,9 +41,19 @@ const App: React.FC = () => {
   useEffect(() => {
     let unsubSnapshot: (() => void) | null = null;
 
+    // 리다이렉트 로그인 결과 처리 (모바일/PWA에서 돌아온 경우)
+    // 이 처리를 onAuthStateChanged 외부에서 먼저 시도하여 결과를 기다립니다.
+    const checkRedirect = async () => {
+      try {
+        await getRedirectResult(auth);
+      } catch (err) {
+        console.error("Redirect Login Result Error:", err);
+      }
+    };
+    checkRedirect();
+
     const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // 1. 유저 정보가 있으면 모달을 닫음
         setShowLoginModal(false);
         const userRef = doc(db, 'users', firebaseUser.uid);
         
@@ -54,7 +64,6 @@ const App: React.FC = () => {
           if (snap.exists()) {
             userData = snap.data() as User;
           } else {
-            // 신규 유저 생성
             userData = { 
               id: firebaseUser.uid, 
               name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Learner', 
@@ -68,46 +77,53 @@ const App: React.FC = () => {
           }
           
           setUser(userData);
-          // 2. 중요: 유저 데이터 로드 완료 후 대시보드로 상태 변경
+          // 유저가 확인되면 항상 대시보드로 이동
           setCurrentState(AppState.DASHBOARD);
 
-          // 3. 실시간 업데이트 구독
+          // 실시간 업데이트 구독
           unsubSnapshot = onSnapshot(userRef, (s) => {
             if (s.exists()) setUser(s.data() as User);
           });
         } catch (error) {
           console.error("Firestore Loading Error:", error);
+        } finally {
+          setIsLoading(false);
         }
       } else {
         if (unsubSnapshot) unsubSnapshot();
         setUser(null);
         setCurrentState(AppState.LANDING);
+        setIsLoading(false);
       }
-      // 모든 처리가 끝나면 로딩 상태 해제
-      setIsLoading(false);
     });
-
-    // 리다이렉트 로그인 결과 처리 (모바일/PWA)
-    getRedirectResult(auth).catch(err => console.error("Redirect Login Result Error:", err));
 
     return () => {
       unsubscribeAuth();
       if (unsubSnapshot) unsubSnapshot();
     };
-  }, []); // currentState를 의존성에서 제거하여 루프 방지
+  }, []);
 
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
+    // 'select_account'를 제거하여 이미 로그인된 경우 자연스럽게 넘어가도록 함 (사용자가 요청한 '자연스러운' 방식)
+    // 단, 여러 계정 중 선택이 필요한 경우를 위해 기본 설정 유지
     provider.setCustomParameters({ prompt: 'select_account' });
     
+    // 환경 감지
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
     
     try {
       if (isMobile || isStandalone) {
+        // PWA나 모바일 브라우저에서는 리다이렉트 방식 권장
         await signInWithRedirect(auth, provider);
       } else {
-        await signInWithPopup(auth, provider);
+        // 데스크탑에서는 팝업 방식 사용
+        const result = await signInWithPopup(auth, provider);
+        if (result.user) {
+          setShowLoginModal(false);
+          setCurrentState(AppState.DASHBOARD);
+        }
       }
     } catch (error) {
       console.error("Google Login Initiation Error:", error);
@@ -121,6 +137,8 @@ const App: React.FC = () => {
       } else {
         await signInWithEmailAndPassword(auth, email, pass);
       }
+      setShowLoginModal(false);
+      setCurrentState(AppState.DASHBOARD);
     } catch (error: any) {
       let msg = "Login failed.";
       if (error.code === 'auth/user-not-found') msg = "User ID not found.";
@@ -157,7 +175,7 @@ const App: React.FC = () => {
   if (isLoading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-indigo-900 text-white font-black text-center px-6">
       <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin mb-6"></div>
-      <p className="animate-pulse tracking-widest uppercase text-sm">Authenticating...</p>
+      <p className="animate-pulse tracking-widest uppercase text-sm">Verifying Session...</p>
     </div>
   );
 

@@ -17,7 +17,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLogin, onEmai
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password.length !== 6 || !/^\d+$/.test(password)) {
-      setError("비밀번호는 숫자 6자리여야 합니다.");
+      setError("Password must be 6 digits.");
       return;
     }
     
@@ -27,7 +27,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLogin, onEmai
       const finalEmail = id.includes('@') ? id : `${id}@epsmate.local`;
       await onEmailAuth(finalEmail, password, isSignUp);
     } catch (err: any) {
-      setError(err.message || "로그인 실패");
+      setError(err.message || "Authentication Failed");
     } finally {
       setIsLoading(false);
     }
@@ -95,7 +95,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLogin, onEmai
               className={`w-full py-4 rounded-2xl font-black text-white shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 ${isSignUp ? 'bg-purple-600 shadow-purple-200' : 'bg-indigo-600 shadow-indigo-200'}`}
             >
               {isLoading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : (
-                isSignUp ? <><UserPlus className="w-5 h-5"/> 가입하기</> : <><LogIn className="w-5 h-5"/> 로그인</>
+                isSignUp ? <><UserPlus className="w-5 h-5"/> Sign Up</> : <><LogIn className="w-5 h-5"/> Login</>
               )}
             </button>
           </form>
