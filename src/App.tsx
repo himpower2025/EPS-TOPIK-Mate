@@ -39,7 +39,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   
   const isSyncing = useRef(false);
-  const isHandlingRedirect = useRef(false);
+  const authInitialized = useRef(false);
 
   // Firestore와 사용자 데이터 동기화
   const syncUserWithFirestore = useCallback(async (firebaseUser: any) => {
@@ -51,22 +51,32 @@ const App: React.FC = () => {
       const snap = await getDoc(userRef);
       let userData: User;
       
+      // [관리자 권한 부여] 요청하신 이메일에 대해 3개월 프리미엄 자동 업그레이드
+      const isAdminEmail = firebaseUser.email === 'abraham0715@gmail.com';
+      
       if (snap.exists()) {
         userData = snap.data() as User;
+        if (isAdminEmail && userData.plan === 'free') {
+           userData.plan = '3m';
+           // 만료일을 현재로부터 90일 후로 설정
+           const expiryDate = new Date();
+           expiryDate.setDate(expiryDate.getDate() + 90);
+           userData.subscriptionExpiry = expiryDate.toISOString();
+           await setDoc(userRef, { plan: '3m', subscriptionExpiry: userData.subscriptionExpiry }, { merge: true });
+        }
       } else {
         userData = { 
           id: firebaseUser.uid, 
           name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Learner', 
           email: firebaseUser.email || '', 
           avatarUrl: firebaseUser.photoURL || '', 
-          plan: 'free', 
-          subscriptionExpiry: null, 
+          plan: isAdminEmail ? '3m' : 'free', 
+          subscriptionExpiry: isAdminEmail ? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString() : null, 
           examsRemaining: 3 
         };
         await setDoc(userRef, userData);
       }
       
-      // 유저 상태와 앱 화면 상태를 동시에 업데이트
       setUser(userData);
       setCurrentState(AppState.DASHBOARD);
       setShowLoginModal(false);
@@ -82,8 +92,7 @@ const App: React.FC = () => {
     let isMounted = true;
 
     const initAuth = async () => {
-      // 1. Google Redirect 결과 처리 (모바일/PWA 대응)
-      isHandlingRedirect.current = true;
+      // 1. 모바일 리다이렉트 결과 처리 (가장 먼저 수행)
       try {
         const result = await getRedirectResult(auth);
         if (result?.user && isMounted) {
@@ -91,44 +100,36 @@ const App: React.FC = () => {
         }
       } catch (err) {
         console.error("Redirect Result Error:", err);
-      } finally {
-        isHandlingRedirect.current = false;
       }
 
-      // 2. 인증 상태 실시간 관찰
+      // 2. 인증 상태 관찰 시작
       const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
         if (!isMounted) return;
 
         if (firebaseUser) {
-          // 유저가 있고, 아직 상태가 반영되지 않았을 때만 동기화
           if (!user || user.id !== firebaseUser.uid) {
             setIsLoading(true);
             await syncUserWithFirestore(firebaseUser);
           }
           
-          // Firestore 실시간 데이터 구독 (플랜 변경 등 즉시 반영)
           if (unsubSnapshot) unsubSnapshot();
           unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
             if (s.exists() && isMounted) {
               const latestData = s.data() as User;
               setUser(latestData);
-              // 혹시 모를 LANDING 상태 고착 방지
-              if (currentState === AppState.LANDING) {
-                setCurrentState(AppState.DASHBOARD);
-              }
+              if (currentState === AppState.LANDING) setCurrentState(AppState.DASHBOARD);
             }
           });
-          
           setIsLoading(false);
         } else {
-          // 확실히 로그아웃된 경우
-          if (!isHandlingRedirect.current && !isSyncing.current) {
+          if (!isSyncing.current) {
             if (unsubSnapshot) unsubSnapshot();
             setUser(null);
             setCurrentState(AppState.LANDING);
             setIsLoading(false);
           }
         }
+        authInitialized.current = true;
       });
 
       return unsubscribeAuth;
@@ -157,6 +158,7 @@ const App: React.FC = () => {
       } else {
         const result = await signInWithPopup(auth, provider);
         if (result.user) await syncUserWithFirestore(result.user);
+        else setIsLoading(false);
       }
     } catch (error) {
       console.error("Login Error:", error);
@@ -173,11 +175,7 @@ const App: React.FC = () => {
       } else {
         result = await signInWithEmailAndPassword(auth, email, pass);
       }
-      
-      // 이메일 로그인 성공 시 직접 동기화를 호출하여 즉각 반응성 확보
-      if (result.user) {
-        await syncUserWithFirestore(result.user);
-      }
+      if (result.user) await syncUserWithFirestore(result.user);
     } catch (error: any) {
       setIsLoading(false);
       throw error;
@@ -190,7 +188,7 @@ const App: React.FC = () => {
   };
 
   const handleSetSelect = (setNum: number) => {
-    if (user?.plan === 'free' && setNum > 2) {
+    if (user?.plan === 'free' && setNum > 1) { // 무료 사용자는 무조건 Set 1만 가능
       setShowPaywall(true);
       return;
     }
@@ -208,13 +206,12 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
-  // 마스터 로딩 스크린
   if (isLoading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-indigo-950 text-white font-black text-center px-6">
       <div className="w-16 h-16 border-4 border-white/10 border-t-white rounded-full animate-spin mb-8"></div>
       <div className="space-y-2">
         <p className="animate-pulse tracking-[0.3em] uppercase text-[10px] text-indigo-300">EPS-TOPIK Mate</p>
-        <p className="text-sm font-bold">Synchronizing Session...</p>
+        <p className="text-sm font-bold">Synchronizing Global Session...</p>
       </div>
     </div>
   );
@@ -224,7 +221,6 @@ const App: React.FC = () => {
       <FaviconManager />
       <InstallPwa />
       
-      {/* 렌더링 조건: 로딩이 완전히 끝나고 유저가 없을 때만 랜딩 페이지를 보여줌 */}
       {currentState === AppState.LANDING && !user && (
         <LandingPage onLoginClick={() => setShowLoginModal(true)} />
       )}
