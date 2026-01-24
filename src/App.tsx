@@ -38,10 +38,10 @@ const App: React.FC = () => {
   const [selectedSet, setSelectedSet] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   
-  // 상태 동기화 중임을 나타내는 Ref (Race Condition 방지)
   const isSyncing = useRef(false);
   const isHandlingRedirect = useRef(false);
 
+  // Firestore와 사용자 데이터 동기화
   const syncUserWithFirestore = useCallback(async (firebaseUser: any) => {
     if (isSyncing.current) return;
     isSyncing.current = true;
@@ -66,6 +66,7 @@ const App: React.FC = () => {
         await setDoc(userRef, userData);
       }
       
+      // 유저 상태와 앱 화면 상태를 동시에 업데이트
       setUser(userData);
       setCurrentState(AppState.DASHBOARD);
       setShowLoginModal(false);
@@ -81,7 +82,7 @@ const App: React.FC = () => {
     let isMounted = true;
 
     const initAuth = async () => {
-      // 1. 리다이렉트 처리 감지
+      // 1. Google Redirect 결과 처리 (모바일/PWA 대응)
       isHandlingRedirect.current = true;
       try {
         const result = await getRedirectResult(auth);
@@ -89,33 +90,38 @@ const App: React.FC = () => {
           await syncUserWithFirestore(result.user);
         }
       } catch (err) {
-        console.error("Redirect Error:", err);
+        console.error("Redirect Result Error:", err);
       } finally {
         isHandlingRedirect.current = false;
       }
 
-      // 2. 인증 감시자 설정 (모든 로그인 방식의 중심)
+      // 2. 인증 상태 실시간 관찰
       const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
         if (!isMounted) return;
 
         if (firebaseUser) {
-          // Firebase 유저는 있는데 앱 상태 유저가 없거나 ID가 다를 때만 동기화
+          // 유저가 있고, 아직 상태가 반영되지 않았을 때만 동기화
           if (!user || user.id !== firebaseUser.uid) {
             setIsLoading(true);
             await syncUserWithFirestore(firebaseUser);
           }
           
-          // 실시간 Firestore 구독
+          // Firestore 실시간 데이터 구독 (플랜 변경 등 즉시 반영)
           if (unsubSnapshot) unsubSnapshot();
           unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
             if (s.exists() && isMounted) {
-              setUser(s.data() as User);
+              const latestData = s.data() as User;
+              setUser(latestData);
+              // 혹시 모를 LANDING 상태 고착 방지
+              if (currentState === AppState.LANDING) {
+                setCurrentState(AppState.DASHBOARD);
+              }
             }
           });
           
           setIsLoading(false);
         } else {
-          // 리다이렉트 중이 아닐 때만 로그아웃 상태로 전환
+          // 확실히 로그아웃된 경우
           if (!isHandlingRedirect.current && !isSyncing.current) {
             if (unsubSnapshot) unsubSnapshot();
             setUser(null);
@@ -135,7 +141,7 @@ const App: React.FC = () => {
       cleanup.then(unsub => unsub && unsub());
       if (unsubSnapshot) unsubSnapshot();
     };
-  }, [syncUserWithFirestore, user]);
+  }, [syncUserWithFirestore, user, currentState]);
 
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
@@ -149,8 +155,8 @@ const App: React.FC = () => {
       if (isMobile || isStandalone) {
         await signInWithRedirect(auth, provider);
       } else {
-        await signInWithPopup(auth, provider);
-        // Popup은 onAuthStateChanged에서 감지하여 처리함
+        const result = await signInWithPopup(auth, provider);
+        if (result.user) await syncUserWithFirestore(result.user);
       }
     } catch (error) {
       console.error("Login Error:", error);
@@ -161,13 +167,17 @@ const App: React.FC = () => {
   const handleEmailAuth = async (email: string, pass: string, isSignUp: boolean) => {
     setIsLoading(true);
     try {
+      let result;
       if (isSignUp) {
-        await createUserWithEmailAndPassword(auth, email, pass);
+        result = await createUserWithEmailAndPassword(auth, email, pass);
       } else {
-        await signInWithEmailAndPassword(auth, email, pass);
+        result = await signInWithEmailAndPassword(auth, email, pass);
       }
-      // 직접 syncUserWithFirestore를 호출하지 않습니다. 
-      // onAuthStateChanged가 즉시 감지하여 안전하게 처리할 것입니다.
+      
+      // 이메일 로그인 성공 시 직접 동기화를 호출하여 즉각 반응성 확보
+      if (result.user) {
+        await syncUserWithFirestore(result.user);
+      }
     } catch (error: any) {
       setIsLoading(false);
       throw error;
@@ -198,13 +208,13 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
-  // 로딩 중이거나 동기화 중일 때는 절대로 LandingPage를 보여주지 않습니다.
+  // 마스터 로딩 스크린
   if (isLoading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-indigo-950 text-white font-black text-center px-6">
       <div className="w-16 h-16 border-4 border-white/10 border-t-white rounded-full animate-spin mb-8"></div>
       <div className="space-y-2">
         <p className="animate-pulse tracking-[0.3em] uppercase text-[10px] text-indigo-300">EPS-TOPIK Mate</p>
-        <p className="text-sm font-bold">Synchronizing Security Session...</p>
+        <p className="text-sm font-bold">Synchronizing Session...</p>
       </div>
     </div>
   );
@@ -214,8 +224,8 @@ const App: React.FC = () => {
       <FaviconManager />
       <InstallPwa />
       
-      {/* user가 null이고 로딩이 끝났을 때만 LandingPage 렌더링 */}
-      {currentState === AppState.LANDING && !user && !isLoading && (
+      {/* 렌더링 조건: 로딩이 완전히 끝나고 유저가 없을 때만 랜딩 페이지를 보여줌 */}
+      {currentState === AppState.LANDING && !user && (
         <LandingPage onLoginClick={() => setShowLoginModal(true)} />
       )}
       
@@ -227,54 +237,58 @@ const App: React.FC = () => {
         />
       )}
       
-      {currentState === AppState.DASHBOARD && user && (
-        <Dashboard 
-          user={user} 
-          onModeSelect={handleModeSelect} 
-          onUpgrade={() => setShowPaywall(true)} 
-          onProfileClick={() => setShowProfile(true)} 
-          onViewAnalysis={() => { if (lastSession) setCurrentState(AppState.ANALYTICS); }} 
-        />
-      )}
+      {user && (
+        <>
+          {currentState === AppState.DASHBOARD && (
+            <Dashboard 
+              user={user} 
+              onModeSelect={handleModeSelect} 
+              onUpgrade={() => setShowPaywall(true)} 
+              onProfileClick={() => setShowProfile(true)} 
+              onViewAnalysis={() => { if (lastSession) setCurrentState(AppState.ANALYTICS); }} 
+            />
+          )}
 
-      {currentState === AppState.SET_SELECTION && user && (
-        <SetSelector 
-          mode={examMode} 
-          plan={user.plan} 
-          onSelect={handleSetSelect} 
-          onBack={() => setCurrentState(AppState.DASHBOARD)} 
-        />
-      )}
-      
-      {currentState === AppState.EXAM && user && (
-        <ExamSimulator 
-          mode={examMode}
-          setNumber={selectedSet}
-          onComplete={handleExamComplete} 
-          onExit={() => setCurrentState(AppState.DASHBOARD)} 
-          plan={user.plan}
-        />
-      )}
-      
-      {currentState === AppState.ANALYTICS && lastSession && (
-        <Analytics session={lastSession} onBack={() => setCurrentState(AppState.DASHBOARD)} />
-      )}
+          {currentState === AppState.SET_SELECTION && (
+            <SetSelector 
+              mode={examMode} 
+              plan={user.plan} 
+              onSelect={handleSetSelect} 
+              onBack={() => setCurrentState(AppState.DASHBOARD)} 
+            />
+          )}
+          
+          {currentState === AppState.EXAM && (
+            <ExamSimulator 
+              mode={examMode}
+              setNumber={selectedSet}
+              onComplete={handleExamComplete} 
+              onExit={() => setCurrentState(AppState.DASHBOARD)} 
+              plan={user.plan}
+            />
+          )}
+          
+          {currentState === AppState.ANALYTICS && lastSession && (
+            <Analytics session={lastSession} onBack={() => setCurrentState(AppState.DASHBOARD)} />
+          )}
 
-      {showPaywall && user && <PaywallModal user={user} onClose={() => setShowPaywall(false)} />}
-      
-      {showProfile && user && (
-        <ProfileModal 
-          user={user} 
-          onClose={() => setShowProfile(false)} 
-          onLogout={async () => { 
-            setIsLoading(true);
-            await signOut(auth); 
-            setUser(null); 
-            setCurrentState(AppState.LANDING); 
-            setIsLoading(false);
-          }} 
-          onRenew={() => { setShowProfile(false); setShowPaywall(true); }} 
-        />
+          {showPaywall && <PaywallModal user={user} onClose={() => setShowPaywall(false)} />}
+          
+          {showProfile && (
+            <ProfileModal 
+              user={user} 
+              onClose={() => setShowProfile(false)} 
+              onLogout={async () => { 
+                setIsLoading(true);
+                await signOut(auth); 
+                setUser(null); 
+                setCurrentState(AppState.LANDING); 
+                setIsLoading(false);
+              }} 
+              onRenew={() => { setShowProfile(false); setShowPaywall(true); }} 
+            />
+          )}
+        </>
       )}
     </div>
   );
