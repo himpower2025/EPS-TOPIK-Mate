@@ -41,9 +41,9 @@ const App: React.FC = () => {
   
   const isSyncing = useRef(false);
 
-  // Firestore와 사용자 정보 동기화 및 상태 전환
+  // Firestore와 사용자 정보 동기화 (base44가 제안한 auth.me() 역할과 유사)
   const syncUserWithFirestore = useCallback(async (firebaseUser: any) => {
-    if (!firebaseUser || isSyncing.current) return;
+    if (!firebaseUser || isSyncing.current) return null;
     isSyncing.current = true;
     
     const userRef = doc(db, 'users', firebaseUser.uid);
@@ -55,6 +55,7 @@ const App: React.FC = () => {
       
       if (snap.exists()) {
         userData = snap.data() as User;
+        // 관리자 자동 업그레이드 로직
         if (isAdminEmail && userData.plan === 'free') {
            userData.plan = '3m';
            const expiryDate = new Date();
@@ -63,6 +64,7 @@ const App: React.FC = () => {
            await setDoc(userRef, { plan: '3m', subscriptionExpiry: userData.subscriptionExpiry }, { merge: true });
         }
       } else {
+        // 신규 유저 생성
         userData = { 
           id: firebaseUser.uid, 
           name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Learner', 
@@ -76,74 +78,74 @@ const App: React.FC = () => {
       }
       
       setUser(userData);
-      // [중요] 동기화 성공 시 즉시 대시보드로 상태 전환
-      setCurrentState(AppState.DASHBOARD);
-      setShowLoginModal(false);
+      return userData;
     } catch (error) {
       console.error("User Sync Error:", error);
+      return null;
     } finally {
       isSyncing.current = false;
-      setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
     let unsubSnapshot: (() => void) | null = null;
 
-    const initAuth = async () => {
+    const initializeAuth = async () => {
+      // 1. 지속성 설정 (브라우저를 닫아도 유지)
       await setPersistence(auth, browserLocalPersistence);
 
-      // 리다이렉트 결과 처리 (로그인 루프 해결 핵심)
+      // 2. 리다이렉트 로그인 결과 확인 (무한 루프 방지 핵심)
       try {
         const result = await getRedirectResult(auth);
         if (result?.user) {
-          await syncUserWithFirestore(result.user);
+          const syncedUser = await syncUserWithFirestore(result.user);
+          if (syncedUser) {
+            setCurrentState(AppState.DASHBOARD);
+            setIsLoading(false);
+            return;
+          }
         }
       } catch (err) {
-        console.error("Redirect Error:", err);
+        console.error("Redirect Login Result Error:", err);
       }
 
+      // 3. 인증 상태 구독
       const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
         if (firebaseUser) {
-          // 사용자가 있는데 상태가 LANDING이라면 강제로 DASHBOARD 전환 시도
-          if (currentState === AppState.LANDING) {
+          const syncedUser = await syncUserWithFirestore(firebaseUser);
+          if (syncedUser) {
             setCurrentState(AppState.DASHBOARD);
+            // 실시간 데이터 구독 설정
+            if (unsubSnapshot) unsubSnapshot();
+            unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
+              if (s.exists()) setUser(s.data() as User);
+            });
           }
-          
-          if (!user) {
-            await syncUserWithFirestore(firebaseUser);
-          }
-          
-          if (unsubSnapshot) unsubSnapshot();
-          unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
-            if (s.exists()) {
-              setUser(s.data() as User);
-              setIsLoading(false);
-            }
-          });
         } else {
+          // 로그아웃 상태
           setUser(null);
           setCurrentState(AppState.LANDING);
-          setIsLoading(false);
         }
+        // 모든 인증 확인이 끝난 후 로딩 해제 (base44 방식의 핵심)
+        setIsLoading(false);
       });
 
       return unsubscribeAuth;
     };
 
-    const unsubAuthPromise = initAuth();
+    const unsubPromise = initializeAuth();
 
     return () => {
-      unsubAuthPromise.then(unsub => unsub && unsub());
+      unsubPromise.then(unsub => unsub && unsub());
       if (unsubSnapshot) unsubSnapshot();
     };
-  }, [syncUserWithFirestore, user, currentState]);
+  }, [syncUserWithFirestore]);
 
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     
-    setIsLoading(true);
+    setIsLoading(true); // 로딩 시작
     try {
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
         await signInWithRedirect(auth, provider);
@@ -194,10 +196,11 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
+  // 인증 정보를 완벽히 가져올 때까지 대기
   if (isLoading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-indigo-950 text-white font-black text-center px-6">
       <div className="w-16 h-16 border-4 border-white/10 border-t-white rounded-full animate-spin mb-8"></div>
-      <p className="animate-pulse tracking-[0.3em] uppercase text-[10px] text-indigo-300">인증 정보를 확인 중입니다...</p>
+      <p className="animate-pulse tracking-[0.3em] uppercase text-[10px] text-indigo-300">사용자 인증 정보를 확인 중입니다...</p>
     </div>
   );
 

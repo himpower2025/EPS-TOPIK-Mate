@@ -26,12 +26,12 @@ async function decodeAudioData(data: Uint8Array, ctx: AudioContext, sampleRate: 
   return buffer;
 }
 
-// undefined 입력을 안전하게 처리하도록 수정
+// 1. undefined 입력을 명시적으로 허용하여 타입 에러 해결
 const cleanJson = (text: string | undefined): string => 
   (text || '').replace(/```json/g, '').replace(/```/g, '').replace(/\/\*.*?\*\//gs, '').trim();
 
 export const generateQuestionsBySet = async (mode: ExamMode, setNumber: number, plan: PlanType): Promise<Question[]> => {
-  // 무료 플랜일 경우 정적 데이터 반환 (변수 사용 명시)
+  // 무료 플랜일 경우 정적 데이터 반환 (변수 사용 명시하여 미사용 경고 해결)
   if (plan === 'free') {
     if (mode === 'READING') return STATIC_EXAM_DATA.filter(q => q.id.startsWith('s1_r')).slice(0, 10);
     if (mode === 'LISTENING') return STATIC_EXAM_DATA.filter(q => q.id.startsWith('s1_l')).slice(0, 10);
@@ -71,7 +71,7 @@ export const generateQuestionsBySet = async (mode: ExamMode, setNumber: number, 
       }
     });
 
-    // response.text가 undefined일 경우를 대비해 기본값 처리
+    // 2. response.text ?? "" 를 사용하여 undefined 방지
     const jsonText = cleanJson(response.text ?? "");
     return jsonText ? JSON.parse(jsonText) : [];
   } catch (error) {
@@ -92,7 +92,7 @@ export const generateImage = async (prompt: string): Promise<string | null> => {
       config: { imageConfig: { aspectRatio: "1:1" } }
     });
     
-    // Optional chaining을 사용하여 candidates 및 parts 안전하게 접근
+    // 3. Optional Chaining(?.)을 사용하여 Object is possibly 'undefined' 에러 해결
     const candidate = response.candidates?.[0];
     const part = candidate?.content?.parts?.find(p => p.inlineData);
     return part?.inlineData ? `data:image/png;base64,${part.inlineData.data}` : null;
@@ -116,6 +116,7 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
       }
     });
     
+    // 4. Optional Chaining으로 안전하게 접근
     const base64 = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
     if (base64) {
       const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
@@ -136,7 +137,7 @@ export const analyzePerformance = async (session: ExamSession): Promise<Analytic
       contents: `EPS-TOPIK Analysis. Score: ${session.score}/${session.questions.length}. Feedback in English. Return JSON.`,
       config: { responseMimeType: "application/json" }
     });
-    // response.text가 undefined일 경우를 대비해 기본값 처리
+    // 5. response.text ?? "" 로 안전하게 전달
     const jsonText = cleanJson(response.text ?? "");
     return jsonText ? JSON.parse(jsonText) : null;
   } catch {
