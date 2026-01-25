@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Dashboard } from './components/Dashboard';
 import { SetSelector } from './components/SetSelector';
@@ -21,7 +20,9 @@ import {
   onAuthStateChanged, 
   signOut,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword
+  createUserWithEmailAndPassword,
+  setPersistence,
+  browserLocalPersistence
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
 
@@ -39,11 +40,10 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   
   const isSyncing = useRef(false);
-  const authInitialized = useRef(false);
 
-  // Firestore와 사용자 데이터 동기화
+  // Firestore와 사용자 정보 동기화 및 상태 전환
   const syncUserWithFirestore = useCallback(async (firebaseUser: any) => {
-    if (isSyncing.current) return;
+    if (!firebaseUser || isSyncing.current) return;
     isSyncing.current = true;
     
     const userRef = doc(db, 'users', firebaseUser.uid);
@@ -51,14 +51,12 @@ const App: React.FC = () => {
       const snap = await getDoc(userRef);
       let userData: User;
       
-      // [관리자 권한 부여] 요청하신 이메일에 대해 3개월 프리미엄 자동 업그레이드
       const isAdminEmail = firebaseUser.email === 'abraham0715@gmail.com';
       
       if (snap.exists()) {
         userData = snap.data() as User;
         if (isAdminEmail && userData.plan === 'free') {
            userData.plan = '3m';
-           // 만료일을 현재로부터 90일 후로 설정
            const expiryDate = new Date();
            expiryDate.setDate(expiryDate.getDate() + 90);
            userData.subscriptionExpiry = expiryDate.toISOString();
@@ -78,68 +76,65 @@ const App: React.FC = () => {
       }
       
       setUser(userData);
+      // [중요] 동기화 성공 시 즉시 대시보드로 상태 전환
       setCurrentState(AppState.DASHBOARD);
       setShowLoginModal(false);
     } catch (error) {
-      console.error("Firestore Sync Error:", error);
+      console.error("User Sync Error:", error);
     } finally {
       isSyncing.current = false;
+      setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
     let unsubSnapshot: (() => void) | null = null;
-    let isMounted = true;
 
     const initAuth = async () => {
-      // 1. 모바일 리다이렉트 결과 처리 (가장 먼저 수행)
+      await setPersistence(auth, browserLocalPersistence);
+
+      // 리다이렉트 결과 처리 (로그인 루프 해결 핵심)
       try {
         const result = await getRedirectResult(auth);
-        if (result?.user && isMounted) {
+        if (result?.user) {
           await syncUserWithFirestore(result.user);
         }
       } catch (err) {
-        console.error("Redirect Result Error:", err);
+        console.error("Redirect Error:", err);
       }
 
-      // 2. 인증 상태 관찰 시작
       const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
-        if (!isMounted) return;
-
         if (firebaseUser) {
-          if (!user || user.id !== firebaseUser.uid) {
-            setIsLoading(true);
+          // 사용자가 있는데 상태가 LANDING이라면 강제로 DASHBOARD 전환 시도
+          if (currentState === AppState.LANDING) {
+            setCurrentState(AppState.DASHBOARD);
+          }
+          
+          if (!user) {
             await syncUserWithFirestore(firebaseUser);
           }
           
           if (unsubSnapshot) unsubSnapshot();
           unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
-            if (s.exists() && isMounted) {
-              const latestData = s.data() as User;
-              setUser(latestData);
-              if (currentState === AppState.LANDING) setCurrentState(AppState.DASHBOARD);
+            if (s.exists()) {
+              setUser(s.data() as User);
+              setIsLoading(false);
             }
           });
-          setIsLoading(false);
         } else {
-          if (!isSyncing.current) {
-            if (unsubSnapshot) unsubSnapshot();
-            setUser(null);
-            setCurrentState(AppState.LANDING);
-            setIsLoading(false);
-          }
+          setUser(null);
+          setCurrentState(AppState.LANDING);
+          setIsLoading(false);
         }
-        authInitialized.current = true;
       });
 
       return unsubscribeAuth;
     };
 
-    const cleanup = initAuth();
+    const unsubAuthPromise = initAuth();
 
     return () => {
-      isMounted = false;
-      cleanup.then(unsub => unsub && unsub());
+      unsubAuthPromise.then(unsub => unsub && unsub());
       if (unsubSnapshot) unsubSnapshot();
     };
   }, [syncUserWithFirestore, user, currentState]);
@@ -148,17 +143,13 @@ const App: React.FC = () => {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
-    
     setIsLoading(true);
     try {
-      if (isMobile || isStandalone) {
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
         await signInWithRedirect(auth, provider);
       } else {
         const result = await signInWithPopup(auth, provider);
         if (result.user) await syncUserWithFirestore(result.user);
-        else setIsLoading(false);
       }
     } catch (error) {
       console.error("Login Error:", error);
@@ -169,14 +160,11 @@ const App: React.FC = () => {
   const handleEmailAuth = async (email: string, pass: string, isSignUp: boolean) => {
     setIsLoading(true);
     try {
-      let result;
-      if (isSignUp) {
-        result = await createUserWithEmailAndPassword(auth, email, pass);
-      } else {
-        result = await signInWithEmailAndPassword(auth, email, pass);
-      }
+      const result = isSignUp 
+        ? await createUserWithEmailAndPassword(auth, email, pass)
+        : await signInWithEmailAndPassword(auth, email, pass);
       if (result.user) await syncUserWithFirestore(result.user);
-    } catch (error: any) {
+    } catch (error) {
       setIsLoading(false);
       throw error;
     }
@@ -188,7 +176,7 @@ const App: React.FC = () => {
   };
 
   const handleSetSelect = (setNum: number) => {
-    if (user?.plan === 'free' && setNum > 1) { // 무료 사용자는 무조건 Set 1만 가능
+    if (user?.plan === 'free' && setNum > 1) {
       setShowPaywall(true);
       return;
     }
@@ -209,10 +197,7 @@ const App: React.FC = () => {
   if (isLoading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-indigo-950 text-white font-black text-center px-6">
       <div className="w-16 h-16 border-4 border-white/10 border-t-white rounded-full animate-spin mb-8"></div>
-      <div className="space-y-2">
-        <p className="animate-pulse tracking-[0.3em] uppercase text-[10px] text-indigo-300">EPS-TOPIK Mate</p>
-        <p className="text-sm font-bold">Synchronizing Global Session...</p>
-      </div>
+      <p className="animate-pulse tracking-[0.3em] uppercase text-[10px] text-indigo-300">인증 정보를 확인 중입니다...</p>
     </div>
   );
 
@@ -221,9 +206,7 @@ const App: React.FC = () => {
       <FaviconManager />
       <InstallPwa />
       
-      {currentState === AppState.LANDING && !user && (
-        <LandingPage onLoginClick={() => setShowLoginModal(true)} />
-      )}
+      {currentState === AppState.LANDING && !user && <LandingPage onLoginClick={() => setShowLoginModal(true)} />}
       
       {showLoginModal && (
         <LoginModal 

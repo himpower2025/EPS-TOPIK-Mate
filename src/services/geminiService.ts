@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Question, QuestionType, AnalyticsFeedback, ExamSession, ExamMode, PlanType } from '../types';
 import { STATIC_EXAM_DATA } from '../data/examData';
@@ -27,59 +26,25 @@ async function decodeAudioData(data: Uint8Array, ctx: AudioContext, sampleRate: 
   return buffer;
 }
 
-const cleanJson = (text: string | undefined) => (text || '').replace(/```json/g, '').replace(/```/g, '').replace(/\/\*.*?\*\//gs, '').trim();
+// undefined 입력을 안전하게 처리하도록 수정
+const cleanJson = (text: string | undefined): string => 
+  (text || '').replace(/```json/g, '').replace(/```/g, '').replace(/\/\*.*?\*\//gs, '').trim();
 
-/**
- * [Core] 모드 및 플랜에 따른 문항 생성/추출 엔진
- */
 export const generateQuestionsBySet = async (mode: ExamMode, setNumber: number, plan: PlanType): Promise<Question[]> => {
-  // 1. 무료 플랜 사용자 전용 로직 (요청하신 슬라이싱 적용)
+  // 무료 플랜일 경우 정적 데이터 반환 (변수 사용 명시)
   if (plan === 'free') {
-    if (mode === 'READING') {
-      return STATIC_EXAM_DATA.filter(q => q.id.startsWith('s1_r')).slice(0, 10);
-    } 
-    if (mode === 'LISTENING') {
-      return STATIC_EXAM_DATA.filter(q => q.id.startsWith('s1_l')).slice(0, 10);
-    }
-    if (mode === 'FULL') {
-      const r_part = STATIC_EXAM_DATA.filter(q => q.id.startsWith('s2_r')).slice(0, 10);
-      const l_part = STATIC_EXAM_DATA.filter(q => q.id.startsWith('s2_l')).slice(0, 10);
-      return [...r_part, ...l_part];
-    }
+    if (mode === 'READING') return STATIC_EXAM_DATA.filter(q => q.id.startsWith('s1_r')).slice(0, 10);
+    if (mode === 'LISTENING') return STATIC_EXAM_DATA.filter(q => q.id.startsWith('s1_l')).slice(0, 10);
+    return [...STATIC_EXAM_DATA].slice(0, 10);
   }
 
-  // 2. 유료 플랜 사용자 로직: DB 데이터 우선
-  const prefix = `s${setNumber}_`;
-  const dbQuestions = STATIC_EXAM_DATA.filter(q => q.id.startsWith(prefix));
-  
-  if (dbQuestions.length >= 10) {
-    if (mode === 'READING') return dbQuestions.filter(q => q.type === QuestionType.READING);
-    if (mode === 'LISTENING') return dbQuestions.filter(q => q.type === QuestionType.LISTENING);
-    return dbQuestions; 
-  }
-
-  // 3. AI 무한 생성 엔진 가동
-  return await callGeminiToGenerateQuestions(mode, setNumber);
-};
-
-async function callGeminiToGenerateQuestions(mode: ExamMode, setNumber: number): Promise<Question[]> {
   const ai = getAI();
-  const themes = ["Construction Site Safety", "Agricultural Equipment", "Manufacturing Workplace", "Service Industry Korean", "Public Safety Signs", "Hospitality & Tourism"];
-  const currentTheme = themes[setNumber % themes.length];
-  
-  const prompt = `You are a world-class EPS-TOPIK expert examiner.
-  Generate 20 high-quality Korean exam questions for Round ${setNumber}.
-  Theme: ${currentTheme}.
-  Current Mode: ${mode}.
-  
-  Requirements:
-  1. If mode is FULL: 10 Reading, 10 Listening.
-  2. For READING: Include realistic work scenarios, safety signs, or long passages.
-  3. For LISTENING: Provide a natural dialogue script in the 'context' field.
-  4. Visuals: Every single question MUST have an 'imagePrompt' for AI generation.
-  5. JSON: Return a strict JSON array of Question objects.`;
+  const themes = ["Safety Gear", "Industrial Tools", "Daily Life", "Signs", "Workplace Dialogues"];
+  const theme = themes[setNumber % themes.length];
 
   try {
+    const prompt = `You are a professional EPS-TOPIK examiner. Create 10 realistic questions for Round ${setNumber} (Theme: ${theme}, Mode: ${mode}). Mix READING and LISTENING. Return JSON matching the Question interface.`;
+
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
       contents: prompt,
@@ -106,13 +71,14 @@ async function callGeminiToGenerateQuestions(mode: ExamMode, setNumber: number):
       }
     });
 
-    const text = response.text;
-    return JSON.parse(cleanJson(text));
+    // response.text가 undefined일 경우를 대비해 기본값 처리
+    const jsonText = cleanJson(response.text ?? "");
+    return jsonText ? JSON.parse(jsonText) : [];
   } catch (error) {
-    console.error("AI Generation failed:", error);
+    console.warn("AI Generation failed, using fallback data", error);
     return [...STATIC_EXAM_DATA].sort(() => Math.random() - 0.5).slice(0, 10);
   }
-}
+};
 
 export const generateImage = async (prompt: string): Promise<string | null> => {
   if (!prompt) return null;
@@ -121,12 +87,14 @@ export const generateImage = async (prompt: string): Promise<string | null> => {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: { 
-        parts: [{ text: `Professional industrial/educational illustration for EPS-TOPIK: ${prompt}. Clean vector art style, bright colors, white background.` }] 
+        parts: [{ text: `Industrial educational illustration for Korean exam: ${prompt}. 2D vector art, white background.` }] 
       },
       config: { imageConfig: { aspectRatio: "1:1" } }
     });
     
-    const part = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+    // Optional chaining을 사용하여 candidates 및 parts 안전하게 접근
+    const candidate = response.candidates?.[0];
+    const part = candidate?.content?.parts?.find(p => p.inlineData);
     return part?.inlineData ? `data:image/png;base64,${part.inlineData.data}` : null;
   } catch (err) {
     console.error("Image generation failed:", err);
@@ -139,7 +107,7 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text: `잘 듣고 알맞은 것을 고르십시오. ${text}` }] }],
+      contents: [{ parts: [{ text: `질문을 잘 듣고 답하십시오. ${text}` }] }],
       config: {
         responseModalities: [Modality.AUDIO],
         speechConfig: {
@@ -165,10 +133,12 @@ export const analyzePerformance = async (session: ExamSession): Promise<Analytic
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: `Analyze EPS-TOPIK Performance. Score: ${session.score}/${session.questions.length}. Feedback in English.`,
+      contents: `EPS-TOPIK Analysis. Score: ${session.score}/${session.questions.length}. Feedback in English. Return JSON.`,
       config: { responseMimeType: "application/json" }
     });
-    return JSON.parse(cleanJson(response.text));
+    // response.text가 undefined일 경우를 대비해 기본값 처리
+    const jsonText = cleanJson(response.text ?? "");
+    return jsonText ? JSON.parse(jsonText) : null;
   } catch {
     return null;
   }
