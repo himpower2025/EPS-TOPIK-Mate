@@ -12,7 +12,7 @@ interface ErrorBoundaryState {
 }
 
 /**
- * 전역 에러 바운더리: 애플리케이션의 치명적 오류를 포착하여 사용자에게 안내합니다.
+ * Global Error Boundary: Catches fatal app errors and displays a recovery UI in English.
  */
 class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
@@ -41,9 +41,9 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
           <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center mb-8 shadow-xl">
              <span className="text-5xl">⚠️</span>
           </div>
-          <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">문제가 발생했습니다</h1>
+          <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Something went wrong</h1>
           <p className="text-gray-500 mb-8 max-w-md leading-relaxed">
-            애플리케이션 실행 중 오류가 발생했습니다. 페이지를 새로고침해 주세요.
+            An unexpected error occurred while running the application. Please try reloading the page.
           </p>
           <pre className="bg-white/50 backdrop-blur-md p-6 rounded-2xl border border-indigo-100 text-left text-[11px] text-indigo-400 mb-10 max-w-xl overflow-auto w-full font-mono shadow-inner max-h-40">
             {error?.toString()}
@@ -52,7 +52,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             onClick={() => window.location.reload()}
             className="bg-indigo-600 text-white px-12 py-5 rounded-[2rem] font-black text-xl shadow-2xl shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95"
           >
-            새로고침
+            Reload App
           </button>
         </div>
       );

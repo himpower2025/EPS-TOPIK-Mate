@@ -38,9 +38,9 @@ const App: React.FC = () => {
   const [examMode, setExamMode] = useState<ExamMode>('FULL');
   const [selectedSet, setSelectedSet] = useState(1);
   
-  // Guard states to prevent UI flickering/loops
+  // Guard states to prevent UI loops on mobile
   const [isInitializing, setIsInitializing] = useState(true);
-  const [isAuthProcessing, setIsAuthProcessing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   const isMounted = useRef(true);
 
@@ -54,7 +54,6 @@ const App: React.FC = () => {
       if (snap.exists()) {
         userData = snap.data() as User;
       } else {
-        // Initialize new user
         userData = { 
           id: firebaseUser.uid, 
           name: firebaseUser.displayName || 'Learner', 
@@ -77,12 +76,12 @@ const App: React.FC = () => {
     isMounted.current = true;
     let unsubSnapshot: (() => void) | null = null;
 
-    const initApp = async () => {
+    const startApp = async () => {
       try {
-        // Set persistence for reliable mobile sessions
+        // 1. Force persistence for mobile reliability
         await setPersistence(auth, browserLocalPersistence);
 
-        // Check if returning from a mobile redirect
+        // 2. Handle mobile redirect result immediately
         const redirectResult = await getRedirectResult(auth);
         if (redirectResult?.user && isMounted.current) {
           const synced = await syncUserData(redirectResult.user);
@@ -92,17 +91,19 @@ const App: React.FC = () => {
           }
         }
 
-        // Main auth listener
+        // 3. Listen for auth changes
         const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
           if (firebaseUser) {
             const synced = await syncUserData(firebaseUser);
             if (synced && isMounted.current) {
               setUser(synced);
-              // Setup real-time listener for plan/credits updates
+              
+              // Setup real-time DB sync
               if (unsubSnapshot) unsubSnapshot();
               unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
                 if (s.exists() && isMounted.current) setUser(s.data() as User);
               });
+
               setCurrentState(AppState.DASHBOARD);
             }
           } else if (isMounted.current) {
@@ -110,39 +111,37 @@ const App: React.FC = () => {
             setCurrentState(AppState.LANDING);
           }
           
-          // Only stop the "initializing" loader after auth is resolved
+          // CRITICAL: Only stop showing the loading screen once we know the state
           setIsInitializing(false);
-          setIsAuthProcessing(false);
+          setIsLoading(false);
         });
 
         return unsubscribeAuth;
       } catch (err) {
-        console.error("App Boot Error:", err);
+        console.error("Init Error:", err);
         setIsInitializing(false);
       }
     };
 
-    const cleanupPromise = initApp();
+    const authCleanupPromise = startApp();
 
     return () => {
       isMounted.current = false;
-      cleanupPromise.then(unsub => unsub && unsub());
+      authCleanupPromise.then(unsub => unsub && unsub());
       if (unsubSnapshot) unsubSnapshot();
     };
   }, [syncUserData]);
 
   const handleGoogleLogin = async () => {
-    setIsAuthProcessing(true);
+    setIsLoading(true);
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     
-    // Detect mobile for redirect strategy
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
     try {
       if (isMobile) {
         await signInWithRedirect(auth, provider);
-        // Page will reload, useEffect handles result
       } else {
         const result = await signInWithPopup(auth, provider);
         const synced = await syncUserData(result.user);
@@ -151,16 +150,16 @@ const App: React.FC = () => {
           setCurrentState(AppState.DASHBOARD);
           setShowLoginModal(false);
         }
-        setIsAuthProcessing(false);
+        setIsLoading(false);
       }
     } catch (error) {
       console.error("Login Error:", error);
-      setIsAuthProcessing(false);
+      setIsLoading(false);
     }
   };
 
   const handleEmailAuth = async (email: string, pass: string, isSignUp: boolean) => {
-    setIsAuthProcessing(true);
+    setIsLoading(true);
     try {
       if (isSignUp) {
         await createUserWithEmailAndPassword(auth, email, pass);
@@ -168,7 +167,7 @@ const App: React.FC = () => {
         await signInWithEmailAndPassword(auth, email, pass);
       }
     } catch (error: any) {
-      setIsAuthProcessing(false);
+      setIsLoading(false);
       throw error;
     }
   };
@@ -179,7 +178,7 @@ const App: React.FC = () => {
   };
 
   const handleSetSelect = (setNum: number) => {
-    if (user?.plan === 'free' && setNum > 2) {
+    if (user?.plan === 'free' && setNum > 1) {
       setShowPaywall(true);
       return;
     }
@@ -197,8 +196,8 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
-  // Mandatory Initial Loading Screen (English)
-  if (isInitializing || isAuthProcessing) return (
+  // Full Screen English Loading Screen to prevent jumping
+  if (isInitializing || isLoading) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-indigo-950 text-white font-black text-center px-10">
       <div className="relative w-24 h-24 mb-10">
         <div className="absolute inset-0 border-8 border-white/10 rounded-full"></div>
@@ -268,11 +267,11 @@ const App: React.FC = () => {
               user={user} 
               onClose={() => setShowProfile(false)} 
               onLogout={async () => { 
-                setIsAuthProcessing(true);
+                setIsLoading(true);
                 await signOut(auth); 
                 setUser(null); 
                 setCurrentState(AppState.LANDING); 
-                setIsAuthProcessing(false);
+                setIsLoading(false);
               }} 
               onRenew={() => { setShowProfile(false); setShowPaywall(true); }} 
             />
