@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Dashboard } from './components/Dashboard';
 import { SetSelector } from './components/SetSelector';
 import { ExamSimulator } from './components/ExamSimulator';
@@ -37,10 +37,15 @@ const App: React.FC = () => {
   const [lastSession, setLastSession] = useState<ExamSession | null>(null);
   const [examMode, setExamMode] = useState<ExamMode>('FULL');
   const [selectedSet, setSelectedSet] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
+  
+  // Two-stage loading to prevent flashes and loops
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const isMounted = useRef(true);
 
-  // Firestore 유저 데이터 동기화 함수
   const syncUserData = useCallback(async (firebaseUser: any) => {
+    if (!firebaseUser) return null;
     const userRef = doc(db, 'users', firebaseUser.uid);
     try {
       const snap = await getDoc(userRef);
@@ -49,7 +54,6 @@ const App: React.FC = () => {
       if (snap.exists()) {
         userData = snap.data() as User;
       } else {
-        // 신규 유저 생성
         userData = { 
           id: firebaseUser.uid, 
           name: firebaseUser.displayName || 'Learner', 
@@ -61,7 +65,6 @@ const App: React.FC = () => {
         };
         await setDoc(userRef, userData);
       }
-      setUser(userData);
       return userData;
     } catch (error) {
       console.error("Firestore sync error:", error);
@@ -70,71 +73,89 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    isMounted.current = true;
     let unsubSnapshot: (() => void) | null = null;
 
-    const initAuth = async () => {
-      // 1. 브라우저 로컬 저장소 유지 설정 (모바일 앱 느낌을 위해 필수)
-      await setPersistence(auth, browserLocalPersistence);
-
-      // 2. 모바일 리다이렉트 결과 처리
+    const startApp = async () => {
       try {
-        const result = await getRedirectResult(auth);
-        if (result?.user) {
-          await syncUserData(result.user);
-        }
-      } catch (error) {
-        console.error("Redirect Result Error:", error);
-      }
+        // 1. Force persistence for mobile PWA/Browsers
+        await setPersistence(auth, browserLocalPersistence);
 
-      // 3. 인증 상태 변경 감지
-      const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
-        setIsLoading(true);
-        if (firebaseUser) {
-          const syncedUser = await syncUserData(firebaseUser);
-          if (syncedUser) {
-            // 실시간 DB 업데이트 구독
-            if (unsubSnapshot) unsubSnapshot();
-            unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
-              if (s.exists()) setUser(s.data() as User);
-            });
+        // 2. Handle mobile redirect result FIRST
+        const redirectResult = await getRedirectResult(auth);
+        if (redirectResult?.user && isMounted.current) {
+          const synced = await syncUserData(redirectResult.user);
+          if (synced) {
+            setUser(synced);
             setCurrentState(AppState.DASHBOARD);
-            setShowLoginModal(false);
           }
-        } else {
-          setUser(null);
-          setCurrentState(AppState.LANDING);
         }
-        setIsLoading(false);
-      });
 
-      return unsubscribeAuth;
+        // 3. Setup auth listener
+        const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+          if (firebaseUser) {
+            const synced = await syncUserData(firebaseUser);
+            if (synced && isMounted.current) {
+              setUser(synced);
+              
+              // Setup real-time DB sync
+              if (unsubSnapshot) unsubSnapshot();
+              unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
+                if (s.exists() && isMounted.current) setUser(s.data() as User);
+              });
+
+              setCurrentState(AppState.DASHBOARD);
+            }
+          } else if (isMounted.current) {
+            setUser(null);
+            setCurrentState(AppState.LANDING);
+          }
+          
+          // initialization complete
+          setIsInitializing(false);
+          setIsLoading(false);
+        });
+
+        return unsubscribeAuth;
+      } catch (err) {
+        console.error("Init Error:", err);
+        setIsInitializing(false);
+      }
     };
 
-    const authPromise = initAuth();
+    const authCleanupPromise = startApp();
 
     return () => {
-      authPromise.then(unsub => unsub && unsub());
+      isMounted.current = false;
+      authCleanupPromise.then(unsub => unsub && unsub());
       if (unsubSnapshot) unsubSnapshot();
     };
   }, [syncUserData]);
 
   const handleGoogleLogin = async () => {
+    setIsLoading(true);
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     
-    // 모바일 환경 체크
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
     try {
       if (isMobile) {
-        // 모바일은 무조건 리다이렉트 (팝업 차단 방지)
         await signInWithRedirect(auth, provider);
+        // Page will reload, useEffect handles result
       } else {
         const result = await signInWithPopup(auth, provider);
-        if (result.user) await syncUserData(result.user);
+        const synced = await syncUserData(result.user);
+        if (synced) {
+          setUser(synced);
+          setCurrentState(AppState.DASHBOARD);
+          setShowLoginModal(false);
+        }
+        setIsLoading(false);
       }
     } catch (error) {
       console.error("Login Error:", error);
+      setIsLoading(false);
     }
   };
 
@@ -146,7 +167,6 @@ const App: React.FC = () => {
       } else {
         await signInWithEmailAndPassword(auth, email, pass);
       }
-      // onAuthStateChanged에서 이후 로직 처리됨
     } catch (error: any) {
       setIsLoading(false);
       throw error;
@@ -177,10 +197,17 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
-  if (isLoading) return (
-    <div className="h-screen flex flex-col items-center justify-center bg-indigo-950 text-white font-black text-center px-6">
-      <div className="w-16 h-16 border-4 border-white/10 border-t-white rounded-full animate-spin mb-8"></div>
-      <p className="animate-pulse tracking-[0.3em] uppercase text-[10px] text-indigo-300">인증 정보를 확인하고 있습니다...</p>
+  // Full Screen English Loading Screen
+  if (isInitializing || isLoading) return (
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-indigo-950 text-white font-black text-center px-10">
+      <div className="relative w-24 h-24 mb-10">
+        <div className="absolute inset-0 border-8 border-white/10 rounded-full"></div>
+        <div className="absolute inset-0 border-8 border-indigo-400 rounded-full border-t-transparent animate-spin"></div>
+      </div>
+      <h2 className="text-2xl tracking-[0.2em] uppercase mb-2">EPS-TOPIK Mate</h2>
+      <p className="animate-pulse text-indigo-300 font-medium tracking-widest text-[10px] uppercase">
+        {isInitializing ? "Securing Session..." : "Syncing Profile..."}
+      </p>
     </div>
   );
 

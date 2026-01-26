@@ -6,7 +6,7 @@ export const LoadingSpinner: React.FC<{ message?: string }> = ({ message = "Load
       <div className="absolute inset-0 border-4 border-indigo-100 rounded-full"></div>
       <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
     </div>
-    <p className="text-indigo-900 font-black text-xs uppercase tracking-widest text-center max-w-[200px] animate-pulse">
+    <p className="text-indigo-900 font-black text-[10px] uppercase tracking-widest text-center max-w-[250px] animate-pulse">
       {message}
     </p>
   </div>
