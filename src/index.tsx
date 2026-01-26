@@ -15,14 +15,12 @@ interface ErrorBoundaryState {
  * 전역 에러 바운더리: 애플리케이션의 치명적 오류를 포착하여 사용자에게 안내합니다.
  */
 class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  // TypeScript가 state를 정확히 인식할 수 있도록 멤버 변수로 선언합니다.
-  public state: ErrorBoundaryState = {
-    hasError: false,
-    error: null
-  };
-
   constructor(props: ErrorBoundaryProps) {
     super(props);
+    this.state = {
+      hasError: false,
+      error: null
+    };
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {

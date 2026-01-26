@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Dashboard } from './components/Dashboard';
 import { SetSelector } from './components/SetSelector';
 import { ExamSimulator } from './components/ExamSimulator';
@@ -38,135 +38,116 @@ const App: React.FC = () => {
   const [examMode, setExamMode] = useState<ExamMode>('FULL');
   const [selectedSet, setSelectedSet] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  
-  const isSyncing = useRef(false);
 
-  // Firestore와 사용자 정보 동기화 (base44가 제안한 auth.me() 역할과 유사)
-  const syncUserWithFirestore = useCallback(async (firebaseUser: any) => {
-    if (!firebaseUser || isSyncing.current) return null;
-    isSyncing.current = true;
-    
+  // Firestore 유저 데이터 동기화 함수
+  const syncUserData = useCallback(async (firebaseUser: any) => {
     const userRef = doc(db, 'users', firebaseUser.uid);
     try {
       const snap = await getDoc(userRef);
       let userData: User;
       
-      const isAdminEmail = firebaseUser.email === 'abraham0715@gmail.com';
-      
       if (snap.exists()) {
         userData = snap.data() as User;
-        // 관리자 자동 업그레이드 로직
-        if (isAdminEmail && userData.plan === 'free') {
-           userData.plan = '3m';
-           const expiryDate = new Date();
-           expiryDate.setDate(expiryDate.getDate() + 90);
-           userData.subscriptionExpiry = expiryDate.toISOString();
-           await setDoc(userRef, { plan: '3m', subscriptionExpiry: userData.subscriptionExpiry }, { merge: true });
-        }
       } else {
         // 신규 유저 생성
         userData = { 
           id: firebaseUser.uid, 
-          name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Learner', 
+          name: firebaseUser.displayName || 'Learner', 
           email: firebaseUser.email || '', 
           avatarUrl: firebaseUser.photoURL || '', 
-          plan: isAdminEmail ? '3m' : 'free', 
-          subscriptionExpiry: isAdminEmail ? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString() : null, 
+          plan: 'free', 
+          subscriptionExpiry: null, 
           examsRemaining: 3 
         };
         await setDoc(userRef, userData);
       }
-      
       setUser(userData);
       return userData;
     } catch (error) {
-      console.error("User Sync Error:", error);
+      console.error("Firestore sync error:", error);
       return null;
-    } finally {
-      isSyncing.current = false;
     }
   }, []);
 
   useEffect(() => {
     let unsubSnapshot: (() => void) | null = null;
 
-    const initializeAuth = async () => {
-      // 1. 지속성 설정 (브라우저를 닫아도 유지)
+    const initAuth = async () => {
+      // 1. 브라우저 로컬 저장소 유지 설정 (모바일 앱 느낌을 위해 필수)
       await setPersistence(auth, browserLocalPersistence);
 
-      // 2. 리다이렉트 로그인 결과 확인 (무한 루프 방지 핵심)
+      // 2. 모바일 리다이렉트 결과 처리
       try {
         const result = await getRedirectResult(auth);
         if (result?.user) {
-          const syncedUser = await syncUserWithFirestore(result.user);
-          if (syncedUser) {
-            setCurrentState(AppState.DASHBOARD);
-            setIsLoading(false);
-            return;
-          }
+          await syncUserData(result.user);
         }
-      } catch (err) {
-        console.error("Redirect Login Result Error:", err);
+      } catch (error) {
+        console.error("Redirect Result Error:", error);
       }
 
-      // 3. 인증 상태 구독
+      // 3. 인증 상태 변경 감지
       const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+        setIsLoading(true);
         if (firebaseUser) {
-          const syncedUser = await syncUserWithFirestore(firebaseUser);
+          const syncedUser = await syncUserData(firebaseUser);
           if (syncedUser) {
-            setCurrentState(AppState.DASHBOARD);
-            // 실시간 데이터 구독 설정
+            // 실시간 DB 업데이트 구독
             if (unsubSnapshot) unsubSnapshot();
             unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
               if (s.exists()) setUser(s.data() as User);
             });
+            setCurrentState(AppState.DASHBOARD);
+            setShowLoginModal(false);
           }
         } else {
-          // 로그아웃 상태
           setUser(null);
           setCurrentState(AppState.LANDING);
         }
-        // 모든 인증 확인이 끝난 후 로딩 해제 (base44 방식의 핵심)
         setIsLoading(false);
       });
 
       return unsubscribeAuth;
     };
 
-    const unsubPromise = initializeAuth();
+    const authPromise = initAuth();
 
     return () => {
-      unsubPromise.then(unsub => unsub && unsub());
+      authPromise.then(unsub => unsub && unsub());
       if (unsubSnapshot) unsubSnapshot();
     };
-  }, [syncUserWithFirestore]);
+  }, [syncUserData]);
 
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     
-    setIsLoading(true); // 로딩 시작
+    // 모바일 환경 체크
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
     try {
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      if (isMobile) {
+        // 모바일은 무조건 리다이렉트 (팝업 차단 방지)
         await signInWithRedirect(auth, provider);
       } else {
         const result = await signInWithPopup(auth, provider);
-        if (result.user) await syncUserWithFirestore(result.user);
+        if (result.user) await syncUserData(result.user);
       }
     } catch (error) {
       console.error("Login Error:", error);
-      setIsLoading(false);
     }
   };
 
   const handleEmailAuth = async (email: string, pass: string, isSignUp: boolean) => {
     setIsLoading(true);
     try {
-      const result = isSignUp 
-        ? await createUserWithEmailAndPassword(auth, email, pass)
-        : await signInWithEmailAndPassword(auth, email, pass);
-      if (result.user) await syncUserWithFirestore(result.user);
-    } catch (error) {
+      if (isSignUp) {
+        await createUserWithEmailAndPassword(auth, email, pass);
+      } else {
+        await signInWithEmailAndPassword(auth, email, pass);
+      }
+      // onAuthStateChanged에서 이후 로직 처리됨
+    } catch (error: any) {
       setIsLoading(false);
       throw error;
     }
@@ -196,11 +177,10 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
-  // 인증 정보를 완벽히 가져올 때까지 대기
   if (isLoading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-indigo-950 text-white font-black text-center px-6">
       <div className="w-16 h-16 border-4 border-white/10 border-t-white rounded-full animate-spin mb-8"></div>
-      <p className="animate-pulse tracking-[0.3em] uppercase text-[10px] text-indigo-300">사용자 인증 정보를 확인 중입니다...</p>
+      <p className="animate-pulse tracking-[0.3em] uppercase text-[10px] text-indigo-300">인증 정보를 확인하고 있습니다...</p>
     </div>
   );
 

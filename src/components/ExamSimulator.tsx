@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Question, QuestionType, ExamSession, ExamMode, PlanType } from '../types';
 import { generateQuestionsBySet, generateSpeech, generateImage } from '../services/geminiService';
@@ -131,7 +130,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     });
   };
 
-  if (loading) return <div className="h-full flex items-center justify-center p-12 bg-white"><LoadingSpinner message="AI가 문항을 생성하고 있습니다..." /></div>;
+  if (loading) return <div className="h-full flex items-center justify-center p-12 bg-white"><LoadingSpinner message="AI is generating exam content..." /></div>;
 
   const currentQ = questions[currentIndex];
   const isLast = currentIndex === questions.length - 1;
@@ -141,9 +140,9 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     return (
       <div className="flex flex-col items-center justify-center h-full bg-indigo-950 text-white p-10 text-center pt-safe">
         <Headphones className="w-20 h-20 mb-8 text-indigo-300 animate-pulse" />
-        <h2 className="text-3xl font-black mb-4">듣기 평가 섹션</h2>
-        <p className="mb-12 text-indigo-200/70 font-medium">준비되셨나요? 시작 버튼을 누르면 음성이 나옵니다.</p>
-        <button onClick={initAudio} className="bg-white text-indigo-900 px-12 py-5 rounded-[2.5rem] font-black text-xl shadow-2xl active:scale-95">시작하기</button>
+        <h2 className="text-3xl font-black mb-4">Listening Section</h2>
+        <p className="mb-12 text-indigo-200/70 font-medium">Ready? Tap the button below to start and hear the audio.</p>
+        <button onClick={initAudio} className="bg-white text-indigo-900 px-12 py-5 rounded-[2.5rem] font-black text-xl shadow-2xl active:scale-95">Start Section</button>
       </div>
     );
   }
@@ -176,7 +175,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                 {isGeneratingVisuals && !questionImage ? (
                   <div className="flex flex-col items-center gap-4 py-12 text-center">
                     <Sparkles className="w-12 h-12 text-indigo-400 animate-spin" />
-                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">AI가 그림을 그리고 있습니다...</span>
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">AI Illustrator drawing...</span>
                   </div>
                 ) : (
                   <>
@@ -188,7 +187,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                       ) : (
                         <div className="flex flex-col items-center text-gray-300 gap-2 opacity-50">
                            <ImageIcon className="w-16 h-16" />
-                           <span className="text-[10px] font-black uppercase tracking-widest">No Visual Attached</span>
+                           <span className="text-[10px] font-black uppercase tracking-widest">No visual generated</span>
                         </div>
                       )
                     )}
@@ -200,7 +199,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                          >
                             {loadingAudio ? <div className="w-10 h-10 border-4 border-current border-t-transparent rounded-full animate-spin"/> : <Volume2 className="w-14 h-14" />}
                          </button>
-                         <span className="text-[10px] font-black text-indigo-900 uppercase tracking-widest">{isPlaying ? "AI가 말하고 있습니다..." : "음성을 들으려면 버튼을 누르세요"}</span>
+                         <span className="text-[10px] font-black text-indigo-900 uppercase tracking-widest">{isPlaying ? "AI is speaking..." : "Tap to play audio"}</span>
                       </div>
                     )}
                   </>
@@ -224,14 +223,14 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
 
       <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-gray-100 p-6 pb-safe flex gap-4 max-w-2xl mx-auto z-40">
           <button onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))} disabled={currentIndex === 0} className="px-8 py-5 rounded-2xl bg-gray-100 text-gray-700 disabled:opacity-30 font-bold active:bg-gray-200 transition-colors"><ChevronLeft className="w-8 h-8" /></button>
-          <button onClick={isLast ? handleSubmit : () => setCurrentIndex(p => p + 1)} className={`flex-1 ${isLast ? 'bg-green-600 shadow-green-100' : 'bg-indigo-600 shadow-indigo-100'} text-white font-black rounded-2xl shadow-xl active:scale-95 text-xl uppercase tracking-tight transition-all`}>{isLast ? '제출하기' : '다음 문제'}</button>
+          <button onClick={isLast ? handleSubmit : () => setCurrentIndex(p => p + 1)} className={`flex-1 ${isLast ? 'bg-green-600 shadow-green-100' : 'bg-indigo-600 shadow-indigo-100'} text-white font-black rounded-2xl shadow-xl active:scale-95 text-xl uppercase tracking-tight transition-all`}>{isLast ? 'Submit Exam' : 'Next Question'}</button>
       </div>
 
       {isDrawerOpen && (
         <div className="fixed inset-0 z-[60] flex">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setIsDrawerOpen(false)}></div>
           <div className="relative w-80 bg-white h-full shadow-2xl flex flex-col pt-safe animate-slide-in-right">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center font-black text-xl">시험 현황<button onClick={() => setIsDrawerOpen(false)}><X className="w-6 h-6" /></button></div>
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center font-black text-xl">Overview<button onClick={() => setIsDrawerOpen(false)}><X className="w-6 h-6" /></button></div>
             <div className="flex-1 overflow-y-auto p-5 grid grid-cols-4 gap-4">
                {questions.map((q, idx) => (
                   <button key={q.id} onClick={() => { setCurrentIndex(idx); setIsDrawerOpen(false); }} className={`aspect-square rounded-2xl font-black text-sm border-2 flex items-center justify-center transition-all ${idx === currentIndex ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : answers[q.id] !== undefined ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-gray-100 text-gray-300'}`}>{idx + 1}</button>
