@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { X, Mail, Lock, UserPlus, LogIn } from 'lucide-react';
 

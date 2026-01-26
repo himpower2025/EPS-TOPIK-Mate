@@ -38,9 +38,9 @@ const App: React.FC = () => {
   const [examMode, setExamMode] = useState<ExamMode>('FULL');
   const [selectedSet, setSelectedSet] = useState(1);
   
-  // Two-stage loading to prevent flashes and loops
+  // Guard states to prevent UI flickering/loops
   const [isInitializing, setIsInitializing] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isAuthProcessing, setIsAuthProcessing] = useState(false);
   
   const isMounted = useRef(true);
 
@@ -54,6 +54,7 @@ const App: React.FC = () => {
       if (snap.exists()) {
         userData = snap.data() as User;
       } else {
+        // Initialize new user
         userData = { 
           id: firebaseUser.uid, 
           name: firebaseUser.displayName || 'Learner', 
@@ -76,12 +77,12 @@ const App: React.FC = () => {
     isMounted.current = true;
     let unsubSnapshot: (() => void) | null = null;
 
-    const startApp = async () => {
+    const initApp = async () => {
       try {
-        // 1. Force persistence for mobile PWA/Browsers
+        // Set persistence for reliable mobile sessions
         await setPersistence(auth, browserLocalPersistence);
 
-        // 2. Handle mobile redirect result FIRST
+        // Check if returning from a mobile redirect
         const redirectResult = await getRedirectResult(auth);
         if (redirectResult?.user && isMounted.current) {
           const synced = await syncUserData(redirectResult.user);
@@ -91,19 +92,17 @@ const App: React.FC = () => {
           }
         }
 
-        // 3. Setup auth listener
+        // Main auth listener
         const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
           if (firebaseUser) {
             const synced = await syncUserData(firebaseUser);
             if (synced && isMounted.current) {
               setUser(synced);
-              
-              // Setup real-time DB sync
+              // Setup real-time listener for plan/credits updates
               if (unsubSnapshot) unsubSnapshot();
               unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
                 if (s.exists() && isMounted.current) setUser(s.data() as User);
               });
-
               setCurrentState(AppState.DASHBOARD);
             }
           } else if (isMounted.current) {
@@ -111,32 +110,33 @@ const App: React.FC = () => {
             setCurrentState(AppState.LANDING);
           }
           
-          // initialization complete
+          // Only stop the "initializing" loader after auth is resolved
           setIsInitializing(false);
-          setIsLoading(false);
+          setIsAuthProcessing(false);
         });
 
         return unsubscribeAuth;
       } catch (err) {
-        console.error("Init Error:", err);
+        console.error("App Boot Error:", err);
         setIsInitializing(false);
       }
     };
 
-    const authCleanupPromise = startApp();
+    const cleanupPromise = initApp();
 
     return () => {
       isMounted.current = false;
-      authCleanupPromise.then(unsub => unsub && unsub());
+      cleanupPromise.then(unsub => unsub && unsub());
       if (unsubSnapshot) unsubSnapshot();
     };
   }, [syncUserData]);
 
   const handleGoogleLogin = async () => {
-    setIsLoading(true);
+    setIsAuthProcessing(true);
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     
+    // Detect mobile for redirect strategy
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
     try {
@@ -151,16 +151,16 @@ const App: React.FC = () => {
           setCurrentState(AppState.DASHBOARD);
           setShowLoginModal(false);
         }
-        setIsLoading(false);
+        setIsAuthProcessing(false);
       }
     } catch (error) {
       console.error("Login Error:", error);
-      setIsLoading(false);
+      setIsAuthProcessing(false);
     }
   };
 
   const handleEmailAuth = async (email: string, pass: string, isSignUp: boolean) => {
-    setIsLoading(true);
+    setIsAuthProcessing(true);
     try {
       if (isSignUp) {
         await createUserWithEmailAndPassword(auth, email, pass);
@@ -168,7 +168,7 @@ const App: React.FC = () => {
         await signInWithEmailAndPassword(auth, email, pass);
       }
     } catch (error: any) {
-      setIsLoading(false);
+      setIsAuthProcessing(false);
       throw error;
     }
   };
@@ -179,7 +179,7 @@ const App: React.FC = () => {
   };
 
   const handleSetSelect = (setNum: number) => {
-    if (user?.plan === 'free' && setNum > 1) {
+    if (user?.plan === 'free' && setNum > 2) {
       setShowPaywall(true);
       return;
     }
@@ -197,8 +197,8 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
-  // Full Screen English Loading Screen
-  if (isInitializing || isLoading) return (
+  // Mandatory Initial Loading Screen (English)
+  if (isInitializing || isAuthProcessing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-indigo-950 text-white font-black text-center px-10">
       <div className="relative w-24 h-24 mb-10">
         <div className="absolute inset-0 border-8 border-white/10 rounded-full"></div>
@@ -268,11 +268,11 @@ const App: React.FC = () => {
               user={user} 
               onClose={() => setShowProfile(false)} 
               onLogout={async () => { 
-                setIsLoading(true);
+                setIsAuthProcessing(true);
                 await signOut(auth); 
                 setUser(null); 
                 setCurrentState(AppState.LANDING); 
-                setIsLoading(false);
+                setIsAuthProcessing(false);
               }} 
               onRenew={() => { setShowProfile(false); setShowPaywall(true); }} 
             />
