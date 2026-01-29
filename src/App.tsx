@@ -38,7 +38,7 @@ const App: React.FC = () => {
   const [examMode, setExamMode] = useState<ExamMode>('FULL');
   const [selectedSet, setSelectedSet] = useState(1);
   
-  // CRITICAL: isInitializing stays true until Firebase definitely resolves
+  // CRITICAL: isInitializing stays true until we are 100% sure of the auth state.
   const [isInitializing, setIsInitializing] = useState(true);
   const [isAuthProcessing, setIsAuthProcessing] = useState(false);
   
@@ -76,29 +76,31 @@ const App: React.FC = () => {
     isMounted.current = true;
     let unsubSnapshot: (() => void) | null = null;
 
-    const setupAuth = async () => {
+    const initializeAuth = async () => {
       try {
-        // 1. Force local persistence for stable sessions
+        // 1. Force local persistence
         await setPersistence(auth, browserLocalPersistence);
 
-        // 2. Catch the result of a mobile redirect
+        // 2. Handle Redirect Result (Crucial for Mobile)
+        // We do this BEFORE the listener to catch the user immediately
         const redirectResult = await getRedirectResult(auth);
         if (redirectResult?.user && isMounted.current) {
           const synced = await syncUserData(redirectResult.user);
           if (synced) {
             setUser(synced);
             setCurrentState(AppState.DASHBOARD);
+            localStorage.removeItem('eps_mate_login_pending');
           }
         }
 
-        // 3. Listen for definitive changes in auth state
+        // 3. Set up the long-term listener
         const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
           if (firebaseUser) {
             const synced = await syncUserData(firebaseUser);
             if (synced && isMounted.current) {
               setUser(synced);
+              localStorage.removeItem('eps_mate_login_pending');
               
-              // Setup real-time listener for profile updates
               if (unsubSnapshot) unsubSnapshot();
               unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
                 if (s.exists() && isMounted.current) setUser(s.data() as User);
@@ -107,33 +109,49 @@ const App: React.FC = () => {
               setCurrentState(AppState.DASHBOARD);
             }
           } else if (isMounted.current) {
-            setUser(null);
-            setCurrentState(AppState.LANDING);
+            // Check if we are waiting for a redirect return
+            const isLoginPending = localStorage.getItem('eps_mate_login_pending');
+            if (!isLoginPending) {
+              setUser(null);
+              setCurrentState(AppState.LANDING);
+            }
           }
           
-          // FINALLY: Only after first response from Firebase, disable the loading screen
-          setIsInitializing(false);
-          setIsAuthProcessing(false);
+          // Only stop the loading screen if we aren't waiting for a redirect hint
+          if (!localStorage.getItem('eps_mate_login_pending')) {
+            setIsInitializing(false);
+            setIsAuthProcessing(false);
+          }
         });
+
+        // Safety timeout: If auth takes more than 10s, release the gate
+        setTimeout(() => {
+          if (isMounted.current && isInitializing) {
+            setIsInitializing(false);
+            localStorage.removeItem('eps_mate_login_pending');
+          }
+        }, 10000);
 
         return unsubscribeAuth;
       } catch (err) {
-        console.error("Auth Critical Error:", err);
+        console.error("Auth System Error:", err);
         if (isMounted.current) setIsInitializing(false);
       }
     };
 
-    const cleanupPromise = setupAuth();
+    const cleanupPromise = initializeAuth();
 
     return () => {
       isMounted.current = false;
       cleanupPromise.then(unsub => unsub && unsub());
       if (unsubSnapshot) unsubSnapshot();
     };
-  }, [syncUserData]);
+  }, [syncUserData, isInitializing]);
 
   const handleGoogleLogin = async () => {
     setIsAuthProcessing(true);
+    localStorage.setItem('eps_mate_login_pending', 'true');
+    
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     
@@ -141,6 +159,7 @@ const App: React.FC = () => {
     
     try {
       if (isMobile) {
+        // Redirect will happen, hint is set in localStorage
         await signInWithRedirect(auth, provider);
       } else {
         const result = await signInWithPopup(auth, provider);
@@ -149,12 +168,14 @@ const App: React.FC = () => {
           setUser(synced);
           setCurrentState(AppState.DASHBOARD);
           setShowLoginModal(false);
+          localStorage.removeItem('eps_mate_login_pending');
         }
         setIsAuthProcessing(false);
       }
     } catch (error) {
-      console.error("Google Login Error:", error);
+      console.error("Google Login Fail:", error);
       setIsAuthProcessing(false);
+      localStorage.removeItem('eps_mate_login_pending');
     }
   };
 
@@ -196,7 +217,7 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
-  // INITIALIZATION GATE: While checking session, show a clean splash screen only.
+  // INITIALIZATION GATE: Stays active until Auth is confirmed.
   if (isInitializing || isAuthProcessing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-indigo-950 text-white font-black text-center px-10">
       <div className="relative w-24 h-24 mb-10">
@@ -270,6 +291,7 @@ const App: React.FC = () => {
                 setIsAuthProcessing(true);
                 await signOut(auth); 
                 setUser(null); 
+                localStorage.removeItem('eps_mate_login_pending');
                 setCurrentState(AppState.LANDING); 
                 setIsAuthProcessing(false);
               }} 
