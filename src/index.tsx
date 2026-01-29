@@ -1,4 +1,4 @@
-import React, { ReactNode, ErrorInfo, Component } from 'react';
+import React, { ReactNode, ErrorInfo } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
@@ -14,24 +14,22 @@ interface ErrorBoundaryState {
 /**
  * Global Error Boundary: Catches fatal app errors and displays a recovery UI in English.
  */
-class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = {
-      hasError: false,
-      error: null
-    };
-  }
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  // Explicitly define state as a class property to avoid TS 'does not exist' errors
+  public override state: ErrorBoundaryState = {
+    hasError: false,
+    error: null
+  };
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+  public static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("Uncaught error:", error, errorInfo);
   }
 
-  render() {
+  public override render() {
     const { hasError, error } = this.state;
     const { children } = this.props;
 
@@ -41,7 +39,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
           <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center mb-8 shadow-xl">
              <span className="text-5xl">⚠️</span>
           </div>
-          <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Something went wrong</h1>
+          <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Application Error</h1>
           <p className="text-gray-500 mb-8 max-w-md leading-relaxed">
             An unexpected error occurred while running the application. Please try reloading the page.
           </p>
