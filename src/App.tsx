@@ -38,7 +38,7 @@ const App: React.FC = () => {
   const [examMode, setExamMode] = useState<ExamMode>('FULL');
   const [selectedSet, setSelectedSet] = useState(1);
   
-  // CRITICAL: isInitializing stays true until we are 100% sure of the auth state.
+  // 인증 상태 확인 중임을 나타내는 게이트 상태
   const [isInitializing, setIsInitializing] = useState(true);
   const [isAuthProcessing, setIsAuthProcessing] = useState(false);
   
@@ -76,30 +76,29 @@ const App: React.FC = () => {
     isMounted.current = true;
     let unsubSnapshot: (() => void) | null = null;
 
-    const initializeAuth = async () => {
+    const initAuth = async () => {
       try {
-        // 1. Force local persistence
+        // 1. 세션 지속성 설정 (로컬 스토리지에 저장)
         await setPersistence(auth, browserLocalPersistence);
 
-        // 2. Handle Redirect Result (Crucial for Mobile)
-        // We do this BEFORE the listener to catch the user immediately
+        // 2. 모바일 리다이렉트 결과 우선 확인
         const redirectResult = await getRedirectResult(auth);
         if (redirectResult?.user && isMounted.current) {
           const synced = await syncUserData(redirectResult.user);
           if (synced) {
             setUser(synced);
             setCurrentState(AppState.DASHBOARD);
-            localStorage.removeItem('eps_mate_login_pending');
+            localStorage.removeItem('eps_auth_pending'); // 로그인 완료 시 힌트 삭제
           }
         }
 
-        // 3. Set up the long-term listener
+        // 3. 인증 상태 리스너 설정
         const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
           if (firebaseUser) {
             const synced = await syncUserData(firebaseUser);
             if (synced && isMounted.current) {
               setUser(synced);
-              localStorage.removeItem('eps_mate_login_pending');
+              localStorage.removeItem('eps_auth_pending'); // 힌트 삭제
               
               if (unsubSnapshot) unsubSnapshot();
               unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
@@ -109,48 +108,51 @@ const App: React.FC = () => {
               setCurrentState(AppState.DASHBOARD);
             }
           } else if (isMounted.current) {
-            // Check if we are waiting for a redirect return
-            const isLoginPending = localStorage.getItem('eps_mate_login_pending');
-            if (!isLoginPending) {
+            // 로그인이 되어있지 않을 때, 만약 '로그인 시도 중' 힌트가 없다면 랜딩으로 이동
+            const isAuthPending = localStorage.getItem('eps_auth_pending');
+            if (!isAuthPending) {
               setUser(null);
               setCurrentState(AppState.LANDING);
             }
           }
           
-          // Only stop the loading screen if we aren't waiting for a redirect hint
-          if (!localStorage.getItem('eps_mate_login_pending')) {
+          // 로그인 시도 중이 아닐 때만 초기화 로딩을 해제함
+          if (!localStorage.getItem('eps_auth_pending')) {
             setIsInitializing(false);
             setIsAuthProcessing(false);
           }
         });
 
-        // Safety timeout: If auth takes more than 10s, release the gate
-        setTimeout(() => {
-          if (isMounted.current && isInitializing) {
-            setIsInitializing(false);
-            localStorage.removeItem('eps_mate_login_pending');
-          }
-        }, 10000);
-
         return unsubscribeAuth;
       } catch (err) {
-        console.error("Auth System Error:", err);
+        console.error("Auth Critical System Error:", err);
         if (isMounted.current) setIsInitializing(false);
       }
     };
 
-    const cleanupPromise = initializeAuth();
+    // 안전장치: 10초 이상 로딩이 지속되면 강제로 게이트를 엽니다.
+    const timeout = setTimeout(() => {
+      if (isMounted.current && isInitializing) {
+        console.warn("Auth initialization timed out. Releasing gate.");
+        setIsInitializing(false);
+        localStorage.removeItem('eps_auth_pending');
+      }
+    }, 10000);
+
+    const cleanupPromise = initAuth();
 
     return () => {
       isMounted.current = false;
+      clearTimeout(timeout);
       cleanupPromise.then(unsub => unsub && unsub());
       if (unsubSnapshot) unsubSnapshot();
     };
-  }, [syncUserData, isInitializing]);
+  }, [syncUserData]);
 
   const handleGoogleLogin = async () => {
     setIsAuthProcessing(true);
-    localStorage.setItem('eps_mate_login_pending', 'true');
+    // 모바일 리다이렉트 시 페이지가 새로고침되므로 힌트를 저장합니다.
+    localStorage.setItem('eps_auth_pending', 'true');
     
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
@@ -159,7 +161,6 @@ const App: React.FC = () => {
     
     try {
       if (isMobile) {
-        // Redirect will happen, hint is set in localStorage
         await signInWithRedirect(auth, provider);
       } else {
         const result = await signInWithPopup(auth, provider);
@@ -168,14 +169,14 @@ const App: React.FC = () => {
           setUser(synced);
           setCurrentState(AppState.DASHBOARD);
           setShowLoginModal(false);
-          localStorage.removeItem('eps_mate_login_pending');
+          localStorage.removeItem('eps_auth_pending');
         }
         setIsAuthProcessing(false);
       }
     } catch (error) {
-      console.error("Google Login Fail:", error);
+      console.error("Login Error:", error);
       setIsAuthProcessing(false);
-      localStorage.removeItem('eps_mate_login_pending');
+      localStorage.removeItem('eps_auth_pending');
     }
   };
 
@@ -187,6 +188,7 @@ const App: React.FC = () => {
       } else {
         await signInWithEmailAndPassword(auth, email, pass);
       }
+      localStorage.removeItem('eps_auth_pending');
     } catch (error: any) {
       setIsAuthProcessing(false);
       throw error;
@@ -217,7 +219,7 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
-  // INITIALIZATION GATE: Stays active until Auth is confirmed.
+  // 초기화 게이트: 인증 확인 전까지는 스플래시 화면만 노출
   if (isInitializing || isAuthProcessing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-indigo-950 text-white font-black text-center px-10">
       <div className="relative w-24 h-24 mb-10">
@@ -291,7 +293,7 @@ const App: React.FC = () => {
                 setIsAuthProcessing(true);
                 await signOut(auth); 
                 setUser(null); 
-                localStorage.removeItem('eps_mate_login_pending');
+                localStorage.removeItem('eps_auth_pending');
                 setCurrentState(AppState.LANDING); 
                 setIsAuthProcessing(false);
               }} 

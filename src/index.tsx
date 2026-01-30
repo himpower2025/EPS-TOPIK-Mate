@@ -12,10 +12,10 @@ interface ErrorBoundaryState {
 }
 
 /**
- * Global Error Boundary: Catches fatal app errors and displays a recovery UI in English.
+ * 전역 에러 바운더리: 앱의 치명적인 오류를 포착하여 안전하게 복구 화면을 보여줍니다.
  */
 class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  // Fix for TypeScript property access
+  // TypeScript에서 state를 클래스 속성으로 명시적으로 정의합니다.
   public override state: ErrorBoundaryState = {
     hasError: false,
     error: null
@@ -41,7 +41,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
           </div>
           <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Application Error</h1>
           <p className="text-gray-500 mb-8 max-w-md leading-relaxed">
-            An unexpected error occurred while running the application. Please try reloading the page.
+            An unexpected error occurred. Please try reloading the page.
           </p>
           <pre className="bg-white/50 backdrop-blur-md p-6 rounded-2xl border border-indigo-100 text-left text-[11px] text-indigo-400 mb-10 max-w-xl overflow-auto w-full font-mono shadow-inner max-h-40">
             {error?.toString()}
