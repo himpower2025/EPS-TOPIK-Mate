@@ -38,7 +38,7 @@ const App: React.FC = () => {
   const [examMode, setExamMode] = useState<ExamMode>('FULL');
   const [selectedSet, setSelectedSet] = useState(1);
   
-  // 인증 상태 확인 중임을 나타내는 게이트 상태
+  // 앱 초기화 및 인증 처리 통합 게이트
   const [isInitializing, setIsInitializing] = useState(true);
   const [isAuthProcessing, setIsAuthProcessing] = useState(false);
   
@@ -75,30 +75,30 @@ const App: React.FC = () => {
   useEffect(() => {
     isMounted.current = true;
     let unsubSnapshot: (() => void) | null = null;
+    let unsubscribeAuth: (() => void) | null = null;
 
-    const initAuth = async () => {
+    const bootApp = async () => {
       try {
-        // 1. 세션 지속성 설정 (로컬 스토리지에 저장)
+        // 1. 브라우저 로컬 스토리지 유지 강제
         await setPersistence(auth, browserLocalPersistence);
 
-        // 2. 모바일 리다이렉트 결과 우선 확인
+        // 2. 모바일 리다이렉트 결과 대기 (가장 중요한 부분)
+        // 지메일 인증 등을 마치고 돌아온 결과를 여기서 먼저 잡아냅니다.
         const redirectResult = await getRedirectResult(auth);
         if (redirectResult?.user && isMounted.current) {
           const synced = await syncUserData(redirectResult.user);
           if (synced) {
             setUser(synced);
             setCurrentState(AppState.DASHBOARD);
-            localStorage.removeItem('eps_auth_pending'); // 로그인 완료 시 힌트 삭제
           }
         }
 
-        // 3. 인증 상태 리스너 설정
-        const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+        // 3. 실시간 인증 상태 리스너 가동
+        unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
           if (firebaseUser) {
             const synced = await syncUserData(firebaseUser);
             if (synced && isMounted.current) {
               setUser(synced);
-              localStorage.removeItem('eps_auth_pending'); // 힌트 삭제
               
               if (unsubSnapshot) unsubSnapshot();
               unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
@@ -108,52 +108,32 @@ const App: React.FC = () => {
               setCurrentState(AppState.DASHBOARD);
             }
           } else if (isMounted.current) {
-            // 로그인이 되어있지 않을 때, 만약 '로그인 시도 중' 힌트가 없다면 랜딩으로 이동
-            const isAuthPending = localStorage.getItem('eps_auth_pending');
-            if (!isAuthPending) {
-              setUser(null);
-              setCurrentState(AppState.LANDING);
-            }
+            setUser(null);
+            setCurrentState(AppState.LANDING);
           }
           
-          // 로그인 시도 중이 아닐 때만 초기화 로딩을 해제함
-          if (!localStorage.getItem('eps_auth_pending')) {
-            setIsInitializing(false);
-            setIsAuthProcessing(false);
-          }
+          // 확정적인 상태가 되었을 때만 로딩 화면을 제거합니다.
+          setIsInitializing(false);
+          setIsAuthProcessing(false);
         });
 
-        return unsubscribeAuth;
       } catch (err) {
-        console.error("Auth Critical System Error:", err);
+        console.error("Critical Auth Boot Error:", err);
         if (isMounted.current) setIsInitializing(false);
       }
     };
 
-    // 안전장치: 10초 이상 로딩이 지속되면 강제로 게이트를 엽니다.
-    const timeout = setTimeout(() => {
-      if (isMounted.current && isInitializing) {
-        console.warn("Auth initialization timed out. Releasing gate.");
-        setIsInitializing(false);
-        localStorage.removeItem('eps_auth_pending');
-      }
-    }, 10000);
-
-    const cleanupPromise = initAuth();
+    bootApp();
 
     return () => {
       isMounted.current = false;
-      clearTimeout(timeout);
-      cleanupPromise.then(unsub => unsub && unsub());
+      if (unsubscribeAuth) unsubscribeAuth();
       if (unsubSnapshot) unsubSnapshot();
     };
   }, [syncUserData]);
 
   const handleGoogleLogin = async () => {
     setIsAuthProcessing(true);
-    // 모바일 리다이렉트 시 페이지가 새로고침되므로 힌트를 저장합니다.
-    localStorage.setItem('eps_auth_pending', 'true');
-    
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     
@@ -161,22 +141,22 @@ const App: React.FC = () => {
     
     try {
       if (isMobile) {
+        // 모바일은 리다이렉트 방식 (지메일 앱 등으로 이동했다 돌아옴)
         await signInWithRedirect(auth, provider);
       } else {
+        // 데스크톱은 팝업 방식
         const result = await signInWithPopup(auth, provider);
         const synced = await syncUserData(result.user);
         if (synced) {
           setUser(synced);
           setCurrentState(AppState.DASHBOARD);
           setShowLoginModal(false);
-          localStorage.removeItem('eps_auth_pending');
         }
         setIsAuthProcessing(false);
       }
     } catch (error) {
-      console.error("Login Error:", error);
+      console.error("Google Login Exception:", error);
       setIsAuthProcessing(false);
-      localStorage.removeItem('eps_auth_pending');
     }
   };
 
@@ -188,7 +168,6 @@ const App: React.FC = () => {
       } else {
         await signInWithEmailAndPassword(auth, email, pass);
       }
-      localStorage.removeItem('eps_auth_pending');
     } catch (error: any) {
       setIsAuthProcessing(false);
       throw error;
@@ -219,16 +198,16 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
-  // 초기화 게이트: 인증 확인 전까지는 스플래시 화면만 노출
+  // 초기 로딩 화면: Firebase 응답이 오기 전까지는 절대 앱 진입을 허용하지 않음
   if (isInitializing || isAuthProcessing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-indigo-950 text-white font-black text-center px-10">
       <div className="relative w-24 h-24 mb-10">
         <div className="absolute inset-0 border-8 border-white/10 rounded-full"></div>
         <div className="absolute inset-0 border-8 border-indigo-400 rounded-full border-t-transparent animate-spin"></div>
       </div>
-      <h2 className="text-2xl tracking-[0.2em] uppercase mb-2">EPS-TOPIK Mate</h2>
+      <h2 className="text-2xl tracking-[0.2em] uppercase mb-2 font-black">EPS-TOPIK Mate</h2>
       <p className="animate-pulse text-indigo-300 font-medium tracking-widest text-[10px] uppercase">
-        {isInitializing ? "Securing Session..." : "Syncing Profile..."}
+        {isInitializing ? "로그인 정보 확인 중..." : "프로필 동기화 중..."}
       </p>
     </div>
   );
@@ -293,7 +272,6 @@ const App: React.FC = () => {
                 setIsAuthProcessing(true);
                 await signOut(auth); 
                 setUser(null); 
-                localStorage.removeItem('eps_auth_pending');
                 setCurrentState(AppState.LANDING); 
                 setIsAuthProcessing(false);
               }} 
