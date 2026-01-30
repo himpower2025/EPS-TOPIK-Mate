@@ -15,7 +15,7 @@ interface ErrorBoundaryState {
  * Global Error Boundary: Catches fatal app errors and displays a recovery UI in English.
  */
 class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  // TypeScript class property initialization
+  // Explicitly define state with public access for TypeScript compatibility
   public override state: ErrorBoundaryState = {
     hasError: false,
     error: null
