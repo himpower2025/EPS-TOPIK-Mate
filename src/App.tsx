@@ -38,7 +38,7 @@ const App: React.FC = () => {
   const [examMode, setExamMode] = useState<ExamMode>('FULL');
   const [selectedSet, setSelectedSet] = useState(1);
   
-  // 앱 초기화 및 인증 처리 통합 게이트
+  // Guard states: isInitializing is TRUE until the app is absolutely sure of the auth state.
   const [isInitializing, setIsInitializing] = useState(true);
   const [isAuthProcessing, setIsAuthProcessing] = useState(false);
   
@@ -77,28 +77,29 @@ const App: React.FC = () => {
     let unsubSnapshot: (() => void) | null = null;
     let unsubscribeAuth: (() => void) | null = null;
 
-    const bootApp = async () => {
+    const initializeAuth = async () => {
       try {
-        // 1. 브라우저 로컬 스토리지 유지 강제
+        // 1. Force local persistence
         await setPersistence(auth, browserLocalPersistence);
 
-        // 2. 모바일 리다이렉트 결과 대기 (가장 중요한 부분)
-        // 지메일 인증 등을 마치고 돌아온 결과를 여기서 먼저 잡아냅니다.
+        // 2. Check for redirect result first (crucial for mobile context loss)
         const redirectResult = await getRedirectResult(auth);
         if (redirectResult?.user && isMounted.current) {
           const synced = await syncUserData(redirectResult.user);
           if (synced) {
             setUser(synced);
             setCurrentState(AppState.DASHBOARD);
+            localStorage.removeItem('eps_mate_auth_hint'); // Auth confirmed
           }
         }
 
-        // 3. 실시간 인증 상태 리스너 가동
+        // 3. Listen for subsequent auth changes
         unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
           if (firebaseUser) {
             const synced = await syncUserData(firebaseUser);
             if (synced && isMounted.current) {
               setUser(synced);
+              localStorage.removeItem('eps_mate_auth_hint'); // Clear pending hint
               
               if (unsubSnapshot) unsubSnapshot();
               unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
@@ -108,13 +109,19 @@ const App: React.FC = () => {
               setCurrentState(AppState.DASHBOARD);
             }
           } else if (isMounted.current) {
-            setUser(null);
-            setCurrentState(AppState.LANDING);
+            // Only go to landing if we are NOT waiting for a redirect return
+            const isAuthPending = localStorage.getItem('eps_mate_auth_hint');
+            if (!isAuthPending) {
+              setUser(null);
+              setCurrentState(AppState.LANDING);
+            }
           }
           
-          // 확정적인 상태가 되었을 때만 로딩 화면을 제거합니다.
-          setIsInitializing(false);
-          setIsAuthProcessing(false);
+          // Stop loading only if we aren't suspecting a redirect return
+          if (!localStorage.getItem('eps_mate_auth_hint')) {
+            setIsInitializing(false);
+            setIsAuthProcessing(false);
+          }
         });
 
       } catch (err) {
@@ -123,10 +130,19 @@ const App: React.FC = () => {
       }
     };
 
-    bootApp();
+    // Safety timeout: If auth hasn't resolved in 10s, release the gate
+    const authTimeout = setTimeout(() => {
+      if (isMounted.current && isInitializing) {
+        setIsInitializing(false);
+        localStorage.removeItem('eps_mate_auth_hint');
+      }
+    }, 10000);
+
+    initializeAuth();
 
     return () => {
       isMounted.current = false;
+      clearTimeout(authTimeout);
       if (unsubscribeAuth) unsubscribeAuth();
       if (unsubSnapshot) unsubSnapshot();
     };
@@ -134,6 +150,9 @@ const App: React.FC = () => {
 
   const handleGoogleLogin = async () => {
     setIsAuthProcessing(true);
+    // Set a hint that we are in the middle of an auth transition
+    localStorage.setItem('eps_mate_auth_hint', 'true');
+    
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     
@@ -141,22 +160,23 @@ const App: React.FC = () => {
     
     try {
       if (isMobile) {
-        // 모바일은 리다이렉트 방식 (지메일 앱 등으로 이동했다 돌아옴)
+        // Redirecting... Hint is set, useEffect will handle return
         await signInWithRedirect(auth, provider);
       } else {
-        // 데스크톱은 팝업 방식
         const result = await signInWithPopup(auth, provider);
         const synced = await syncUserData(result.user);
         if (synced) {
           setUser(synced);
           setCurrentState(AppState.DASHBOARD);
           setShowLoginModal(false);
+          localStorage.removeItem('eps_mate_auth_hint');
         }
         setIsAuthProcessing(false);
       }
     } catch (error) {
-      console.error("Google Login Exception:", error);
+      console.error("Login Exception:", error);
       setIsAuthProcessing(false);
+      localStorage.removeItem('eps_mate_auth_hint');
     }
   };
 
@@ -168,6 +188,7 @@ const App: React.FC = () => {
       } else {
         await signInWithEmailAndPassword(auth, email, pass);
       }
+      localStorage.removeItem('eps_mate_auth_hint');
     } catch (error: any) {
       setIsAuthProcessing(false);
       throw error;
@@ -198,7 +219,7 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
-  // 초기 로딩 화면: Firebase 응답이 오기 전까지는 절대 앱 진입을 허용하지 않음
+  // SPLASH SCREEN (Strict English UI)
   if (isInitializing || isAuthProcessing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-indigo-950 text-white font-black text-center px-10">
       <div className="relative w-24 h-24 mb-10">
@@ -207,7 +228,7 @@ const App: React.FC = () => {
       </div>
       <h2 className="text-2xl tracking-[0.2em] uppercase mb-2 font-black">EPS-TOPIK Mate</h2>
       <p className="animate-pulse text-indigo-300 font-medium tracking-widest text-[10px] uppercase">
-        {isInitializing ? "로그인 정보 확인 중..." : "프로필 동기화 중..."}
+        {isInitializing ? "Securing Session..." : "Syncing Profile..."}
       </p>
     </div>
   );
@@ -272,6 +293,7 @@ const App: React.FC = () => {
                 setIsAuthProcessing(true);
                 await signOut(auth); 
                 setUser(null); 
+                localStorage.removeItem('eps_mate_auth_hint');
                 setCurrentState(AppState.LANDING); 
                 setIsAuthProcessing(false);
               }} 
