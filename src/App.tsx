@@ -38,7 +38,7 @@ const App: React.FC = () => {
   const [examMode, setExamMode] = useState<ExamMode>('FULL');
   const [selectedSet, setSelectedSet] = useState(1);
   
-  // Guard states: isInitializing stays true until a definitive auth state is reached.
+  // Guard states: Stay in 'initializing' until Firebase definitively tells us the auth state.
   const [isInitializing, setIsInitializing] = useState(true);
   const [isAuthProcessing, setIsAuthProcessing] = useState(false);
   
@@ -77,13 +77,13 @@ const App: React.FC = () => {
     let unsubSnapshot: (() => void) | null = null;
     let unsubAuth: (() => void) | null = null;
 
-    const startApp = async () => {
+    const bootApp = async () => {
       try {
-        // 1. Force local session persistence
+        // 1. Force local persistence for better mobile session recovery
         await setPersistence(auth, browserLocalPersistence);
 
-        // 2. Await the redirect result explicitly before anything else
-        // This is key to preventing the loop back to landing on mobile.
+        // 2. Explicitly wait for the Redirect Result. 
+        // This stops the app from rendering the LandingPage if the user just returned from Google.
         const result = await getRedirectResult(auth);
         if (result?.user && isMounted.current) {
           const synced = await syncUserData(result.user);
@@ -93,7 +93,7 @@ const App: React.FC = () => {
           }
         }
 
-        // 3. Only after checking redirect, start the general listener
+        // 3. Setup the Auth State Listener
         unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
           if (firebaseUser) {
             const synced = await syncUserData(firebaseUser);
@@ -110,18 +110,18 @@ const App: React.FC = () => {
             setCurrentState(AppState.LANDING);
           }
           
-          // Only release the loading gate once we have a definitive auth state
+          // CRITICAL: Only hide the splash screen after auth state is confirmed
           setIsInitializing(false);
           setIsAuthProcessing(false);
         });
 
       } catch (err) {
-        console.error("Auth Boot Failure:", err);
+        console.error("Auth initialization failure:", err);
         if (isMounted.current) setIsInitializing(false);
       }
     };
 
-    startApp();
+    bootApp();
 
     return () => {
       isMounted.current = false;
@@ -139,7 +139,7 @@ const App: React.FC = () => {
     
     try {
       if (isMobile) {
-        // Redirect triggers a page reload, useEffect will handle return result
+        // Redirect will reload the page. useEffect will catch the result via getRedirectResult.
         await signInWithRedirect(auth, provider);
       } else {
         const result = await signInWithPopup(auth, provider);
@@ -152,7 +152,7 @@ const App: React.FC = () => {
         setIsAuthProcessing(false);
       }
     } catch (error) {
-      console.error("Google Auth Exception:", error);
+      console.error("Login Exception:", error);
       setIsAuthProcessing(false);
     }
   };
@@ -195,7 +195,7 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
-  // INITIAL LOADING SCREEN (Strictly English UI)
+  // INITIAL LOADING SCREEN (English UI Only)
   if (isInitializing || isAuthProcessing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-indigo-950 text-white font-black text-center px-10">
       <div className="relative w-24 h-24 mb-10">

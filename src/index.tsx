@@ -12,10 +12,9 @@ interface ErrorBoundaryState {
 }
 
 /**
- * Global Error Boundary: Catches fatal app errors and displays a recovery UI in English.
+ * Global Error Boundary: Catches fatal app errors and displays an English-only recovery UI.
  */
 class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  // Explicitly define state with public access for TypeScript compatibility
   public override state: ErrorBoundaryState = {
     hasError: false,
     error: null
@@ -41,7 +40,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
           </div>
           <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Application Error</h1>
           <p className="text-gray-500 mb-8 max-w-md leading-relaxed">
-            An unexpected error occurred. Please try reloading the application.
+            An unexpected error occurred. Please reload the application to continue.
           </p>
           <pre className="bg-white/50 backdrop-blur-md p-6 rounded-2xl border border-indigo-100 text-left text-[11px] text-indigo-400 mb-10 max-w-xl overflow-auto w-full font-mono shadow-inner max-h-40">
             {error?.toString()}
