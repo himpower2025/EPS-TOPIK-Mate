@@ -12,7 +12,7 @@ interface ErrorBoundaryState {
 }
 
 /**
- * Global Error Boundary: Catches fatal app errors and displays an English-only recovery UI.
+ * Global Error Boundary: Catches fatal app errors and displays a recovery UI in English.
  */
 class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   public override state: ErrorBoundaryState = {
@@ -25,7 +25,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
   }
 
   public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("Uncaught error:", error, errorInfo);
+    console.error("Uncaught application error:", error, errorInfo);
   }
 
   public override render() {
@@ -36,11 +36,11 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
       return (
         <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-indigo-50 text-center font-sans">
           <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center mb-8 shadow-xl">
-             <span className="text-5xl">⚠️</span>
+             <span className="text-5xl" role="img" aria-label="warning">⚠️</span>
           </div>
           <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Application Error</h1>
           <p className="text-gray-500 mb-8 max-w-md leading-relaxed">
-            An unexpected error occurred. Please reload the application to continue.
+            A critical error occurred. Please reload the application to restore functionality.
           </p>
           <pre className="bg-white/50 backdrop-blur-md p-6 rounded-2xl border border-indigo-100 text-left text-[11px] text-indigo-400 mb-10 max-w-xl overflow-auto w-full font-mono shadow-inner max-h-40">
             {error?.toString()}

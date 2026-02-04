@@ -38,7 +38,7 @@ const App: React.FC = () => {
   const [examMode, setExamMode] = useState<ExamMode>('FULL');
   const [selectedSet, setSelectedSet] = useState(1);
   
-  // Guard states: Stay in 'initializing' until Firebase definitively tells us the auth state.
+  // Guard states: The "Splash Gate" logic
   const [isInitializing, setIsInitializing] = useState(true);
   const [isAuthProcessing, setIsAuthProcessing] = useState(false);
   
@@ -77,23 +77,23 @@ const App: React.FC = () => {
     let unsubSnapshot: (() => void) | null = null;
     let unsubAuth: (() => void) | null = null;
 
-    const bootApp = async () => {
+    const startAuthenticationFlow = async () => {
       try {
-        // 1. Force local persistence for better mobile session recovery
+        // 1. Set Local Persistence first
         await setPersistence(auth, browserLocalPersistence);
 
-        // 2. Explicitly wait for the Redirect Result. 
-        // This stops the app from rendering the LandingPage if the user just returned from Google.
-        const result = await getRedirectResult(auth);
-        if (result?.user && isMounted.current) {
-          const synced = await syncUserData(result.user);
+        // 2. Explicitly wait for Redirect Results (Crucial for Mobile)
+        // If this isn't awaited, App might render LandingPage before RedirectResult is processed.
+        const redirectResult = await getRedirectResult(auth);
+        if (redirectResult?.user && isMounted.current) {
+          const synced = await syncUserData(redirectResult.user);
           if (synced) {
             setUser(synced);
             setCurrentState(AppState.DASHBOARD);
           }
         }
 
-        // 3. Setup the Auth State Listener
+        // 3. Now setup the permanent listener
         unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
           if (firebaseUser) {
             const synced = await syncUserData(firebaseUser);
@@ -110,18 +110,18 @@ const App: React.FC = () => {
             setCurrentState(AppState.LANDING);
           }
           
-          // CRITICAL: Only hide the splash screen after auth state is confirmed
+          // CRITICAL: The gate only opens after Firebase is finished with its checks
           setIsInitializing(false);
           setIsAuthProcessing(false);
         });
 
       } catch (err) {
-        console.error("Auth initialization failure:", err);
+        console.error("Critical Auth Boot Failure:", err);
         if (isMounted.current) setIsInitializing(false);
       }
     };
 
-    bootApp();
+    startAuthenticationFlow();
 
     return () => {
       isMounted.current = false;
@@ -139,7 +139,7 @@ const App: React.FC = () => {
     
     try {
       if (isMobile) {
-        // Redirect will reload the page. useEffect will catch the result via getRedirectResult.
+        // Redirect will refresh the page. useEffect will catch result via getRedirectResult.
         await signInWithRedirect(auth, provider);
       } else {
         const result = await signInWithPopup(auth, provider);
@@ -152,7 +152,7 @@ const App: React.FC = () => {
         setIsAuthProcessing(false);
       }
     } catch (error) {
-      console.error("Login Exception:", error);
+      console.error("Authentication Exception:", error);
       setIsAuthProcessing(false);
     }
   };
@@ -195,7 +195,7 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
-  // INITIAL LOADING SCREEN (English UI Only)
+  // ENGLISH-ONLY SPLASH SCREEN
   if (isInitializing || isAuthProcessing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-indigo-950 text-white font-black text-center px-10">
       <div className="relative w-24 h-24 mb-10">
