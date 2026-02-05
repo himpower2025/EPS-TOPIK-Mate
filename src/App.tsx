@@ -38,22 +38,23 @@ const App: React.FC = () => {
   const [examMode, setExamMode] = useState<ExamMode>('FULL');
   const [selectedSet, setSelectedSet] = useState(1);
   
-  // 앱 초기화 상태 - 가장 중요함
+  // 인증 로딩 상태 제어
   const [isInitializing, setIsInitializing] = useState(true);
-  const [isAuthProcessing, setIsAuthProcessing] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("Securing connection...");
   
   const isMounted = useRef(true);
 
-  // 유저 데이터 싱크
+  // Firestore 사용자 데이터 동기화
   const syncUserData = useCallback(async (firebaseUser: any) => {
     if (!firebaseUser) return null;
     const userRef = doc(db, 'users', firebaseUser.uid);
     try {
       const snap = await getDoc(userRef);
+      let userData: User;
       if (snap.exists()) {
-        return snap.data() as User;
+        userData = snap.data() as User;
       } else {
-        const userData: User = { 
+        userData = { 
           id: firebaseUser.uid, 
           name: firebaseUser.displayName || 'Learner', 
           email: firebaseUser.email || '', 
@@ -63,8 +64,8 @@ const App: React.FC = () => {
           examsRemaining: 3 
         };
         await setDoc(userRef, userData);
-        return userData;
       }
+      return userData;
     } catch (error) {
       console.error("Firestore sync error:", error);
       return null;
@@ -76,35 +77,47 @@ const App: React.FC = () => {
     let unsubSnapshot: (() => void) | null = null;
     let unsubAuth: (() => void) | null = null;
 
-    const runAuthSequence = async () => {
+    const startBootSequence = async () => {
       try {
-        // 1. 브라우저 세션 영속성 강제 설정
+        setLoadingMessage("Checking session...");
+        
+        // 1. 브라우저 세션 영속성 설정
         await setPersistence(auth, browserLocalPersistence);
 
-        // 2. 리다이렉트 처리 (모바일은 여기서 잡힘)
+        // 2. 모바일 리다이렉트 힌트 확인 (매우 중요)
+        const isRedirectPending = sessionStorage.getItem('auth_redirect_pending') === 'true';
+
+        // 3. 리다이렉트 결과 처리
+        if (isRedirectPending) {
+          setLoadingMessage("Finalizing login...");
+        }
+        
         const redirectResult = await getRedirectResult(auth);
         
-        // 3. 리다이렉트 힌트 검사
-        const authFlag = localStorage.getItem('auth_redirect_active') === 'true';
-
         if (redirectResult?.user && isMounted.current) {
           const synced = await syncUserData(redirectResult.user);
           if (synced) {
             setUser(synced);
-            localStorage.removeItem('auth_redirect_active');
             setCurrentState(AppState.DASHBOARD);
+            sessionStorage.removeItem('auth_redirect_pending');
             setIsInitializing(false);
-            return; // 리다이렉트 성공 시 즉시 종료
+            return;
           }
         }
 
-        // 4. 일반적인 상태 리스너 (새로고침 등)
+        // 4. 리다이렉트 결과가 없더라도 힌트가 있으면 잠시 대기 (Firebase 내부 처리 시간 확보)
+        if (isRedirectPending) {
+           await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
+        // 5. 실시간 인증 상태 감시
         unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
           if (firebaseUser) {
+            setLoadingMessage("Syncing profile...");
             const synced = await syncUserData(firebaseUser);
             if (synced && isMounted.current) {
               setUser(synced);
-              localStorage.removeItem('auth_redirect_active');
+              sessionStorage.removeItem('auth_redirect_pending');
               
               if (unsubSnapshot) unsubSnapshot();
               unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
@@ -114,28 +127,27 @@ const App: React.FC = () => {
               setCurrentState(AppState.DASHBOARD);
             }
           } else if (isMounted.current) {
-            // [결정적 포인트] 리다이렉트 중이 아닐 때만 유저를 날리고 랜딩으로 보냄
-            if (!authFlag) {
+            // [결정적 포인트] 리다이렉트 처리 중이 아닐 때만 랜딩으로 보냄
+            const stillPending = sessionStorage.getItem('auth_redirect_pending') === 'true';
+            if (!stillPending) {
               setUser(null);
               setCurrentState(AppState.LANDING);
             }
           }
           
-          // 모든 비동기 인증 절차가 확정된 후 게이트 해제
           if (isMounted.current) {
             setIsInitializing(false);
-            setIsAuthProcessing(false);
           }
         });
 
       } catch (err) {
-        console.error("Critical Auth Error:", err);
-        localStorage.removeItem('auth_redirect_active');
+        console.error("Auth Boot Sequence Failed:", err);
+        sessionStorage.removeItem('auth_redirect_pending');
         if (isMounted.current) setIsInitializing(false);
       }
     };
 
-    runAuthSequence();
+    startBootSequence();
 
     return () => {
       isMounted.current = false;
@@ -145,18 +157,20 @@ const App: React.FC = () => {
   }, [syncUserData]);
 
   const handleGoogleLogin = async () => {
-    setIsAuthProcessing(true);
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-    
-    // 모바일 판단
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
     try {
       if (isMobile) {
-        localStorage.setItem('auth_redirect_active', 'true');
+        // [중요] 리다이렉트 직전에 힌트 저장
+        sessionStorage.setItem('auth_redirect_pending', 'true');
+        setIsInitializing(true);
+        setLoadingMessage("Redirecting to Google...");
         await signInWithRedirect(auth, provider);
       } else {
+        setIsInitializing(true);
+        setLoadingMessage("Opening login window...");
         const result = await signInWithPopup(auth, provider);
         const synced = await syncUserData(result.user);
         if (synced) {
@@ -164,17 +178,18 @@ const App: React.FC = () => {
           setCurrentState(AppState.DASHBOARD);
           setShowLoginModal(false);
         }
-        setIsAuthProcessing(false);
+        setIsInitializing(false);
       }
     } catch (error) {
-      console.error("Login Trigger Failed:", error);
-      localStorage.removeItem('auth_redirect_active');
-      setIsAuthProcessing(false);
+      console.error("Login Error:", error);
+      sessionStorage.removeItem('auth_redirect_pending');
+      setIsInitializing(false);
     }
   };
 
   const handleEmailAuth = async (email: string, pass: string, isSignUp: boolean) => {
-    setIsAuthProcessing(true);
+    setIsInitializing(true);
+    setLoadingMessage(isSignUp ? "Creating account..." : "Logging in...");
     try {
       if (isSignUp) {
         await createUserWithEmailAndPassword(auth, email, pass);
@@ -182,7 +197,7 @@ const App: React.FC = () => {
         await signInWithEmailAndPassword(auth, email, pass);
       }
     } catch (error: any) {
-      setIsAuthProcessing(false);
+      setIsInitializing(false);
       throw error;
     }
   };
@@ -211,17 +226,34 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
-  // 인증 게이트 로딩 (심플하고 전문적인 디자인)
-  if (isInitializing || isAuthProcessing) return (
-    <div className="h-screen w-full flex flex-col items-center justify-center bg-indigo-950 text-white text-center px-10">
-      <div className="relative w-20 h-20 mb-8">
-        <div className="absolute inset-0 border-4 border-white/5 rounded-full"></div>
-        <div className="absolute inset-0 border-4 border-indigo-400 rounded-full border-t-transparent animate-spin"></div>
+  // 강력한 초기 로딩 화면 (Gate)
+  if (isInitializing) return (
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-indigo-950 text-white font-sans overflow-hidden">
+      <div className="relative w-24 h-24 mb-12">
+        <div className="absolute inset-0 border-[6px] border-white/10 rounded-[2.5rem]"></div>
+        <div className="absolute inset-0 border-[6px] border-indigo-400 rounded-[2.5rem] border-t-transparent animate-spin"></div>
+        <div className="absolute inset-0 flex items-center justify-center">
+           <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
+        </div>
       </div>
-      <h2 className="text-xl font-black uppercase tracking-[0.2em] mb-2">EPS-TOPIK Mate</h2>
-      <p className="animate-pulse text-indigo-300 font-bold text-[9px] uppercase tracking-widest">
-        Verifying Secure Session...
-      </p>
+      <div className="space-y-3 text-center">
+        <h2 className="text-2xl font-black tracking-[0.2em] uppercase bg-gradient-to-r from-white to-indigo-300 bg-clip-text text-transparent">EPS-TOPIK Mate</h2>
+        <div className="flex flex-col items-center gap-2">
+           <p className="text-indigo-300 font-bold text-[10px] uppercase tracking-[0.3em] animate-pulse">
+             {loadingMessage}
+           </p>
+           <div className="w-48 h-1 bg-white/5 rounded-full overflow-hidden">
+              <div className="h-full bg-indigo-500 animate-[loading_2s_ease-in-out_infinite]"></div>
+           </div>
+        </div>
+      </div>
+      <style>{`
+        @keyframes loading {
+          0% { width: 0%; transform: translateX(-100%); }
+          50% { width: 100%; transform: translateX(0%); }
+          100% { width: 0%; transform: translateX(100%); }
+        }
+      `}</style>
     </div>
   );
 
@@ -230,9 +262,7 @@ const App: React.FC = () => {
       <FaviconManager />
       <InstallPwa />
       
-      {currentState === AppState.LANDING && !user && (
-        <LandingPage onLoginClick={() => setShowLoginModal(true)} />
-      )}
+      {currentState === AppState.LANDING && !user && <LandingPage onLoginClick={() => setShowLoginModal(true)} />}
       
       {showLoginModal && (
         <LoginModal 
@@ -284,12 +314,13 @@ const App: React.FC = () => {
               user={user} 
               onClose={() => setShowProfile(false)} 
               onLogout={async () => { 
-                setIsAuthProcessing(true);
-                localStorage.removeItem('auth_redirect_active');
+                setIsInitializing(true);
+                setLoadingMessage("Signing out...");
+                sessionStorage.removeItem('auth_redirect_pending');
                 await signOut(auth); 
                 setUser(null); 
                 setCurrentState(AppState.LANDING); 
-                setIsAuthProcessing(false);
+                setIsInitializing(false);
               }} 
               onRenew={() => { setShowProfile(false); setShowPaywall(true); }} 
             />
