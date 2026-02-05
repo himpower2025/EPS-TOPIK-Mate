@@ -4,7 +4,7 @@ import { User, ExamMode } from '../types';
 
 interface DashboardProps {
   user: User;
-  onModeSelect: (mode: ExamMode) => void;
+  onModeSelect: (mode: ExamMode, setNum?: number) => void;
   onUpgrade: () => void;
   onProfileClick: () => void;
   onViewAnalysis: () => void;
@@ -12,6 +12,15 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgrade, onProfileClick, onViewAnalysis }) => {
   const isPremium = user.plan !== 'free';
+
+  // For free users, we use Set 10 as the demo set containing all practice ranges
+  const handlePracticeStart = (mode: ExamMode) => {
+    if (!isPremium) {
+      onModeSelect(mode, 10);
+    } else {
+      onModeSelect(mode);
+    }
+  };
 
   return (
     <div className="flex flex-col h-full bg-gray-50 overflow-hidden">
@@ -42,11 +51,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgr
                   <Star className="w-3 h-3 fill-current" /> Premium Member
                 </span>
               ) : (
-                <p className="text-indigo-200 mb-10 text-sm font-bold opacity-80 uppercase tracking-widest">Master your career in Korea</p>
+                <div className="flex flex-col items-center gap-2 mb-8">
+                   <p className="text-indigo-200 text-sm font-bold opacity-80 uppercase tracking-widest">Master your career in Korea</p>
+                   <span className="bg-white/10 px-3 py-1 rounded-full text-[9px] font-black text-indigo-300 border border-white/10">Free Trial: Set 10 Demo Active</span>
+                </div>
               )}
               
               <div className="w-full max-w-sm space-y-4">
-                <button onClick={() => onModeSelect('FULL')} className="bg-white text-indigo-900 w-full py-5 rounded-[1.8rem] font-black shadow-2xl flex items-center justify-center gap-4 transition-transform active:scale-95 group">
+                <button onClick={() => handlePracticeStart('FULL')} className="bg-white text-indigo-900 w-full py-5 rounded-[1.8rem] font-black shadow-2xl flex items-center justify-center gap-4 transition-transform active:scale-95 group">
                   <PlayCircle className="w-8 h-8 text-indigo-600 group-hover:scale-110 transition-transform" />
                   <span className="text-2xl font-black uppercase">Start Mock Exam</span>
                 </button>
@@ -64,7 +76,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgr
           <h3 className="text-gray-900 font-black text-xs uppercase tracking-[0.2em] mb-6 opacity-40">Practice Labs</h3>
           
           <div className="grid grid-cols-1 gap-4">
-            <button onClick={() => onModeSelect('READING')} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center gap-6 hover:border-indigo-200 active:scale-[0.98] transition-all text-left group">
+            <button onClick={() => handlePracticeStart('READING')} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center gap-6 hover:border-indigo-200 active:scale-[0.98] transition-all text-left group">
                <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-indigo-600 transition-colors">
                   <Globe className="w-8 h-8 text-blue-600 group-hover:text-white" />
                </div>
@@ -75,7 +87,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgr
                <ArrowRight className="w-5 h-5 text-gray-200 group-hover:text-indigo-600 transition-colors" />
             </button>
 
-            <button onClick={() => onModeSelect('LISTENING')} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center gap-6 hover:border-indigo-200 active:scale-[0.98] transition-all text-left group">
+            <button onClick={() => handlePracticeStart('LISTENING')} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center gap-6 hover:border-indigo-200 active:scale-[0.98] transition-all text-left group">
                <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-orange-600 transition-colors">
                   <BookOpen className="w-8 h-8 text-orange-600 group-hover:text-white" />
                </div>

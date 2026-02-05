@@ -202,13 +202,18 @@ const App: React.FC = () => {
     }
   };
 
-  const handleModeSelect = (mode: ExamMode) => {
+  const handleModeSelect = (mode: ExamMode, explicitSet?: number) => {
     setExamMode(mode);
-    setCurrentState(AppState.SET_SELECTION);
+    if (explicitSet) {
+      setSelectedSet(explicitSet);
+      setCurrentState(AppState.EXAM);
+    } else {
+      setCurrentState(AppState.SET_SELECTION);
+    }
   };
 
   const handleSetSelect = (setNum: number) => {
-    if (user?.plan === 'free' && setNum > 1) {
+    if (user?.plan === 'free' && setNum !== 10) {
       setShowPaywall(true);
       return;
     }

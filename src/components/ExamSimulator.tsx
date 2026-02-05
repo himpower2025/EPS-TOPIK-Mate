@@ -35,8 +35,14 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
       setLoading(true);
       try {
         const data = await generateQuestionsBySet(mode, setNumber, plan);
+        if (!data || data.length === 0) {
+          alert("Could not load exam data. Redirecting...");
+          onExit();
+          return;
+        }
         setQuestions(data);
-      } catch {
+      } catch (err) {
+        console.error("Data load error:", err);
         onExit();
       } finally {
         setLoading(false);
@@ -62,18 +68,16 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     setQuestionImage(null);
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
 
-    const generateVisuals = async () => {
-      if (!q.imagePrompt) return;
-      setIsGeneratingVisuals(true);
-      try {
+    const handleVisuals = async () => {
+      if (q.imagePrompt) {
+        setIsGeneratingVisuals(true);
         const img = await generateImage(q.imagePrompt);
         setQuestionImage(img);
-      } finally {
         setIsGeneratingVisuals(false);
       }
     };
+    handleVisuals();
 
-    generateVisuals();
     if (q.type === QuestionType.LISTENING && audioContextReady) {
       handlePlayAudio();
     }
@@ -96,6 +100,8 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     
     setLoadingAudio(true);
     try {
+      if (!audioContextRef.current) await initAudio();
+      
       const buffer = await generateSpeech(script);
       if (buffer && audioContextRef.current) {
         const source = audioContextRef.current.createBufferSource();
@@ -106,7 +112,8 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
         setIsPlaying(true);
         source.onended = () => { setIsPlaying(false); setLoadingAudio(false); };
       }
-    } catch { 
+    } catch (err) { 
+      console.error("Audio error:", err);
       setIsPlaying(false); 
       setLoadingAudio(false); 
     }
@@ -131,8 +138,9 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
   };
 
   if (loading) return (
-    <div className="h-full flex items-center justify-center p-12 bg-white">
-      <LoadingSpinner message="AI is preparing your practice round..." />
+    <div className="h-full flex flex-col items-center justify-center p-12 bg-white text-center">
+      <LoadingSpinner message="AI is synchronizing with the official DB..." />
+      <p className="mt-4 text-[10px] text-gray-400 font-black uppercase tracking-widest animate-pulse">Calculating Difficulty & Generating Content</p>
     </div>
   );
 
@@ -173,7 +181,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
         </div>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-8 pb-40">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-8 pb-40 hide-scrollbar">
          <div className="max-w-2xl mx-auto space-y-6">
             <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100">
                 <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 border ${isListening ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-green-50 text-green-700 border-green-100'}`}>
@@ -198,7 +206,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                       ) : (
                         <div className="flex flex-col items-center text-gray-300 gap-2 opacity-50">
                            <ImageIcon className="w-16 h-16" />
-                           <span className="text-[10px] font-black uppercase tracking-widest">Visual assistance active</span>
+                           <span className="text-[10px] font-black uppercase tracking-widest">No Image Needed</span>
                         </div>
                       )
                     )}
@@ -241,7 +249,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
         <div className="fixed inset-0 z-[60] flex">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setIsDrawerOpen(false)}></div>
           <div className="relative w-80 bg-white h-full shadow-2xl flex flex-col pt-safe animate-slide-in-right">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center font-black text-xl uppercase tracking-tight">Overview<button onClick={() => setIsDrawerOpen(false)}><X className="w-6 h-6" /></button></div>
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center font-black text-xl uppercase tracking-tight">Status<button onClick={() => setIsDrawerOpen(false)}><X className="w-6 h-6" /></button></div>
             <div className="flex-1 overflow-y-auto p-5 grid grid-cols-4 gap-4">
                {questions.map((q, idx) => (
                   <button key={q.id} onClick={() => { setCurrentIndex(idx); setIsDrawerOpen(false); }} className={`aspect-square rounded-2xl font-black text-sm border-2 flex items-center justify-center transition-all ${idx === currentIndex ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : answers[q.id] !== undefined ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-gray-100 text-gray-300'}`}>{idx + 1}</button>

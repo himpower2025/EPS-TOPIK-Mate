@@ -26,24 +26,76 @@ async function decodeAudioData(data: Uint8Array, ctx: AudioContext, sampleRate: 
   return buffer;
 }
 
-// 1. undefined 입력을 명시적으로 허용하여 타입 에러 해결
 const cleanJson = (text: string | undefined): string => 
-  (text || '').replace(/```json/g, '').replace(/```/g, '').replace(/\/\*.*?\*\//gs, '').trim();
+  (text ?? "").replace(/```json/g, '').replace(/```/g, '').replace(/\/\*.*?\*\//gs, '').trim();
 
-export const generateQuestionsBySet = async (mode: ExamMode, setNumber: number, plan: PlanType): Promise<Question[]> => {
-  // 무료 플랜일 경우 정적 데이터 반환 (변수 사용 명시하여 미사용 경고 해결)
+/**
+ * 플랜별 데이터 매핑 및 AI 생성 핵심 로직
+ */
+export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number, plan: PlanType): Promise<Question[]> => {
+  // 1. 무료 사용자/맛보기 로직 (Set 10 활용)
   if (plan === 'free') {
-    if (mode === 'READING') return STATIC_EXAM_DATA.filter(q => q.id.startsWith('s1_r')).slice(0, 10);
-    if (mode === 'LISTENING') return STATIC_EXAM_DATA.filter(q => q.id.startsWith('s1_l')).slice(0, 10);
-    return [...STATIC_EXAM_DATA].slice(0, 10);
+    if (mode === 'READING') {
+      return STATIC_EXAM_DATA.filter(q => q.id.includes('s10_r_') && parseInt(q.id.split('_r_')[1]) <= 10);
+    }
+    if (mode === 'LISTENING') {
+      return STATIC_EXAM_DATA.filter(q => q.id.includes('s10_l_') && parseInt(q.id.split('_l_')[1]) >= 21 && parseInt(q.id.split('_l_')[1]) <= 29);
+    }
+    if (mode === 'FULL') {
+      const r = STATIC_EXAM_DATA.filter(q => q.id.includes('s10_r_') && parseInt(q.id.split('_r_')[1]) >= 11 && parseInt(q.id.split('_r_')[1]) <= 20);
+      const l = STATIC_EXAM_DATA.filter(q => q.id.includes('s10_l_') && parseInt(q.id.split('_l_')[1]) >= 30 && parseInt(q.id.split('_l_')[1]) <= 40);
+      return [...r, ...l];
+    }
   }
 
-  const ai = getAI();
-  const themes = ["Safety Gear", "Industrial Tools", "Daily Life", "Signs", "Workplace Dialogues"];
-  const theme = themes[setNumber % themes.length];
+  // 2. 유료 플랜 매핑 로직 시작
+  let targetSetIndex = -1;
+  let useAI = false;
 
+  if (plan === '1m') {
+    if (mode === 'READING' || mode === 'LISTENING') targetSetIndex = roundNumber; // 1-5
+    else if (mode === 'FULL') targetSetIndex = [12, 14, 16, 18, 20][roundNumber - 1]; // 12, 14...
+  } 
+  else if (plan === '3m') {
+    if (mode === 'READING' || mode === 'LISTENING') targetSetIndex = roundNumber; // 1-20
+    else if (mode === 'FULL') {
+      if (roundNumber <= 10) targetSetIndex = roundNumber + 20; // 21-30
+      else useAI = true; // 31-40 (AI)
+    }
+  } 
+  else if (plan === '6m') {
+    if (mode === 'READING' || mode === 'LISTENING') {
+      if (roundNumber <= 15) targetSetIndex = roundNumber; // 1-15
+      else useAI = true; // 16-50 (AI)
+    } else if (mode === 'FULL') {
+      if (roundNumber <= 15) targetSetIndex = roundNumber + 15; // 16-30
+      else useAI = true; // 31-50 (AI)
+    }
+  }
+
+  // DB에서 가져오기
+  if (!useAI && targetSetIndex !== -1) {
+    const setPrefix = `s${targetSetIndex}_`;
+    const setData = STATIC_EXAM_DATA.filter(q => q.id.startsWith(setPrefix));
+    
+    if (mode === 'READING') return setData.filter(q => q.type === QuestionType.READING).slice(0, 20);
+    if (mode === 'LISTENING') return setData.filter(q => q.type === QuestionType.LISTENING).slice(0, 20);
+    if (mode === 'FULL') {
+      const r = setData.filter(q => q.type === QuestionType.READING).slice(0, 20);
+      const l = setData.filter(q => q.type === QuestionType.LISTENING).slice(0, 20);
+      return [...r, ...l];
+    }
+  }
+
+  // AI 생성 로직 (Gaps 필터링)
+  const ai = getAI();
   try {
-    const prompt = `You are a professional EPS-TOPIK examiner. Create 10 realistic questions for Round ${setNumber} (Theme: ${theme}, Mode: ${mode}). Mix READING and LISTENING. Return JSON matching the Question interface.`;
+    const prompt = `You are an elite EPS-TOPIK examiner. Generate a COMPLETE ${mode} question set for Round ${roundNumber}. 
+    Your goal is to perfectly mimic the difficulty, vocabulary, and patterns of the existing 30-set database.
+    - If mode is READING: 20 high-quality reading questions.
+    - If mode is LISTENING: 20 high-quality listening questions with scripts.
+    - If mode is FULL: 20 reading + 20 listening questions.
+    Ensure 'imagePrompt' is included for all visual-based questions. Return as JSON.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
@@ -71,12 +123,11 @@ export const generateQuestionsBySet = async (mode: ExamMode, setNumber: number, 
       }
     });
 
-    // 2. response.text ?? "" 를 사용하여 undefined 방지
-    const jsonText = cleanJson(response.text ?? "");
-    return jsonText ? JSON.parse(jsonText) : [];
-  } catch (error) {
-    console.warn("AI Generation failed, using fallback data", error);
-    return [...STATIC_EXAM_DATA].sort(() => Math.random() - 0.5).slice(0, 10);
+    const jsonText = cleanJson(response.text);
+    return JSON.parse(jsonText);
+  } catch (err) {
+    console.error("AI Generation Error:", err);
+    return STATIC_EXAM_DATA.slice(0, 20); // Fallback
   }
 };
 
@@ -87,12 +138,11 @@ export const generateImage = async (prompt: string): Promise<string | null> => {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: { 
-        parts: [{ text: `Industrial educational illustration for Korean exam: ${prompt}. 2D vector art, white background.` }] 
+        parts: [{ text: `High-quality industrial photography for EPS-TOPIK exam: ${prompt}. Professional, clean, and educational.` }] 
       },
       config: { imageConfig: { aspectRatio: "1:1" } }
     });
     
-    // 3. Optional Chaining(?.)을 사용하여 Object is possibly 'undefined' 에러 해결
     const candidate = response.candidates?.[0];
     const part = candidate?.content?.parts?.find(p => p.inlineData);
     return part?.inlineData ? `data:image/png;base64,${part.inlineData.data}` : null;
@@ -107,7 +157,7 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text: `질문을 잘 듣고 답하십시오. ${text}` }] }],
+      contents: [{ parts: [{ text: text }] }],
       config: {
         responseModalities: [Modality.AUDIO],
         speechConfig: {
@@ -116,11 +166,11 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
       }
     });
     
-    // 4. Optional Chaining으로 안전하게 접근
-    const base64 = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-    if (base64) {
+    const candidate = response.candidates?.[0];
+    const audioData = candidate?.content?.parts?.[0]?.inlineData?.data;
+    if (audioData) {
       const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
-      return await decodeAudioData(decodeBase64(base64), ctx, 24000, 1);
+      return await decodeAudioData(decodeBase64(audioData), ctx, 24000, 1);
     }
     return null;
   } catch (err) {
@@ -134,12 +184,10 @@ export const analyzePerformance = async (session: ExamSession): Promise<Analytic
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: `EPS-TOPIK Analysis. Score: ${session.score}/${session.questions.length}. Feedback in English. Return JSON.`,
+      contents: `Analyze EPS-TOPIK session score: ${session.score}/${session.questions.length}.`,
       config: { responseMimeType: "application/json" }
     });
-    // 5. response.text ?? "" 로 안전하게 전달
-    const jsonText = cleanJson(response.text ?? "");
-    return jsonText ? JSON.parse(jsonText) : null;
+    return JSON.parse(cleanJson(response.text));
   } catch {
     return null;
   }
