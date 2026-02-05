@@ -38,24 +38,22 @@ const App: React.FC = () => {
   const [examMode, setExamMode] = useState<ExamMode>('FULL');
   const [selectedSet, setSelectedSet] = useState(1);
   
-  // 인증 초기화 상태 (기본값 true)
+  // 앱 초기화 상태 - 가장 중요함
   const [isInitializing, setIsInitializing] = useState(true);
   const [isAuthProcessing, setIsAuthProcessing] = useState(false);
   
   const isMounted = useRef(true);
 
-  // Firestore와 사용자 데이터 동기화
+  // 유저 데이터 싱크
   const syncUserData = useCallback(async (firebaseUser: any) => {
     if (!firebaseUser) return null;
     const userRef = doc(db, 'users', firebaseUser.uid);
     try {
       const snap = await getDoc(userRef);
-      let userData: User;
-      
       if (snap.exists()) {
-        userData = snap.data() as User;
+        return snap.data() as User;
       } else {
-        userData = { 
+        const userData: User = { 
           id: firebaseUser.uid, 
           name: firebaseUser.displayName || 'Learner', 
           email: firebaseUser.email || '', 
@@ -65,8 +63,8 @@ const App: React.FC = () => {
           examsRemaining: 3 
         };
         await setDoc(userRef, userData);
+        return userData;
       }
-      return userData;
     } catch (error) {
       console.error("Firestore sync error:", error);
       return null;
@@ -80,28 +78,27 @@ const App: React.FC = () => {
 
     const runAuthSequence = async () => {
       try {
-        // 1. 지속성 설정 (모바일 세션 유지의 핵심)
+        // 1. 브라우저 세션 영속성 강제 설정
         await setPersistence(auth, browserLocalPersistence);
 
-        // 2. 리다이렉트 힌트 확인 (핸드폰 루프 방지용)
-        const loginInProgress = localStorage.getItem('auth_redirect_active') === 'true';
-
-        // 3. 리다이렉트 결과 처리 (모바일 로그인 복귀 시)
-        // 이 작업이 완료될 때까지 앱은 초기 화면을 보여주지 않고 대기합니다.
+        // 2. 리다이렉트 처리 (모바일은 여기서 잡힘)
         const redirectResult = await getRedirectResult(auth);
         
+        // 3. 리다이렉트 힌트 검사
+        const authFlag = localStorage.getItem('auth_redirect_active') === 'true';
+
         if (redirectResult?.user && isMounted.current) {
-          localStorage.removeItem('auth_redirect_active');
           const synced = await syncUserData(redirectResult.user);
           if (synced) {
             setUser(synced);
+            localStorage.removeItem('auth_redirect_active');
             setCurrentState(AppState.DASHBOARD);
             setIsInitializing(false);
-            return; 
+            return; // 리다이렉트 성공 시 즉시 종료
           }
         }
 
-        // 4. 인증 상태 리스너 등록
+        // 4. 일반적인 상태 리스너 (새로고침 등)
         unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
           if (firebaseUser) {
             const synced = await syncUserData(firebaseUser);
@@ -117,14 +114,14 @@ const App: React.FC = () => {
               setCurrentState(AppState.DASHBOARD);
             }
           } else if (isMounted.current) {
-            // [중요] 리다이렉트 깃발(loginInProgress)이 없을 때만 랜딩으로 보냄
-            if (!loginInProgress) {
+            // [결정적 포인트] 리다이렉트 중이 아닐 때만 유저를 날리고 랜딩으로 보냄
+            if (!authFlag) {
               setUser(null);
               setCurrentState(AppState.LANDING);
             }
           }
           
-          // 모든 검증(Redirect 결과 확인 포함)이 완전히 끝났을 때만 로딩 게이트 해제
+          // 모든 비동기 인증 절차가 확정된 후 게이트 해제
           if (isMounted.current) {
             setIsInitializing(false);
             setIsAuthProcessing(false);
@@ -132,7 +129,7 @@ const App: React.FC = () => {
         });
 
       } catch (err) {
-        console.error("Auth Sequence Failed:", err);
+        console.error("Critical Auth Error:", err);
         localStorage.removeItem('auth_redirect_active');
         if (isMounted.current) setIsInitializing(false);
       }
@@ -152,11 +149,11 @@ const App: React.FC = () => {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     
+    // 모바일 판단
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
     try {
       if (isMobile) {
-        // 리다이렉트 전 깃발 꽂기
         localStorage.setItem('auth_redirect_active', 'true');
         await signInWithRedirect(auth, provider);
       } else {
@@ -170,7 +167,7 @@ const App: React.FC = () => {
         setIsAuthProcessing(false);
       }
     } catch (error) {
-      console.error("Login Exception:", error);
+      console.error("Login Trigger Failed:", error);
       localStorage.removeItem('auth_redirect_active');
       setIsAuthProcessing(false);
     }
@@ -214,16 +211,16 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
-  // 초기 로딩 화면 (게이트웨이)
+  // 인증 게이트 로딩 (심플하고 전문적인 디자인)
   if (isInitializing || isAuthProcessing) return (
-    <div className="h-screen w-full flex flex-col items-center justify-center bg-indigo-950 text-white font-black text-center px-10">
-      <div className="relative w-24 h-24 mb-10">
-        <div className="absolute inset-0 border-8 border-white/10 rounded-full"></div>
-        <div className={`absolute inset-0 border-8 border-indigo-400 rounded-full border-t-transparent animate-spin`}></div>
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-indigo-950 text-white text-center px-10">
+      <div className="relative w-20 h-20 mb-8">
+        <div className="absolute inset-0 border-4 border-white/5 rounded-full"></div>
+        <div className="absolute inset-0 border-4 border-indigo-400 rounded-full border-t-transparent animate-spin"></div>
       </div>
-      <h2 className="text-2xl tracking-[0.2em] uppercase mb-2 font-black">EPS-TOPIK Mate</h2>
-      <p className="animate-pulse text-indigo-300 font-medium tracking-widest text-[10px] uppercase">
-        {isInitializing ? "Verifying Access..." : "Finalizing Login..."}
+      <h2 className="text-xl font-black uppercase tracking-[0.2em] mb-2">EPS-TOPIK Mate</h2>
+      <p className="animate-pulse text-indigo-300 font-bold text-[9px] uppercase tracking-widest">
+        Verifying Secure Session...
       </p>
     </div>
   );
@@ -233,7 +230,9 @@ const App: React.FC = () => {
       <FaviconManager />
       <InstallPwa />
       
-      {currentState === AppState.LANDING && !user && <LandingPage onLoginClick={() => setShowLoginModal(true)} />}
+      {currentState === AppState.LANDING && !user && (
+        <LandingPage onLoginClick={() => setShowLoginModal(true)} />
+      )}
       
       {showLoginModal && (
         <LoginModal 
