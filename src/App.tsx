@@ -38,12 +38,13 @@ const App: React.FC = () => {
   const [examMode, setExamMode] = useState<ExamMode>('FULL');
   const [selectedSet, setSelectedSet] = useState(1);
   
-  // Guard states: The Splash Gate Logic
+  // 인증 초기화 상태 (기본값 true)
   const [isInitializing, setIsInitializing] = useState(true);
   const [isAuthProcessing, setIsAuthProcessing] = useState(false);
   
   const isMounted = useRef(true);
 
+  // Firestore와 사용자 데이터 동기화
   const syncUserData = useCallback(async (firebaseUser: any) => {
     if (!firebaseUser) return null;
     const userRef = doc(db, 'users', firebaseUser.uid);
@@ -77,50 +78,53 @@ const App: React.FC = () => {
     let unsubSnapshot: (() => void) | null = null;
     let unsubAuth: (() => void) | null = null;
 
-    const startAuthenticationFlow = async () => {
+    const runAuthSequence = async () => {
       try {
-        // 1. Force persistence mode first to ensure cookie handling is set
+        // 1. 지속성 설정 (모바일 세션 유지의 핵심)
         await setPersistence(auth, browserLocalPersistence);
 
-        // 2. Mobile Redirect Check
-        // If we were in the middle of a redirect, wait for it before showing landing page.
+        // 2. 리다이렉트 힌트 확인 (핸드폰 루프 방지용)
+        const loginInProgress = localStorage.getItem('auth_redirect_active') === 'true';
+
+        // 3. 리다이렉트 결과 처리 (모바일 로그인 복귀 시)
+        // 이 작업이 완료될 때까지 앱은 초기 화면을 보여주지 않고 대기합니다.
         const redirectResult = await getRedirectResult(auth);
         
-        // Clean up the login hint regardless of success/fail
-        const wasPending = sessionStorage.getItem('login_pending');
-        sessionStorage.removeItem('login_pending');
-
         if (redirectResult?.user && isMounted.current) {
+          localStorage.removeItem('auth_redirect_active');
           const synced = await syncUserData(redirectResult.user);
           if (synced) {
             setUser(synced);
             setCurrentState(AppState.DASHBOARD);
             setIsInitializing(false);
-            return;
+            return; 
           }
         }
 
-        // 3. Auth Listener (Standard recovery)
+        // 4. 인증 상태 리스너 등록
         unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
           if (firebaseUser) {
             const synced = await syncUserData(firebaseUser);
             if (synced && isMounted.current) {
               setUser(synced);
+              localStorage.removeItem('auth_redirect_active');
+              
               if (unsubSnapshot) unsubSnapshot();
               unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
                 if (s.exists() && isMounted.current) setUser(s.data() as User);
               });
+              
               setCurrentState(AppState.DASHBOARD);
             }
           } else if (isMounted.current) {
-            // ONLY if we are not waiting for a redirect result should we go to landing
-            if (!wasPending) {
+            // [중요] 리다이렉트 깃발(loginInProgress)이 없을 때만 랜딩으로 보냄
+            if (!loginInProgress) {
               setUser(null);
               setCurrentState(AppState.LANDING);
             }
           }
           
-          // CRITICAL: Finalizing initialization state
+          // 모든 검증(Redirect 결과 확인 포함)이 완전히 끝났을 때만 로딩 게이트 해제
           if (isMounted.current) {
             setIsInitializing(false);
             setIsAuthProcessing(false);
@@ -128,12 +132,13 @@ const App: React.FC = () => {
         });
 
       } catch (err) {
-        console.error("Critical Auth Boot Failure:", err);
+        console.error("Auth Sequence Failed:", err);
+        localStorage.removeItem('auth_redirect_active');
         if (isMounted.current) setIsInitializing(false);
       }
     };
 
-    startAuthenticationFlow();
+    runAuthSequence();
 
     return () => {
       isMounted.current = false;
@@ -151,8 +156,8 @@ const App: React.FC = () => {
     
     try {
       if (isMobile) {
-        // Set a hint so that when we return, we know to wait for RedirectResult
-        sessionStorage.setItem('login_pending', 'true');
+        // 리다이렉트 전 깃발 꽂기
+        localStorage.setItem('auth_redirect_active', 'true');
         await signInWithRedirect(auth, provider);
       } else {
         const result = await signInWithPopup(auth, provider);
@@ -165,8 +170,8 @@ const App: React.FC = () => {
         setIsAuthProcessing(false);
       }
     } catch (error) {
-      console.error("Authentication Exception:", error);
-      sessionStorage.removeItem('login_pending');
+      console.error("Login Exception:", error);
+      localStorage.removeItem('auth_redirect_active');
       setIsAuthProcessing(false);
     }
   };
@@ -209,16 +214,16 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
-  // INITIAL LOADING SCREEN (Splash Gate)
+  // 초기 로딩 화면 (게이트웨이)
   if (isInitializing || isAuthProcessing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-indigo-950 text-white font-black text-center px-10">
       <div className="relative w-24 h-24 mb-10">
         <div className="absolute inset-0 border-8 border-white/10 rounded-full"></div>
-        <div className="absolute inset-0 border-8 border-indigo-400 rounded-full border-t-transparent animate-spin"></div>
+        <div className={`absolute inset-0 border-8 border-indigo-400 rounded-full border-t-transparent animate-spin`}></div>
       </div>
       <h2 className="text-2xl tracking-[0.2em] uppercase mb-2 font-black">EPS-TOPIK Mate</h2>
       <p className="animate-pulse text-indigo-300 font-medium tracking-widest text-[10px] uppercase">
-        {isInitializing ? "Validating Credentials..." : "Accessing Dashboard..."}
+        {isInitializing ? "Verifying Access..." : "Finalizing Login..."}
       </p>
     </div>
   );
@@ -281,6 +286,7 @@ const App: React.FC = () => {
               onClose={() => setShowProfile(false)} 
               onLogout={async () => { 
                 setIsAuthProcessing(true);
+                localStorage.removeItem('auth_redirect_active');
                 await signOut(auth); 
                 setUser(null); 
                 setCurrentState(AppState.LANDING); 
