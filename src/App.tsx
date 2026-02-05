@@ -38,7 +38,7 @@ const App: React.FC = () => {
   const [examMode, setExamMode] = useState<ExamMode>('FULL');
   const [selectedSet, setSelectedSet] = useState(1);
   
-  // Guard states: The "Splash Gate" logic
+  // Guard states: The Splash Gate Logic
   const [isInitializing, setIsInitializing] = useState(true);
   const [isAuthProcessing, setIsAuthProcessing] = useState(false);
   
@@ -79,21 +79,28 @@ const App: React.FC = () => {
 
     const startAuthenticationFlow = async () => {
       try {
-        // 1. Set Local Persistence first
+        // 1. Force persistence mode first to ensure cookie handling is set
         await setPersistence(auth, browserLocalPersistence);
 
-        // 2. Explicitly wait for Redirect Results (Crucial for Mobile)
-        // If this isn't awaited, App might render LandingPage before RedirectResult is processed.
+        // 2. Mobile Redirect Check
+        // If we were in the middle of a redirect, wait for it before showing landing page.
         const redirectResult = await getRedirectResult(auth);
+        
+        // Clean up the login hint regardless of success/fail
+        const wasPending = sessionStorage.getItem('login_pending');
+        sessionStorage.removeItem('login_pending');
+
         if (redirectResult?.user && isMounted.current) {
           const synced = await syncUserData(redirectResult.user);
           if (synced) {
             setUser(synced);
             setCurrentState(AppState.DASHBOARD);
+            setIsInitializing(false);
+            return;
           }
         }
 
-        // 3. Now setup the permanent listener
+        // 3. Auth Listener (Standard recovery)
         unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
           if (firebaseUser) {
             const synced = await syncUserData(firebaseUser);
@@ -106,13 +113,18 @@ const App: React.FC = () => {
               setCurrentState(AppState.DASHBOARD);
             }
           } else if (isMounted.current) {
-            setUser(null);
-            setCurrentState(AppState.LANDING);
+            // ONLY if we are not waiting for a redirect result should we go to landing
+            if (!wasPending) {
+              setUser(null);
+              setCurrentState(AppState.LANDING);
+            }
           }
           
-          // CRITICAL: The gate only opens after Firebase is finished with its checks
-          setIsInitializing(false);
-          setIsAuthProcessing(false);
+          // CRITICAL: Finalizing initialization state
+          if (isMounted.current) {
+            setIsInitializing(false);
+            setIsAuthProcessing(false);
+          }
         });
 
       } catch (err) {
@@ -139,7 +151,8 @@ const App: React.FC = () => {
     
     try {
       if (isMobile) {
-        // Redirect will refresh the page. useEffect will catch result via getRedirectResult.
+        // Set a hint so that when we return, we know to wait for RedirectResult
+        sessionStorage.setItem('login_pending', 'true');
         await signInWithRedirect(auth, provider);
       } else {
         const result = await signInWithPopup(auth, provider);
@@ -153,6 +166,7 @@ const App: React.FC = () => {
       }
     } catch (error) {
       console.error("Authentication Exception:", error);
+      sessionStorage.removeItem('login_pending');
       setIsAuthProcessing(false);
     }
   };
@@ -195,7 +209,7 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
-  // ENGLISH-ONLY SPLASH SCREEN
+  // INITIAL LOADING SCREEN (Splash Gate)
   if (isInitializing || isAuthProcessing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-indigo-950 text-white font-black text-center px-10">
       <div className="relative w-24 h-24 mb-10">
@@ -204,7 +218,7 @@ const App: React.FC = () => {
       </div>
       <h2 className="text-2xl tracking-[0.2em] uppercase mb-2 font-black">EPS-TOPIK Mate</h2>
       <p className="animate-pulse text-indigo-300 font-medium tracking-widest text-[10px] uppercase">
-        {isInitializing ? "Verifying Session..." : "Syncing Profile..."}
+        {isInitializing ? "Validating Credentials..." : "Accessing Dashboard..."}
       </p>
     </div>
   );
