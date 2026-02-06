@@ -38,30 +38,39 @@ const App: React.FC = () => {
   const [examMode, setExamMode] = useState<ExamMode>('FULL');
   const [selectedSet, setSelectedSet] = useState(1);
   
-  // 인증 로딩 상태 제어
   const [isInitializing, setIsInitializing] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("Securing connection...");
   
   const isMounted = useRef(true);
 
-  // Firestore 사용자 데이터 동기화
   const syncUserData = useCallback(async (firebaseUser: any) => {
     if (!firebaseUser) return null;
     const userRef = doc(db, 'users', firebaseUser.uid);
     try {
       const snap = await getDoc(userRef);
       let userData: User;
+      
+      // 관리자 이메일 확인 (6개월 플랜 자동 부여)
+      const isAdmin = firebaseUser.email === 'abraham0715@gmail.com';
+      const expiryDate = isAdmin ? new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString() : null;
+
       if (snap.exists()) {
         userData = snap.data() as User;
+        // 관리자인 경우 기존 데이터가 있더라도 플랜 업데이트
+        if (isAdmin && userData.plan !== '6m') {
+          userData.plan = '6m';
+          userData.subscriptionExpiry = expiryDate;
+          await setDoc(userRef, userData, { merge: true });
+        }
       } else {
         userData = { 
           id: firebaseUser.uid, 
           name: firebaseUser.displayName || 'Learner', 
           email: firebaseUser.email || '', 
           avatarUrl: firebaseUser.photoURL || '', 
-          plan: 'free', 
-          subscriptionExpiry: null, 
-          examsRemaining: 3 
+          plan: isAdmin ? '6m' : 'free', 
+          subscriptionExpiry: isAdmin ? expiryDate : null, 
+          examsRemaining: isAdmin ? 999 : 3 
         };
         await setDoc(userRef, userData);
       }
@@ -80,14 +89,9 @@ const App: React.FC = () => {
     const startBootSequence = async () => {
       try {
         setLoadingMessage("Checking session...");
-        
-        // 1. 브라우저 세션 영속성 설정
         await setPersistence(auth, browserLocalPersistence);
-
-        // 2. 모바일 리다이렉트 힌트 확인 (매우 중요)
         const isRedirectPending = sessionStorage.getItem('auth_redirect_pending') === 'true';
 
-        // 3. 리다이렉트 결과 처리
         if (isRedirectPending) {
           setLoadingMessage("Finalizing login...");
         }
@@ -105,12 +109,10 @@ const App: React.FC = () => {
           }
         }
 
-        // 4. 리다이렉트 결과가 없더라도 힌트가 있으면 잠시 대기 (Firebase 내부 처리 시간 확보)
         if (isRedirectPending) {
            await new Promise(resolve => setTimeout(resolve, 1000));
         }
 
-        // 5. 실시간 인증 상태 감시
         unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
           if (firebaseUser) {
             setLoadingMessage("Syncing profile...");
@@ -127,17 +129,13 @@ const App: React.FC = () => {
               setCurrentState(AppState.DASHBOARD);
             }
           } else if (isMounted.current) {
-            // [결정적 포인트] 리다이렉트 처리 중이 아닐 때만 랜딩으로 보냄
             const stillPending = sessionStorage.getItem('auth_redirect_pending') === 'true';
             if (!stillPending) {
               setUser(null);
               setCurrentState(AppState.LANDING);
             }
           }
-          
-          if (isMounted.current) {
-            setIsInitializing(false);
-          }
+          if (isMounted.current) setIsInitializing(false);
         });
 
       } catch (err) {
@@ -163,7 +161,6 @@ const App: React.FC = () => {
     
     try {
       if (isMobile) {
-        // [중요] 리다이렉트 직전에 힌트 저장
         sessionStorage.setItem('auth_redirect_pending', 'true');
         setIsInitializing(true);
         setLoadingMessage("Redirecting to Google...");
@@ -231,7 +228,6 @@ const App: React.FC = () => {
     setCurrentState(AppState.ANALYTICS); 
   };
 
-  // 강력한 초기 로딩 화면 (Gate)
   if (isInitializing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-indigo-950 text-white font-sans overflow-hidden">
       <div className="relative w-24 h-24 mb-12">
@@ -247,18 +243,8 @@ const App: React.FC = () => {
            <p className="text-indigo-300 font-bold text-[10px] uppercase tracking-[0.3em] animate-pulse">
              {loadingMessage}
            </p>
-           <div className="w-48 h-1 bg-white/5 rounded-full overflow-hidden">
-              <div className="h-full bg-indigo-500 animate-[loading_2s_ease-in-out_infinite]"></div>
-           </div>
         </div>
       </div>
-      <style>{`
-        @keyframes loading {
-          0% { width: 0%; transform: translateX(-100%); }
-          50% { width: 100%; transform: translateX(0%); }
-          100% { width: 0%; transform: translateX(100%); }
-        }
-      `}</style>
     </div>
   );
 

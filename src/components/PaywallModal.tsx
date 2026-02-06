@@ -73,10 +73,15 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
       createdAt: serverTimestamp()
     });
 
-    const isSuccess = await verifyPaymentWithServer(requestId);
-    if (isSuccess) setStep('SUCCESS');
-    else {
-      alert("Verification failed. Please scan and pay correctly before verifying.");
+    try {
+      const isSuccess = await verifyPaymentWithServer(requestId);
+      if (isSuccess) setStep('SUCCESS');
+      else {
+        alert("Verification failed. Please scan and pay correctly before verifying.");
+        setStep('PAYMENT');
+      }
+    } catch (e) {
+      console.error("Verification error", e);
       setStep('PAYMENT');
     }
   };
@@ -86,7 +91,8 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
       <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
         <div className="bg-gradient-to-br from-indigo-600 via-indigo-900 to-black p-8 text-white text-center relative shrink-0">
-          {step !== 'VERIFYING' && <button onClick={onClose} className="absolute top-6 right-6 text-white/50 hover:text-white p-2 z-20"><X className="w-6 h-6"/></button>}
+          {/* 닫기 버튼을 항상 노출하도록 수정 (X 표시가 없어 무한로딩에 갇히는 문제 해결) */}
+          <button onClick={onClose} className="absolute top-6 right-6 text-white/50 hover:text-white p-2 z-20"><X className="w-6 h-6"/></button>
           <div className="flex flex-col items-center">
             <div className="w-16 h-16 bg-white/10 rounded-3xl flex items-center justify-center mb-4 border border-white/20 shadow-inner">
               <Crown className="w-10 h-10 text-yellow-400 fill-yellow-400" />
@@ -118,7 +124,6 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
                         </div>
                         <div className="text-right">
                           <div className="font-black text-2xl text-indigo-600 tracking-tighter">{plan.price}</div>
-                          <div className="text-[8px] text-gray-400 font-bold uppercase">One-time payment</div>
                         </div>
                      </div>
 
@@ -140,11 +145,8 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
           {step === 'PAYMENT' && (
             <div className="flex flex-col items-center animate-fade-in text-center">
               <div className="bg-white p-8 rounded-[3rem] shadow-xl border border-gray-100 mb-8 w-full max-w-[300px] relative">
-                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-white px-4 py-1 border border-gray-100 rounded-full">
-                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Official Fonepay QR</span>
-                 </div>
                  <div className="aspect-square bg-white rounded-3xl overflow-hidden flex items-center justify-center relative border-4 border-gray-50 p-4 mb-6 shadow-inner">
-                    <img src="./fonepay-qr.png" alt="QR" className="w-full h-full object-contain" onError={(e) => (e.target as any).src = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=fonepay-eps-mate'} />
+                    <img src="./fonepay-qr.png" alt="QR" className="w-full h-full object-contain" />
                  </div>
                  <div className="bg-indigo-900 p-5 rounded-[2rem] text-white shadow-xl flex justify-between items-center w-full">
                     <div className="text-left">
@@ -154,14 +156,8 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
                     <Smartphone className="w-8 h-8" />
                  </div>
               </div>
-              <div className="mb-8 px-4">
-                <p className="text-[11px] text-gray-400 font-bold leading-relaxed uppercase tracking-wide">
-                  1. Scan with any Bank App / Fonepay<br/>
-                  2. Pay exactly {currentPlan.price}<br/>
-                  3. Tap verify button below for instant access
-                </p>
-              </div>
               <button onClick={handleStartVerifying} className="w-full bg-indigo-600 text-white font-black py-6 rounded-[2rem] shadow-xl text-xl flex items-center justify-center gap-3 active:scale-95 transition-all"><CheckCircle2 className="w-7 h-7" /> Verify My Payment</button>
+              <button onClick={() => setStep('PLANS')} className="mt-4 text-[11px] text-gray-400 font-black uppercase tracking-widest hover:text-indigo-600">Change Plan</button>
             </div>
           )}
 
@@ -169,7 +165,15 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
             <div className="flex flex-col items-center text-center py-16 animate-fade-in">
                <div className="w-20 h-20 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-8 shadow-xl"></div>
                <h3 className="text-2xl font-black text-gray-900">Connecting to Server...</h3>
-               <p className="text-gray-400 text-sm mt-2 uppercase tracking-widest font-black">Securing your access</p>
+               <p className="text-gray-400 text-sm mt-2 uppercase tracking-widest font-black mb-8">Securing your access</p>
+               
+               {/* 로딩 중에 사용자가 나갈 수 있도록 취소 버튼 추가 */}
+               <button 
+                onClick={() => setStep('PAYMENT')} 
+                className="px-6 py-2 bg-gray-100 text-gray-500 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-gray-200 transition-colors"
+               >
+                 Cancel Verification
+               </button>
             </div>
           )}
 
