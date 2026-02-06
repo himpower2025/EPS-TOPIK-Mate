@@ -3,112 +3,60 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>EPS-TOPIK Mate - Your Exam Partner</title>
+    <title>EPS MATE - AI Exam Center</title>
     
-    <!-- PWA Settings -->
-    <link rel="manifest" href="./manifest.json?v=105" />
-    <meta name="theme-color" content="#4f46e5" />
-    
-    <!-- Android/Chrome Specific PWA Settings -->
-    <meta name="mobile-web-app-capable" content="yes">
-
-    <!-- iOS Specific PWA Settings -->
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#1e1b4b" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-touch-fullscreen" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="EPS-TOPIK" />
-
-    <style>
-      #startup-error { display: none; }
-    </style>
-    <div id="startup-error"></div>
-    <script>
-      window.onerror = function(msg, url, line, col, error) {
-        // Suppress benign resize observer loops or SW errors from showing in console excessively
-        if (msg.includes('ResizeObserver') || msg.includes('ServiceWorker')) return;
-        console.error("Global Error:", msg);
-      };
-      
-      // Default empty process for browser compatibility
-      window.process = window.process || { env: { API_KEY: '' } };
-
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          // Robust registration: Explicitly define scope as './' to match the relative path
-          navigator.serviceWorker.register('./service-worker.js', { scope: './' })
-            .then((registration) => {
-              console.log('SW Registered');
-              registration.update();
-            })
-            .catch((error) => {
-              // If scope error persists (often in dev environments with redirects), 
-              // try registering without explicit scope as a fallback
-              console.warn('SW explicit scope failed, retrying default:', error);
-              navigator.serviceWorker.register('./service-worker.js')
-                .catch(e => console.error('SW Final Fail:', e));
-            });
-        });
-      }
-    </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
       :root {
         --sat: env(safe-area-inset-top);
         --sab: env(safe-area-inset-bottom);
-        --sal: env(safe-area-inset-left);
         --sar: env(safe-area-inset-right);
+        --sal: env(safe-area-inset-left);
       }
-
       body {
         font-family: 'Noto Sans KR', sans-serif;
-        overscroll-behavior-y: none; /* Prevent pull-to-refresh effect */
-        -webkit-tap-highlight-color: transparent; /* Remove tap highlight on iOS */
-        -webkit-touch-callout: none; /* Disable long press menu on iOS */
-        user-select: none; /* Disable text selection for app-like feel */
+        overscroll-behavior-y: none;
+        -webkit-tap-highlight-color: transparent;
+        background-color: #f9fafb;
       }
-
-      /* Allow text selection in specific areas if needed */
-      .selectable {
-        user-select: text;
-      }
-
-      /* Safe Area Utilities */
       .pt-safe { padding-top: var(--sat); }
       .pb-safe { padding-bottom: var(--sab); }
-      .pl-safe { padding-left: var(--sal); }
-      .pr-safe { padding-right: var(--sar); }
+      .px-safe { padding-left: var(--sal); padding-right: var(--sar); }
       
-      .mt-safe { margin-top: var(--sat); }
-      .mb-safe { margin-bottom: var(--sab); }
-
-      /* Animation Classes */
-      @keyframes slide-in-right {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-      }
-      @keyframes slide-up {
-        from { transform: translateY(100%); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-      }
-      @keyframes fade-in {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-
-      .animate-slide-in-right { animation: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-      .animate-slide-up { animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-      .animate-fade-in { animation: fade-in 0.2s ease-out forwards; }
+      @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+      .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
+      
+      @keyframes slide-up { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+      .animate-slide-up { animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
       .hide-scrollbar::-webkit-scrollbar { display: none; }
       .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
-
-</head>
-  <body class="bg-gray-100 text-gray-900 h-[100dvh] w-screen overflow-hidden">
-    <div id="root" class="h-full w-full flex flex-col"></div>
-    <script type="module" src="/src/index.tsx"></script>
+    <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "recharts": "https://aistudiocdn.com/recharts@^3.5.1",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "firebase/": "https://esm.sh/firebase@^12.7.0/",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+  }
+}
+</script>
+  </head>
+  <body class="text-gray-900 h-[100dvh] w-screen overflow-hidden">
+    <div id="root" class="h-full w-full"></div>
+    <script type="module" src="./src/index.tsx"></script>
   </body>
 </html>

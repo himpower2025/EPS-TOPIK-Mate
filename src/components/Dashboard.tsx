@@ -13,108 +13,111 @@ interface DashboardProps {
 export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgrade, onProfileClick, onViewAnalysis }) => {
   const isPremium = user.plan !== 'free';
 
-  // For free users, we use Set 10 as the demo set containing all practice ranges
   const handlePracticeStart = (mode: ExamMode) => {
-    if (!isPremium) {
-      onModeSelect(mode, 10);
-    } else {
-      onModeSelect(mode);
-    }
+    if (!isPremium) onModeSelect(mode, 10);
+    else onModeSelect(mode);
   };
 
   return (
     <div className="flex flex-col h-full bg-gray-50 overflow-hidden">
-      {/* Navbar */}
+      {/* 고정 상단바 */}
       <div className="bg-indigo-900 pt-safe text-white shrink-0 shadow-lg z-20">
-         <div className="px-5 py-5 flex justify-between items-center">
-            <div className="flex items-center gap-3">
-                <div className="relative w-10 h-10">
-                    <div className="absolute top-0 left-0 bg-white rounded-lg text-indigo-900 text-[10px] font-black w-7 h-7 flex items-center justify-center z-10 shadow-md">Kor</div>
-                    <div className="absolute bottom-0 right-0 bg-purple-500 rounded-lg text-white text-[10px] font-black w-7 h-7 flex items-center justify-center shadow-md">A</div>
+         <div className="px-6 py-5 flex justify-between items-center max-w-screen-xl mx-auto w-full">
+            <div className="flex items-center gap-4">
+                <div className="relative w-12 h-12">
+                    <div className="absolute top-0 left-0 bg-white rounded-xl text-indigo-900 text-xs font-black w-8 h-8 flex items-center justify-center z-10 shadow-lg border-2 border-indigo-900">가</div>
+                    <div className="absolute bottom-0 right-0 bg-purple-500 rounded-xl text-white text-xs font-black w-8 h-8 flex items-center justify-center shadow-lg border-2 border-indigo-900">A</div>
                 </div>
-                <div className="font-black text-xl tracking-tighter uppercase">EPS Mate</div>
+                <div>
+                   <div className="font-black text-2xl tracking-tighter uppercase leading-none">EPS MATE</div>
+                   <p className="text-[8px] text-indigo-300 font-black tracking-[0.3em] uppercase mt-1">AI Exam Partner</p>
+                </div>
             </div>
-            <button onClick={onProfileClick} className="w-10 h-10 rounded-full border-2 border-indigo-400 overflow-hidden shadow-sm active:scale-90 transition-transform">
-                {user.avatarUrl ? <img src={user.avatarUrl} alt="User" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-indigo-500 flex items-center justify-center"><UserIcon className="w-6 h-6" /></div>}
+            <button 
+              onClick={onProfileClick} 
+              className="w-12 h-12 rounded-2xl border-2 border-indigo-400/50 overflow-hidden shadow-xl active:scale-90 transition-all hover:border-white"
+            >
+                {user.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="User" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-indigo-500 flex items-center justify-center">
+                    <UserIcon className="w-6 h-6" />
+                  </div>
+                )}
             </button>
          </div>
       </div>
 
-      {/* Hero & Selection */}
-      <div className="flex-1 overflow-y-auto pb-24">
-        <div className="bg-indigo-900 text-white rounded-b-[3.5rem] px-5 pb-16 pt-4 relative overflow-hidden shadow-xl">
-           <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-           <div className="relative z-10 max-w-2xl mx-auto text-center flex flex-col items-center">
-              <h1 className="text-4xl font-black mb-2 tracking-tight">Welcome, {user.name.split(' ')[0]}!</h1>
+      {/* 스크롤 영역 */}
+      <div className="flex-1 overflow-y-auto pb-32 hide-scrollbar">
+        {/* 히어로 섹션 */}
+        <div className="bg-indigo-900 text-white rounded-b-[4rem] px-6 pb-20 pt-8 relative overflow-hidden shadow-2xl">
+           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+           <div className="relative z-10 max-w-screen-xl mx-auto text-center flex flex-col items-center">
+              <h1 className="text-4xl md:text-6xl font-black mb-4 tracking-tight">안녕하세요, {user.name.split(' ')[0]}님!</h1>
               {isPremium ? (
-                <span className="bg-yellow-400 text-indigo-950 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg flex items-center gap-1.5 mb-8">
-                  <Star className="w-3 h-3 fill-current" /> Premium Member
-                </span>
+                <div className="bg-yellow-400 text-indigo-950 px-6 py-2 rounded-full font-black text-xs uppercase tracking-widest shadow-xl flex items-center gap-2 mb-10 animate-bounce">
+                  <Star className="w-4 h-4 fill-current" /> Premium Member Active
+                </div>
               ) : (
-                <div className="flex flex-col items-center gap-2 mb-8">
-                   <p className="text-indigo-200 text-sm font-bold opacity-80 uppercase tracking-widest">Master your career in Korea</p>
-                   <span className="bg-white/10 px-3 py-1 rounded-full text-[9px] font-black text-indigo-300 border border-white/10">Free Trial: Set 10 Demo Active</span>
+                <div className="flex flex-col items-center gap-4 mb-10">
+                   <p className="text-indigo-200 text-lg font-medium opacity-80">꿈을 향한 도전, AI Mate가 함께합니다.</p>
+                   <span className="bg-white/10 px-4 py-1.5 rounded-full text-[10px] font-black text-indigo-300 border border-white/10 uppercase tracking-widest">Free Demo: Round 10 Only</span>
                 </div>
               )}
               
-              <div className="w-full max-w-sm space-y-4">
-                <button onClick={() => handlePracticeStart('FULL')} className="bg-white text-indigo-900 w-full py-5 rounded-[1.8rem] font-black shadow-2xl flex items-center justify-center gap-4 transition-transform active:scale-95 group">
-                  <PlayCircle className="w-8 h-8 text-indigo-600 group-hover:scale-110 transition-transform" />
-                  <span className="text-2xl font-black uppercase">Start Mock Exam</span>
+              <div className="w-full max-w-lg space-y-4">
+                <button 
+                  onClick={() => handlePracticeStart('FULL')} 
+                  className="bg-white text-indigo-900 w-full py-6 rounded-[2.5rem] font-black shadow-2xl flex items-center justify-center gap-6 transition-all active:scale-95 group hover:bg-indigo-50"
+                >
+                  <PlayCircle className="w-10 h-10 text-indigo-600 group-hover:scale-110 transition-transform" />
+                  <span className="text-3xl font-black uppercase tracking-tight">모의고사 시작</span>
                 </button>
                 {!isPremium && (
-                  <button onClick={onUpgrade} className="bg-indigo-800/50 backdrop-blur-md border border-indigo-400/30 text-white w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95">
-                    <Lock className="w-5 h-5 text-indigo-300" /> Unlock Unlimited Rounds
+                  <button 
+                    onClick={onUpgrade} 
+                    className="bg-indigo-800/40 backdrop-blur-xl border border-white/10 text-white w-full py-5 rounded-[2rem] font-black flex items-center justify-center gap-3 active:scale-95 transition-all hover:bg-white/10"
+                  >
+                    <Lock className="w-5 h-5 text-yellow-400" /> 모든 라운드 해제하기
                   </button>
                 )}
               </div>
            </div>
         </div>
 
-        {/* Categories */}
-        <div className="px-5 py-10 max-w-4xl mx-auto">
-          <h3 className="text-gray-900 font-black text-xs uppercase tracking-[0.2em] mb-6 opacity-40">Practice Labs</h3>
+        {/* 랩 센터 (그리드 레이아웃) */}
+        <div className="px-6 py-12 max-w-screen-xl mx-auto">
+          <h3 className="text-gray-900 font-black text-xs uppercase tracking-[0.4em] mb-8 opacity-30 text-center">Practice Center</h3>
           
-          <div className="grid grid-cols-1 gap-4">
-            <button onClick={() => handlePracticeStart('READING')} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center gap-6 hover:border-indigo-200 active:scale-[0.98] transition-all text-left group">
-               <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-indigo-600 transition-colors">
-                  <Globe className="w-8 h-8 text-blue-600 group-hover:text-white" />
-               </div>
-               <div className="flex-1">
-                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">Reading Lab</h4>
-                  <p className="text-xs text-gray-400 font-bold mt-1">Focus on workplace vocabulary & passages</p>
-               </div>
-               <ArrowRight className="w-5 h-5 text-gray-200 group-hover:text-indigo-600 transition-colors" />
-            </button>
-
-            <button onClick={() => handlePracticeStart('LISTENING')} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center gap-6 hover:border-indigo-200 active:scale-[0.98] transition-all text-left group">
-               <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-orange-600 transition-colors">
-                  <BookOpen className="w-8 h-8 text-orange-600 group-hover:text-white" />
-               </div>
-               <div className="flex-1">
-                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">Listening Lab</h4>
-                  <p className="text-xs text-gray-400 font-bold mt-1">Practice with AI multi-speaker dialogues</p>
-               </div>
-               <ArrowRight className="w-5 h-5 text-gray-200 group-hover:text-orange-600 transition-colors" />
-            </button>
-
-            <button onClick={onViewAnalysis} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center gap-6 hover:border-indigo-200 active:scale-[0.98] transition-all text-left group">
-               <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-green-600 transition-colors">
-                  <Target className="w-8 h-8 text-green-600 group-hover:text-white" />
-               </div>
-               <div className="flex-1">
-                  <h4 className="font-black text-gray-900 text-lg uppercase tracking-tight">AI Score Analysis</h4>
-                  <p className="text-xs text-gray-400 font-bold mt-1">Get personalized feedback on your progress</p>
-               </div>
-               <ArrowRight className="w-5 h-5 text-gray-200 group-hover:text-green-600 transition-colors" />
-            </button>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { mode: 'READING', title: 'Reading Lab', desc: '직무별 어휘 및 지문 학습', icon: <Globe className="w-10 h-10 text-blue-600" />, bg: 'bg-blue-50', hover: 'hover:border-blue-200' },
+              { mode: 'LISTENING', title: 'Listening Lab', desc: '대화형 멀티 보이스 청취', icon: <BookOpen className="w-10 h-10 text-orange-600" />, bg: 'bg-orange-50', hover: 'hover:border-orange-200' },
+              { type: 'ANALYSIS', title: 'Performance', desc: 'AI 기반 취약점 분석 리포트', icon: <Target className="w-10 h-10 text-green-600" />, bg: 'bg-green-50', hover: 'hover:border-green-200' }
+            ].map((item, idx) => (
+              <button 
+                key={idx} 
+                onClick={() => item.type === 'ANALYSIS' ? onViewAnalysis() : handlePracticeStart(item.mode as ExamMode)}
+                className={`bg-white p-8 rounded-[3.5rem] shadow-sm border border-gray-100 flex flex-col items-center text-center transition-all active:scale-95 group ${item.hover} hover:shadow-xl`}
+              >
+                <div className={`w-20 h-20 ${item.bg} rounded-[2rem] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-inner`}>
+                  {item.icon}
+                </div>
+                <h4 className="font-black text-gray-900 text-xl uppercase tracking-tight mb-2">{item.title}</h4>
+                <p className="text-xs text-gray-400 font-bold leading-relaxed">{item.desc}</p>
+                <div className="mt-6 p-2 bg-gray-50 rounded-full group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                  <ArrowRight className="w-5 h-5" />
+                </div>
+              </button>
+            ))}
           </div>
         </div>
       </div>
       
-      {/* Footer */}
-      <div className="text-center py-6 text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] border-t border-gray-50 shrink-0">
-        © EPS Mate • AI Exam Partner
+      {/* 푸터 */}
+      <div className="text-center py-8 text-[10px] text-gray-400 font-black uppercase tracking-[0.4em] border-t border-gray-100 shrink-0 bg-white">
+        © EPS MATE • GLOBAL KOREAN PARTNER
       </div>
     </div>
   );

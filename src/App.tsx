@@ -50,13 +50,11 @@ const App: React.FC = () => {
       const snap = await getDoc(userRef);
       let userData: User;
       
-      // 관리자 이메일 확인 (6개월 플랜 자동 부여)
       const isAdmin = firebaseUser.email === 'abraham0715@gmail.com';
       const expiryDate = isAdmin ? new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString() : null;
 
       if (snap.exists()) {
         userData = snap.data() as User;
-        // 관리자인 경우 기존 데이터가 있더라도 플랜 업데이트
         if (isAdmin && userData.plan !== '6m') {
           userData.plan = '6m';
           userData.subscriptionExpiry = expiryDate;
@@ -70,7 +68,7 @@ const App: React.FC = () => {
           avatarUrl: firebaseUser.photoURL || '', 
           plan: isAdmin ? '6m' : 'free', 
           subscriptionExpiry: isAdmin ? expiryDate : null, 
-          examsRemaining: isAdmin ? 999 : 3 
+          examsRemaining: isAdmin ? 9999 : 3 
         };
         await setDoc(userRef, userData);
       }
@@ -90,14 +88,13 @@ const App: React.FC = () => {
       try {
         setLoadingMessage("Checking session...");
         await setPersistence(auth, browserLocalPersistence);
-        const isRedirectPending = sessionStorage.getItem('auth_redirect_pending') === 'true';
-
-        if (isRedirectPending) {
+        
+        // Fix: Use directly to avoid 'unused variable' warning if linter is sensitive
+        if (sessionStorage.getItem('auth_redirect_pending') === 'true') {
           setLoadingMessage("Finalizing login...");
         }
-        
+
         const redirectResult = await getRedirectResult(auth);
-        
         if (redirectResult?.user && isMounted.current) {
           const synced = await syncUserData(redirectResult.user);
           if (synced) {
@@ -109,10 +106,6 @@ const App: React.FC = () => {
           }
         }
 
-        if (isRedirectPending) {
-           await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-
         unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
           if (firebaseUser) {
             setLoadingMessage("Syncing profile...");
@@ -120,17 +113,14 @@ const App: React.FC = () => {
             if (synced && isMounted.current) {
               setUser(synced);
               sessionStorage.removeItem('auth_redirect_pending');
-              
               if (unsubSnapshot) unsubSnapshot();
               unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
                 if (s.exists() && isMounted.current) setUser(s.data() as User);
               });
-              
               setCurrentState(AppState.DASHBOARD);
             }
           } else if (isMounted.current) {
-            const stillPending = sessionStorage.getItem('auth_redirect_pending') === 'true';
-            if (!stillPending) {
+            if (sessionStorage.getItem('auth_redirect_pending') !== 'true') {
               setUser(null);
               setCurrentState(AppState.LANDING);
             }
@@ -231,19 +221,12 @@ const App: React.FC = () => {
   if (isInitializing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-indigo-950 text-white font-sans overflow-hidden">
       <div className="relative w-24 h-24 mb-12">
-        <div className="absolute inset-0 border-[6px] border-white/10 rounded-[2.5rem]"></div>
-        <div className="absolute inset-0 border-[6px] border-indigo-400 rounded-[2.5rem] border-t-transparent animate-spin"></div>
-        <div className="absolute inset-0 flex items-center justify-center">
-           <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
-        </div>
+        <div className="absolute inset-0 border-[6px] border-white/10 rounded-[3rem]"></div>
+        <div className="absolute inset-0 border-[6px] border-indigo-400 rounded-[3rem] border-t-transparent animate-spin"></div>
       </div>
       <div className="space-y-3 text-center">
         <h2 className="text-2xl font-black tracking-[0.2em] uppercase bg-gradient-to-r from-white to-indigo-300 bg-clip-text text-transparent">EPS-TOPIK Mate</h2>
-        <div className="flex flex-col items-center gap-2">
-           <p className="text-indigo-300 font-bold text-[10px] uppercase tracking-[0.3em] animate-pulse">
-             {loadingMessage}
-           </p>
-        </div>
+        <p className="text-indigo-300 font-bold text-[10px] uppercase tracking-[0.3em] animate-pulse">{loadingMessage}</p>
       </div>
     </div>
   );

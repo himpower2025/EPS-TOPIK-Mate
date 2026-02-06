@@ -29,21 +29,21 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
       period: '1 Month', 
       label: 'Starter Pass',
       features: [
-        'Reading Lab: 20 Sets (200 Qs)',
-        'Listening Lab: 20 Sets (200 Qs)',
-        'Mock Exam: 5 Sets (400 Qs total)'
+        'Reading Lab: 20 Sets',
+        'Listening Lab: 20 Sets',
+        'Mock Exam: 5 Rounds'
       ]
     },
     '3m': { 
       price: 'Rs. 1000', 
       period: '3 Months', 
-      label: 'Best Value',
+      label: 'Value Pass',
       isPopular: true,
       features: [
-        'Reading Lab: 70 Sets (700 Qs)',
-        'Listening Lab: 70 Sets (700 Qs)',
-        'Mock Exam: 30 Sets (1200 Qs total)',
-        'AI Performance Analysis'
+        'Reading Lab: 70 Sets',
+        'Listening Lab: 70 Sets',
+        'Mock Exam: 20 Rounds',
+        'AI Performance Report'
       ]
     },
     '6m': { 
@@ -52,10 +52,10 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
       label: 'Master Pass',
       isPremium: true,
       features: [
-        'Reading Lab: 150 Sets (1500 Qs)',
-        'Listening Lab: 150 Sets (1500 Qs)',
-        'Mock Exam: 70 Sets (2800 Qs total)',
-        'Unlimited AI Content Engine'
+        'Full Library Access',
+        '50+ Mock Exam Rounds',
+        'Unlimited AI Generation',
+        'Priority AI Illustration'
       ]
     }
   };
@@ -77,34 +77,36 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
       const isSuccess = await verifyPaymentWithServer(requestId);
       if (isSuccess) setStep('SUCCESS');
       else {
-        alert("Verification failed. Please scan and pay correctly before verifying.");
+        alert("Payment not confirmed yet. Please ensure you have scanned and paid.");
         setStep('PAYMENT');
       }
-    } catch (e) {
-      console.error("Verification error", e);
+    } catch {
       setStep('PAYMENT');
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/95 backdrop-blur-xl flex items-center justify-center z-[100] p-4 animate-fade-in">
-      <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[92vh]">
-        {/* Header */}
-        <div className="bg-gradient-to-br from-indigo-600 via-indigo-900 to-black p-8 text-white text-center relative shrink-0">
-          {/* 닫기 버튼을 항상 노출하도록 수정 (X 표시가 없어 무한로딩에 갇히는 문제 해결) */}
-          <button onClick={onClose} className="absolute top-6 right-6 text-white/50 hover:text-white p-2 z-20"><X className="w-6 h-6"/></button>
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-2xl flex items-center justify-center z-[100] p-4 animate-fade-in">
+      <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[95vh] relative">
+        
+        {/* Universal Close Button - Always Accessible */}
+        <button onClick={onClose} className="absolute top-8 right-8 text-gray-400 hover:text-indigo-600 p-2 z-[110] bg-white/80 rounded-full backdrop-blur-sm transition-colors shadow-sm">
+          <X className="w-6 h-6"/>
+        </button>
+
+        <div className="bg-indigo-900 p-10 text-white text-center shrink-0">
           <div className="flex flex-col items-center">
-            <div className="w-16 h-16 bg-white/10 rounded-3xl flex items-center justify-center mb-4 border border-white/20 shadow-inner">
-              <Crown className="w-10 h-10 text-yellow-400 fill-yellow-400" />
+            <div className="w-20 h-20 bg-white/10 rounded-[2rem] flex items-center justify-center mb-6 border border-white/20">
+              <Crown className="w-12 h-12 text-yellow-400 fill-yellow-400" />
             </div>
-            <h2 className="text-2xl font-black uppercase tracking-widest">Premium Pass</h2>
-            <p className="text-indigo-300 text-[10px] font-black mt-2 opacity-80 uppercase tracking-[0.2em]">Unlock Your Korean Dream</p>
+            <h2 className="text-3xl font-black uppercase tracking-tight">Upgrade Pass</h2>
+            <p className="text-indigo-300 text-xs font-black mt-2 opacity-80 uppercase tracking-widest">Master Korean with AI Mate</p>
           </div>
         </div>
 
-        <div className="p-6 overflow-y-auto bg-gray-50 flex-1 hide-scrollbar">
+        <div className="p-8 overflow-y-auto bg-gray-50 flex-1 hide-scrollbar pb-10">
           {step === 'PLANS' && (
-            <div className="space-y-4 pb-4">
+            <div className="space-y-4">
                {(Object.keys(plans) as Array<keyof typeof plans>).map((key) => {
                  const plan = plans[key];
                  const isSelected = selectedPlan === key;
@@ -112,79 +114,79 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
                    <div 
                     key={key} 
                     onClick={() => setSelectedPlan(key)} 
-                    className={`relative p-6 rounded-[2rem] border-2 transition-all cursor-pointer ${isSelected ? 'border-indigo-600 bg-white shadow-xl ring-4 ring-indigo-600/5' : 'border-gray-200 bg-white hover:border-indigo-300'}`}
+                    className={`relative p-6 rounded-[2.5rem] border-2 transition-all cursor-pointer ${isSelected ? 'border-indigo-600 bg-white shadow-xl' : 'border-white bg-white hover:border-indigo-100'}`}
                    >
-                     {plan.isPopular && <div className="absolute -top-3 left-8 bg-orange-500 text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase shadow-lg tracking-widest flex items-center gap-1"><Star className="w-3 h-3 fill-current"/> Most Popular</div>}
-                     {plan.isPremium && <div className="absolute -top-3 left-8 bg-indigo-600 text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase shadow-lg tracking-widest flex items-center gap-1"><Trophy className="w-3 h-3 fill-current"/> Best Investment</div>}
+                     {plan.isPopular && <div className="absolute -top-3 left-8 bg-orange-500 text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase shadow-lg tracking-widest flex items-center gap-1"><Star className="w-3 h-3 fill-current"/> POPULAR</div>}
+                     {plan.isPremium && <div className="absolute -top-3 left-8 bg-indigo-600 text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase shadow-lg tracking-widest flex items-center gap-1"><Trophy className="w-3 h-3 fill-current"/> MASTER</div>}
                      
-                     <div className="flex justify-between items-start mb-4">
+                     <div className="flex justify-between items-center mb-4">
                         <div>
-                          <h3 className="font-black text-xl text-indigo-900">{plan.period}</h3>
-                          <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">{plan.label}</span>
+                          <h3 className="font-black text-2xl text-indigo-950 tracking-tight">{plan.period}</h3>
+                          <span className="text-[10px] text-gray-400 font-black uppercase">{plan.label}</span>
                         </div>
-                        <div className="text-right">
-                          <div className="font-black text-2xl text-indigo-600 tracking-tighter">{plan.price}</div>
-                        </div>
+                        <div className="font-black text-2xl text-indigo-600 tracking-tighter">{plan.price}</div>
                      </div>
 
-                     <div className="space-y-2 border-t pt-4">
+                     <div className="space-y-2 border-t border-gray-50 pt-4">
                         {plan.features.map((feature, fIdx) => (
-                          <div key={fIdx} className="flex items-center gap-2">
-                             <CheckCircle2 className={`w-3.5 h-3.5 ${isSelected ? 'text-green-500' : 'text-gray-300'}`} />
-                             <span className="text-[11px] font-bold text-gray-600">{feature}</span>
+                          <div key={fIdx} className="flex items-center gap-3">
+                             <CheckCircle2 className={`w-4 h-4 ${isSelected ? 'text-green-500' : 'text-gray-200'}`} />
+                             <span className="text-[12px] font-bold text-gray-600">{feature}</span>
                           </div>
                         ))}
                      </div>
                    </div>
                  );
                })}
-               <button onClick={() => setStep('PAYMENT')} className="w-full bg-indigo-600 text-white font-black py-5 rounded-[2rem] shadow-xl text-lg mt-6 flex items-center justify-center gap-3 active:scale-95 transition-all">Continue to Payment <ArrowRight className="w-6 h-6"/></button>
+               <button onClick={() => setStep('PAYMENT')} className="w-full bg-indigo-600 text-white font-black py-6 rounded-[2.5rem] shadow-2xl text-xl mt-6 active:scale-95 transition-all flex items-center justify-center gap-3">Continue <ArrowRight className="w-6 h-6"/></button>
             </div>
           )}
 
           {step === 'PAYMENT' && (
             <div className="flex flex-col items-center animate-fade-in text-center">
-              <div className="bg-white p-8 rounded-[3rem] shadow-xl border border-gray-100 mb-8 w-full max-w-[300px] relative">
-                 <div className="aspect-square bg-white rounded-3xl overflow-hidden flex items-center justify-center relative border-4 border-gray-50 p-4 mb-6 shadow-inner">
-                    <img src="./fonepay-qr.png" alt="QR" className="w-full h-full object-contain" />
+              <div className="bg-white p-10 rounded-[3.5rem] shadow-xl border border-gray-100 mb-8 w-full max-w-[320px]">
+                 <div className="aspect-square bg-gray-50 rounded-[2.5rem] overflow-hidden flex items-center justify-center border-4 border-white shadow-inner mb-6">
+                    <img src="./fonepay-qr.png" alt="QR" className="w-full h-full object-contain p-4" />
                  </div>
-                 <div className="bg-indigo-900 p-5 rounded-[2rem] text-white shadow-xl flex justify-between items-center w-full">
+                 <div className="bg-indigo-950 p-6 rounded-[2rem] text-white shadow-xl flex justify-between items-center">
                     <div className="text-left">
-                       <div className="text-[9px] opacity-60 font-black uppercase tracking-widest">Total Amount</div>
-                       <div className="text-2xl font-black tracking-tighter">{currentPlan.price}</div>
+                       <p className="text-[9px] opacity-60 font-black uppercase tracking-widest mb-1">Total</p>
+                       <p className="text-3xl font-black tracking-tighter leading-none">{currentPlan.price}</p>
                     </div>
-                    <Smartphone className="w-8 h-8" />
+                    <Smartphone className="w-10 h-10 text-indigo-400" />
                  </div>
               </div>
-              <button onClick={handleStartVerifying} className="w-full bg-indigo-600 text-white font-black py-6 rounded-[2rem] shadow-xl text-xl flex items-center justify-center gap-3 active:scale-95 transition-all"><CheckCircle2 className="w-7 h-7" /> Verify My Payment</button>
-              <button onClick={() => setStep('PLANS')} className="mt-4 text-[11px] text-gray-400 font-black uppercase tracking-widest hover:text-indigo-600">Change Plan</button>
+              <button onClick={handleStartVerifying} className="w-full bg-indigo-600 text-white font-black py-6 rounded-[2.5rem] shadow-2xl text-xl active:scale-95 transition-all">I Have Paid • Verify Now</button>
+              <button onClick={() => setStep('PLANS')} className="mt-6 text-[11px] text-gray-400 font-black uppercase tracking-widest hover:text-indigo-600 transition-colors">Go Back to Plans</button>
             </div>
           )}
 
           {step === 'VERIFYING' && (
-            <div className="flex flex-col items-center text-center py-16 animate-fade-in">
-               <div className="w-20 h-20 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-8 shadow-xl"></div>
-               <h3 className="text-2xl font-black text-gray-900">Connecting to Server...</h3>
-               <p className="text-gray-400 text-sm mt-2 uppercase tracking-widest font-black mb-8">Securing your access</p>
+            <div className="flex flex-col items-center text-center py-20 animate-fade-in">
+               <div className="relative w-28 h-28 mb-10">
+                  <div className="absolute inset-0 border-4 border-indigo-100 rounded-full"></div>
+                  <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
+               </div>
+               <h3 className="text-3xl font-black text-gray-900 mb-2">Verifying Payment</h3>
+               <p className="text-gray-400 text-sm font-bold uppercase tracking-widest mb-10 animate-pulse">Checking Secure Server...</p>
                
-               {/* 로딩 중에 사용자가 나갈 수 있도록 취소 버튼 추가 */}
                <button 
                 onClick={() => setStep('PAYMENT')} 
-                className="px-6 py-2 bg-gray-100 text-gray-500 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-gray-200 transition-colors"
+                className="px-10 py-4 bg-gray-100 text-gray-500 rounded-full font-black text-xs uppercase tracking-widest hover:bg-gray-200 active:scale-95 transition-all"
                >
-                 Cancel Verification
+                 Cancel & Return
                </button>
             </div>
           )}
 
           {step === 'SUCCESS' && (
             <div className="flex flex-col items-center text-center py-12 animate-slide-up">
-               <div className="w-28 h-28 bg-green-100 rounded-[2.5rem] flex items-center justify-center mb-8 shadow-xl shadow-green-200">
-                  <CheckCircle2 className="w-16 h-16 text-green-600" />
+               <div className="w-32 h-32 bg-green-50 rounded-[3rem] flex items-center justify-center mb-8 shadow-inner">
+                  <CheckCircle2 className="w-20 h-20 text-green-500" />
                </div>
-               <h3 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Access Granted!</h3>
-               <div className="bg-indigo-950 text-white px-6 py-2 rounded-full font-black text-lg uppercase tracking-widest shadow-lg mb-10">{currentPlan.label} Member</div>
-               <button onClick={onClose} className="w-full bg-indigo-600 text-white font-black py-6 rounded-[2rem] shadow-xl text-xl hover:scale-[1.02] active:scale-95 transition-all">Start Your Journey</button>
+               <h3 className="text-4xl font-black text-gray-900 mb-2">Welcome Aboard!</h3>
+               <p className="text-gray-400 font-bold mb-10">{currentPlan.period} Master Pass is now active.</p>
+               <button onClick={onClose} className="w-full bg-indigo-600 text-white font-black py-6 rounded-[2.5rem] shadow-2xl text-xl hover:scale-[1.02] active:scale-95 transition-all">Start Practice</button>
             </div>
           )}
         </div>
