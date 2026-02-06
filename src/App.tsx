@@ -89,11 +89,13 @@ const App: React.FC = () => {
         setLoadingMessage("Checking session...");
         await setPersistence(auth, browserLocalPersistence);
         
-        // Fix: Use directly to avoid 'unused variable' warning if linter is sensitive
-        if (sessionStorage.getItem('auth_redirect_pending') === 'true') {
-          setLoadingMessage("Finalizing login...");
+        // 1. 리다이렉트 처리 여부 우선 확인
+        const isRedirectPending = sessionStorage.getItem('auth_redirect_pending') === 'true';
+        if (isRedirectPending) {
+          setLoadingMessage("Completing sign-in...");
         }
 
+        // 2. 리다이렉트 결과 가져오기
         const redirectResult = await getRedirectResult(auth);
         if (redirectResult?.user && isMounted.current) {
           const synced = await syncUserData(redirectResult.user);
@@ -106,6 +108,7 @@ const App: React.FC = () => {
           }
         }
 
+        // 3. 일반적인 인증 상태 리스너 등록
         unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
           if (firebaseUser) {
             setLoadingMessage("Syncing profile...");
@@ -113,18 +116,23 @@ const App: React.FC = () => {
             if (synced && isMounted.current) {
               setUser(synced);
               sessionStorage.removeItem('auth_redirect_pending');
+              
               if (unsubSnapshot) unsubSnapshot();
               unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
                 if (s.exists() && isMounted.current) setUser(s.data() as User);
               });
+              
               setCurrentState(AppState.DASHBOARD);
             }
           } else if (isMounted.current) {
+            // 리다이렉트 대기 중이 아닐 때만 랜딩 페이지로 전환
             if (sessionStorage.getItem('auth_redirect_pending') !== 'true') {
               setUser(null);
               setCurrentState(AppState.LANDING);
             }
           }
+          
+          // 모든 상황이 정리되면 초기화 완료
           if (isMounted.current) setIsInitializing(false);
         });
 
@@ -151,6 +159,7 @@ const App: React.FC = () => {
     
     try {
       if (isMobile) {
+        // 모바일인 경우 리다이렉트 상태 저장 후 진행
         sessionStorage.setItem('auth_redirect_pending', 'true');
         setIsInitializing(true);
         setLoadingMessage("Redirecting to Google...");

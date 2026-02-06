@@ -116,8 +116,17 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
                     onClick={() => setSelectedPlan(key)} 
                     className={`relative p-6 rounded-[2.5rem] border-2 transition-all cursor-pointer ${isSelected ? 'border-indigo-600 bg-white shadow-xl' : 'border-white bg-white hover:border-indigo-100'}`}
                    >
-                     {plan.isPopular && <div className="absolute -top-3 left-8 bg-orange-500 text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase shadow-lg tracking-widest flex items-center gap-1"><Star className="w-3 h-3 fill-current"/> POPULAR</div>}
-                     {plan.isPremium && <div className="absolute -top-3 left-8 bg-indigo-600 text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase shadow-lg tracking-widest flex items-center gap-1"><Trophy className="w-3 h-3 fill-current"/> MASTER</div>}
+                     {/* Use Star and Trophy icons here to resolve unused variable warning */}
+                     {plan.isPopular && (
+                        <div className="absolute -top-3 left-8 bg-orange-500 text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase shadow-lg tracking-widest flex items-center gap-1">
+                          <Star className="w-3 h-3 fill-current" /> POPULAR
+                        </div>
+                     )}
+                     {plan.isPremium && (
+                        <div className="absolute -top-3 left-8 bg-indigo-600 text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase shadow-lg tracking-widest flex items-center gap-1">
+                          <Trophy className="w-3 h-3 fill-current" /> MASTER
+                        </div>
+                     )}
                      
                      <div className="flex justify-between items-center mb-4">
                         <div>
