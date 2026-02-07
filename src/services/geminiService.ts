@@ -29,80 +29,26 @@ async function decodeAudioData(data: Uint8Array, ctx: AudioContext, sampleRate: 
 const cleanJson = (text: string | undefined): string => 
   (text ?? "").replace(/```json/g, '').replace(/```/g, '').replace(/\/\*.*?\*\//gs, '').trim();
 
-/**
- * 플랜별 데이터 매핑 및 고도화된 AI 유사 문항 생성 로직
- */
 export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number, plan: PlanType): Promise<Question[]> => {
-  // 1. 무료 사용자/맛보기 로직 (Set 10 정밀 필터링)
-  if (plan === 'free') {
-    if (mode === 'READING') {
-      return STATIC_EXAM_DATA.filter(q => q.id.includes('s10_r_') && parseInt(q.id.split('_r_')[1]) <= 10);
-    }
-    if (mode === 'LISTENING') {
-      return STATIC_EXAM_DATA.filter(q => q.id.includes('s10_l_') && parseInt(q.id.split('_l_')[1]) >= 21 && parseInt(q.id.split('_l_')[1]) <= 29);
-    }
-    if (mode === 'FULL') {
-      const r = STATIC_EXAM_DATA.filter(q => q.id.includes('s10_r_') && parseInt(q.id.split('_r_')[1]) >= 11 && parseInt(q.id.split('_r_')[1]) <= 20);
-      const l = STATIC_EXAM_DATA.filter(q => q.id.includes('s10_l_') && parseInt(q.id.split('_l_')[1]) >= 30 && parseInt(q.id.split('_l_')[1]) <= 40);
-      return [...r, ...l];
-    }
-  }
-
-  // 2. 플랜별 타겟 인덱스 결정
-  let targetSetIndex = -1;
-  let useAI = false;
-
-  if (plan === '1m') {
-    if (mode === 'READING' || mode === 'LISTENING') targetSetIndex = roundNumber; // 1-5
-    else if (mode === 'FULL') targetSetIndex = [12, 14, 16, 18, 20][roundNumber - 1];
-  } 
-  else if (plan === '3m') {
-    if (mode === 'READING' || mode === 'LISTENING') targetSetIndex = roundNumber; // 1-20
-    else if (mode === 'FULL') {
-      if (roundNumber <= 10) targetSetIndex = roundNumber + 20; // 21-30
-      else useAI = true; // 31-40 (AI Generated)
-    }
-  } 
-  else if (plan === '6m') {
-    if (mode === 'READING' || mode === 'LISTENING') {
-      if (roundNumber <= 15) targetSetIndex = roundNumber; // 1-15
-      else useAI = true; // 16-50 (AI Generated)
-    } else if (mode === 'FULL') {
-      if (roundNumber <= 15) targetSetIndex = roundNumber + 15; // 16-30
-      else useAI = true; // 31-50 (AI Generated)
-    }
-  }
-
-  // 3. DB 로드 또는 AI 생성 실행
-  if (!useAI && targetSetIndex !== -1) {
-    const prefix = `s${targetSetIndex}_`;
-    const setData = STATIC_EXAM_DATA.filter(q => q.id.startsWith(prefix));
-    
-    if (mode === 'READING') return setData.filter(q => q.type === QuestionType.READING).slice(0, 20);
-    if (mode === 'LISTENING') return setData.filter(q => q.type === QuestionType.LISTENING).slice(0, 20);
-    if (mode === 'FULL') {
-      const r = setData.filter(q => q.type === QuestionType.READING).slice(0, 20);
-      const l = setData.filter(q => q.type === QuestionType.LISTENING).slice(0, 20);
-      return [...r, ...l];
-    }
-  }
-
-  // AI 생성: DB와의 유사도를 극대화하는 프롬프트 엔지니어링
   const ai = getAI();
-  try {
-    const prompt = `You are an official EPS-TOPIK Question Developer.
-    TASK: Generate a ${mode === 'FULL' ? 'Reading(20) and Listening(20)' : mode + ' (20)'} question set for Round ${roundNumber}.
-    CRITICAL QUALITY GUIDELINES:
-    1. STRICT SIMILARITY: Analyze the existing 30-set database structure. The vocabulary level must be exactly the same as the EPS-TOPIK standard (Intermediate-Beginner).
-    2. VARIETY: Cover diverse categories: Industrial safety, workplace etiquette, daily tools, Korean culture, and simple dialogues.
-    3. NO REPETITION: Do not use the same scenarios from the database. Create fresh but plausible workplace situations.
-    4. LISTENING SCRIPTS: For listening questions, provide natural Korean scripts in the 'context' field. 
-       - Single Speaker: Plain text.
-       - Dialogue: Use 'Man: ...', 'Woman: ...' or '남: ...', '여: ...' format.
-    5. VISUAL PROMPTS: Every question MUST have a descriptive 'imagePrompt' for AI rendering.
-    
-    FORMAT: JSON array of Question objects.`;
+  
+  // Adjusted difficulty based on plan
+  const difficultyLabel = plan === 'free' ? "Standard" : "Advanced Workplace Scenarios";
 
+  const prompt = `You are a world-class EPS-TOPIK examiner from HRD Korea.
+  TASK: Generate a set of 20 high-quality, professional questions for Round ${roundNumber}.
+  PLAN LEVEL: ${plan} (${difficultyLabel}).
+  MODE: ${mode} (If mode is LISTENING, generate ONLY Listening questions. If READING, only Reading questions).
+  
+  CRITICAL AI INSTRUCTIONS:
+  1. NO REPETITION: Every question must be a unique workplace scenario. Do not repeat basic vocabulary. Use realistic industrial, agricultural, or service sector contexts.
+  2. VIVID VISUAL PROMPTS: For the 'imagePrompt' field, write a high-detail description for an illustrator. (e.g., "A yellow triangular caution sign with a black electric spark symbol on a factory wall" instead of just "warning sign"). This ensures the image generator works perfectly.
+  3. LISTENING LAB: For Listening questions, the 'context' field MUST contain the audio script/dialogue. Use 'Man:' and 'Woman:' tags.
+  4. FEEDBACK: Provide all explanations and category labels in professional English. The exam questions (Korean part) must use standard TOPIK level 1-2 vocabulary.
+  
+  FORMAT: Strictly return a JSON array of Question objects.`;
+
+  try {
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
       contents: prompt,
@@ -129,12 +75,12 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
       }
     });
 
-    const jsonText = cleanJson(response.text);
-    return JSON.parse(jsonText);
+    const parsed = JSON.parse(cleanJson(response.text));
+    // Final filtering to ensure mode strictness
+    return parsed.filter((q: Question) => mode === 'FULL' || q.type === mode);
   } catch (err) {
-    console.error("Critical AI Generation Error:", err);
-    // Fallback: 10번 세트에서 무작위로 가져오기
-    return STATIC_EXAM_DATA.filter(q => q.id.includes('s10_')).slice(0, 20);
+    console.error("Gemini Question Generation Error:", err);
+    return STATIC_EXAM_DATA.filter(q => mode === 'FULL' || q.type === mode).slice(0, 20);
   }
 };
 
@@ -145,23 +91,21 @@ export const generateImage = async (prompt: string): Promise<string | null> => {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: { 
-        parts: [{ text: `High-fidelity EPS-TOPIK exam visual aid: ${prompt}. Professional industrial illustration, clean and clear for educational testing, white background, no text inside image.` }] 
+        parts: [{ text: `Professional EPS-TOPIK exam illustration. High clarity, educational style, white background, simple colors. Subject: ${prompt}` }] 
       },
       config: { imageConfig: { aspectRatio: "1:1" } }
     });
     
-    const candidate = response.candidates?.[0];
-    const part = candidate?.content?.parts?.find(p => p.inlineData);
+    const part = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
     return part?.inlineData ? `data:image/png;base64,${part.inlineData.data}` : null;
   } catch (err) {
-    console.error("Image generation failed:", err);
+    console.error("Gemini Image generation failed:", err);
     return null;
   }
 };
 
 export const generateSpeech = async (text: string): Promise<AudioBuffer | null> => {
   const ai = getAI();
-  // 대화 형식 파악
   const isDialogue = text.includes("Man:") || text.includes("Woman:") || text.includes("남:") || text.includes("여:");
   
   try {
@@ -177,9 +121,7 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
         multiSpeakerVoiceConfig: {
           speakerVoiceConfigs: [
             { speaker: 'Man', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Puck' } } },
-            { speaker: 'Woman', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } },
-            { speaker: '남', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Puck' } } },
-            { speaker: '여', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } }
+            { speaker: 'Woman', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } }
           ]
         }
       };
@@ -191,15 +133,14 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
       config
     });
     
-    const candidate = response.candidates?.[0];
-    const audioData = candidate?.content?.parts?.[0]?.inlineData?.data;
+    const audioData = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
     if (audioData) {
       const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
       return await decodeAudioData(decodeBase64(audioData), ctx, 24000, 1);
     }
     return null;
   } catch (err) {
-    console.error("TTS generation failed:", err);
+    console.error("Gemini TTS generation failed:", err);
     return null;
   }
 };
@@ -209,7 +150,7 @@ export const analyzePerformance = async (session: ExamSession): Promise<Analytic
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: `Analyze EPS-TOPIK test results. Score: ${session.score}/${session.questions.length}. Provide deep insights in English. Return JSON.`,
+      contents: `Analyze these EPS-TOPIK mock results. Score: ${session.score}/${session.questions.length}. Provide expert feedback in professional English. Return JSON.`,
       config: { responseMimeType: "application/json" }
     });
     return JSON.parse(cleanJson(response.text));

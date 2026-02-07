@@ -18,7 +18,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(mode === 'FULL' ? 50 * 60 : 25 * 60); 
+  const [timeLeft, setTimeLeft] = useState(mode === 'FULL' ? 50 * 60 : 30 * 60); 
   const [loadingAudio, setLoadingAudio] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
@@ -35,16 +35,17 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
       setLoading(true);
       try {
         const data = await generateQuestionsBySet(mode, setNumber, plan);
-        if (!data || data.length === 0) throw new Error("No data");
+        if (!data || data.length === 0) throw new Error("Question generation failed");
         setQuestions(data);
       } catch (err) {
+        console.error(err);
         onExit();
       } finally {
         setLoading(false);
       }
     };
     loadData();
-  }, [mode, setNumber, plan]);
+  }, [mode, setNumber, plan, onExit]);
 
   const initAudio = async () => {
     if (!audioContextRef.current) {
@@ -63,7 +64,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     setQuestionImage(null);
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
 
-    const handleVisuals = async () => {
+    const loadVisuals = async () => {
       if (q.imagePrompt) {
         setIsGeneratingVisuals(true);
         const img = await generateImage(q.imagePrompt);
@@ -71,7 +72,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
         setIsGeneratingVisuals(false);
       }
     };
-    handleVisuals();
+    loadVisuals();
 
     if (q.type === QuestionType.LISTENING && audioContextReady) {
       handlePlayAudio();
@@ -88,6 +89,10 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     const q = questions[currentIndex];
     const script = q.context || q.questionText;
     if (!script || isPlaying) return;
+    
+    if (currentAudioSource.current) {
+      try { currentAudioSource.current.stop(); } catch {}
+    }
     
     setLoadingAudio(true);
     try {
@@ -128,7 +133,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
 
   if (loading) return (
     <div className="h-full flex flex-col items-center justify-center p-8 bg-white">
-      <LoadingSpinner message="AI 출제 위원이 문제를 검토 중입니다..." />
+      <LoadingSpinner message="AI Examiner is tailoring your personalized questions..." />
     </div>
   );
 
@@ -140,16 +145,15 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     return (
       <div className="flex flex-col items-center justify-center h-full bg-indigo-950 text-white p-10 text-center pt-safe">
         <Headphones className="w-20 h-20 mb-8 text-indigo-300 animate-pulse" />
-        <h2 className="text-3xl font-black mb-4">AUDIO READY</h2>
-        <p className="mb-12 text-indigo-200/70 font-medium">실제 시험장과 동일한 음성 환경을 구성합니다.</p>
-        <button onClick={initAudio} className="bg-white text-indigo-900 px-12 py-5 rounded-[2.5rem] font-black text-xl shadow-2xl active:scale-95">입장하기</button>
+        <h2 className="text-3xl font-black mb-4">Listening Test Ready</h2>
+        <p className="mb-12 text-indigo-200/70 font-medium">Please turn on your sound for a realistic exam experience.</p>
+        <button onClick={initAudio} className="bg-white text-indigo-900 px-12 py-5 rounded-[2.5rem] font-black text-xl shadow-2xl active:scale-95">Begin Audio</button>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col h-full bg-gray-50 font-sans overflow-hidden">
-      {/* 최상단 네비게이션 - 모바일/태블릿 통합 */}
       <div className="bg-white border-b border-gray-200 pt-safe shrink-0 shadow-sm z-30">
         <div className="px-6 py-4 flex justify-between items-center max-w-screen-xl mx-auto w-full">
             <div className="flex items-center gap-4">
@@ -162,29 +166,27 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
               <span className="text-sm font-black text-gray-900">Q {currentIndex + 1} / {questions.length}</span>
             </div>
             
-            <div className="flex items-center gap-3 bg-gray-900 text-white px-5 py-2.5 rounded-2xl shadow-lg">
+            <div className="flex items-center gap-3 bg-indigo-950 text-white px-5 py-2.5 rounded-2xl shadow-lg border border-white/10">
               <Clock className="w-4 h-4 text-indigo-400" />
               <span className="font-mono font-bold text-lg leading-none">{Math.floor(timeLeft/60)}:{(timeLeft%60).toString().padStart(2,'0')}</span>
             </div>
         </div>
       </div>
 
-      {/* 메인 시험 영역 - 반응형 레이아웃 */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-10 pb-40 hide-scrollbar">
          <div className="max-w-screen-xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
             
-            {/* 좌측: 문제 및 시각 자료 */}
             <div className="space-y-6">
                 <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-gray-100">
                     <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-6 border ${isListening ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-green-50 text-green-700 border-green-100'}`}>
                         {isListening ? <Headphones className="w-3 h-3"/> : <ImageIcon className="w-3 h-3"/>}
-                        {currentQ.type} SECTION
+                        {currentQ.type} Section
                     </div>
                     <h2 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight mb-4">{currentQ.questionText}</h2>
-                    {currentQ.category && <p className="text-sm text-gray-400 font-bold uppercase tracking-wider">{currentQ.category}</p>}
+                    <p className="text-xs text-gray-400 font-bold uppercase tracking-widest opacity-60">{currentQ.category}</p>
                 </div>
 
-                <div className="bg-white rounded-[3rem] border border-gray-100 overflow-hidden shadow-sm flex flex-col items-center justify-center p-8 transition-all min-h-[400px]">
+                <div className="bg-white rounded-[3rem] border-2 border-dashed border-gray-200 overflow-hidden shadow-sm flex flex-col items-center justify-center p-8 transition-all min-h-[400px]">
                     {isGeneratingVisuals && !questionImage ? (
                       <div className="flex flex-col items-center gap-6 py-12 text-center animate-pulse">
                         <Sparkles className="w-16 h-16 text-indigo-400 animate-spin" />
@@ -211,7 +213,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                                     {loadingAudio ? <div className="w-12 h-12 border-4 border-current border-t-transparent rounded-full animate-spin"/> : <Volume2 className="w-20 h-20" />}
                                  </button>
                                  <div className="text-center">
-                                    <p className="text-sm font-black text-indigo-900 uppercase tracking-[0.2em] mb-2">{isPlaying ? "NOW PLAYING" : "CLICK TO PLAY"}</p>
+                                    <p className="text-sm font-black text-indigo-900 uppercase tracking-[0.2em] mb-2">{isPlaying ? "Now Playing" : "Tap to Listen"}</p>
                                     <div className="flex gap-1 justify-center">
                                        {[...Array(3)].map((_, i) => <div key={i} className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-indigo-500 animate-bounce' : 'bg-gray-200'}`} style={{animationDelay: `${i*0.2}s`}} />)}
                                     </div>
@@ -225,7 +227,6 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                 </div>
             </div>
 
-            {/* 우측: 정답 옵션 (태블릿 이상에서 나란히 배치) */}
             <div className="grid grid-cols-1 gap-4 h-full content-start">
                 {currentQ.options.map((option, idx) => {
                     const isSelected = answers[currentQ.id] === idx;
@@ -247,7 +248,6 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
          </div>
       </div>
 
-      {/* 하단 내비게이션 바 - 모바일 터치 대응 */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-2xl border-t border-gray-100 p-6 pb-safe z-40">
           <div className="max-w-screen-xl mx-auto flex gap-4">
               <button 
@@ -261,12 +261,11 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                 onClick={isLast ? handleSubmit : () => setCurrentIndex(p => p + 1)} 
                 className={`flex-1 ${isLast ? 'bg-green-600 shadow-green-100' : 'bg-indigo-600 shadow-indigo-100'} text-white font-black rounded-3xl shadow-2xl active:scale-95 text-xl uppercase tracking-widest transition-all py-5`}
               >
-                {isLast ? 'SUBMIT EXAM' : 'NEXT QUESTION'}
+                {isLast ? 'Complete Exam' : 'Next Question'}
               </button>
           </div>
       </div>
 
-      {/* 질문 관리 드로어 */}
       {isDrawerOpen && (
         <div className="fixed inset-0 z-[60] flex">
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={() => setIsDrawerOpen(false)}></div>
@@ -285,15 +284,6 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                     {idx + 1}
                   </button>
                ))}
-            </div>
-            <div className="p-8 bg-gray-50">
-               <div className="flex justify-between text-xs font-black uppercase tracking-widest text-gray-400 mb-2">
-                  <span>Answered</span>
-                  <span>{Object.keys(answers).length} / {questions.length}</span>
-               </div>
-               <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
-                  <div className="h-full bg-indigo-600 transition-all duration-500" style={{width: `${(Object.keys(answers).length / questions.length) * 100}%`}} />
-               </div>
             </div>
           </div>
         </div>
