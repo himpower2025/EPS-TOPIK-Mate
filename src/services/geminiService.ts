@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Question, QuestionType, AnalyticsFeedback, ExamSession, ExamMode, PlanType } from '../types';
 import { STATIC_EXAM_DATA } from '../data/examData';
@@ -32,21 +33,24 @@ const cleanJson = (text: string | undefined): string =>
 export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number, plan: PlanType): Promise<Question[]> => {
   const ai = getAI();
   
-  // Adjusted difficulty based on plan
-  const difficultyLabel = plan === 'free' ? "Standard" : "Advanced Workplace Scenarios";
+  // Use 'plan' to define specific workplace scenarios
+  const workplaceContext = plan === 'free' ? "Basic Service/Manufacturing" : "Heavy Industry, Construction, and Modern Agriculture Scenarios";
 
-  const prompt = `You are a world-class EPS-TOPIK examiner from HRD Korea.
-  TASK: Generate a set of 20 high-quality, professional questions for Round ${roundNumber}.
-  PLAN LEVEL: ${plan} (${difficultyLabel}).
-  MODE: ${mode} (If mode is LISTENING, generate ONLY Listening questions. If READING, only Reading questions).
-  
-  CRITICAL AI INSTRUCTIONS:
-  1. NO REPETITION: Every question must be a unique workplace scenario. Do not repeat basic vocabulary. Use realistic industrial, agricultural, or service sector contexts.
-  2. VIVID VISUAL PROMPTS: For the 'imagePrompt' field, write a high-detail description for an illustrator. (e.g., "A yellow triangular caution sign with a black electric spark symbol on a factory wall" instead of just "warning sign"). This ensures the image generator works perfectly.
-  3. LISTENING LAB: For Listening questions, the 'context' field MUST contain the audio script/dialogue. Use 'Man:' and 'Woman:' tags.
-  4. FEEDBACK: Provide all explanations and category labels in professional English. The exam questions (Korean part) must use standard TOPIK level 1-2 vocabulary.
-  
-  FORMAT: Strictly return a JSON array of Question objects.`;
+  const prompt = `You are a legendary EPS-TOPIK Question Architect. 
+  TASK: Generate 20 high-fidelity exam questions for Round ${roundNumber}.
+  USER LEVEL: ${plan} (${workplaceContext}).
+  MODALITY: ${mode} (If LISTENING, only audio-based. If READING, only visual-text based).
+
+  ULTIMATE QUALITY GUIDELINES:
+  1. HYPER-REALISM: Create scenarios actually found in Korean factories, farms, and sites. No generic or repetitive content.
+  2. IMAGE PROMPT EXCELLENCE: The 'imagePrompt' must be an architecturally detailed description. 
+     - Poor: "A crane."
+     - Superior: "A high-angle 3D vector illustration of a yellow industrial tower crane lifting a steel beam in a busy Korean construction site with safety fences, white background, high contrast."
+  3. AUDIO SCRIPT DEPTH: For LISTENING, use 'Man:' and 'Woman:' tags. Include natural Korean pauses like '음...', '저...' for high realism. Script must be in the 'context' field.
+  4. NO BLANKS: Every single question MUST have a valid 'imagePrompt'.
+  5. LANGUAGE: Korean for exam content. Professional English for categories, explanations, and instructions.
+
+  JSON SCHEMA: Strictly follow the Question interface. No markdown garbage outside JSON.`;
 
   try {
     const response = await ai.models.generateContent({
@@ -76,10 +80,9 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
     });
 
     const parsed = JSON.parse(cleanJson(response.text));
-    // Final filtering to ensure mode strictness
     return parsed.filter((q: Question) => mode === 'FULL' || q.type === mode);
   } catch (err) {
-    console.error("Gemini Question Generation Error:", err);
+    console.error("AI Question Engine Error:", err);
     return STATIC_EXAM_DATA.filter(q => mode === 'FULL' || q.type === mode).slice(0, 20);
   }
 };
@@ -91,7 +94,7 @@ export const generateImage = async (prompt: string): Promise<string | null> => {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: { 
-        parts: [{ text: `Professional EPS-TOPIK exam illustration. High clarity, educational style, white background, simple colors. Subject: ${prompt}` }] 
+        parts: [{ text: `High-definition professional EPS-TOPIK exam visual. Clean line art style, vibrant industrial colors, white background. Subject: ${prompt}` }] 
       },
       config: { imageConfig: { aspectRatio: "1:1" } }
     });
@@ -99,7 +102,7 @@ export const generateImage = async (prompt: string): Promise<string | null> => {
     const part = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
     return part?.inlineData ? `data:image/png;base64,${part.inlineData.data}` : null;
   } catch (err) {
-    console.error("Gemini Image generation failed:", err);
+    console.error("Image generation failed:", err);
     return null;
   }
 };
@@ -129,7 +132,7 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text: text }] }],
+      contents: [{ parts: [{ text: `문제를 잘 듣고 알맞은 답을 고르십시오. ${text}` }] }],
       config
     });
     
@@ -140,7 +143,7 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
     }
     return null;
   } catch (err) {
-    console.error("Gemini TTS generation failed:", err);
+    console.error("Speech generation error:", err);
     return null;
   }
 };
@@ -150,7 +153,7 @@ export const analyzePerformance = async (session: ExamSession): Promise<Analytic
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: `Analyze these EPS-TOPIK mock results. Score: ${session.score}/${session.questions.length}. Provide expert feedback in professional English. Return JSON.`,
+      contents: `Perform a deep academic analysis on these EPS-TOPIK mock test results. Score: ${session.score}/${session.questions.length}. Identify weak grammatical points and suggest a 7-day study plan in professional English. Return JSON.`,
       config: { responseMimeType: "application/json" }
     });
     return JSON.parse(cleanJson(response.text));

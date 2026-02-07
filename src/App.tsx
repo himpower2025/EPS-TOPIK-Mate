@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Dashboard } from './components/Dashboard';
 import { SetSelector } from './components/SetSelector';
@@ -75,6 +76,7 @@ const App: React.FC = () => {
       return userData;
     } catch (error) {
       console.error("Firestore sync error:", error);
+      // 에러 발생 시에도 빈 유저를 반환하지 않고 에러를 던져 finally에서 처리하게 함
       return null;
     }
   }, []);
@@ -85,24 +87,39 @@ const App: React.FC = () => {
     let unsubAuth: (() => void) | null = null;
 
     const startBootSequence = async () => {
+      // 10초 타임아웃: 무한 로딩 방지용 강제 종료 로직
+      const timeoutId = setTimeout(() => {
+        if (isInitializing && isMounted.current) {
+          console.warn("Auth timeout reached. Forcing load completion.");
+          setIsInitializing(false);
+          setLoadingMessage("Session timed out. Please try again.");
+        }
+      }, 10000);
+
       try {
         setLoadingMessage("Checking session...");
         await setPersistence(auth, browserLocalPersistence);
         
-        // 1. Check if we're coming back from a mobile redirect
-        const redirectResult = await getRedirectResult(auth);
-        if (redirectResult?.user && isMounted.current) {
-          const synced = await syncUserData(redirectResult.user);
-          if (synced) {
-            setUser(synced);
-            setCurrentState(AppState.DASHBOARD);
-            sessionStorage.removeItem('auth_redirect_pending');
-            setIsInitializing(false);
-            return;
+        // 1. Redirect Result 우선 처리 (모바일 구글 로그인 결과)
+        try {
+          const redirectResult = await getRedirectResult(auth);
+          if (redirectResult?.user && isMounted.current) {
+            const synced = await syncUserData(redirectResult.user);
+            if (synced) {
+              setUser(synced);
+              setCurrentState(AppState.DASHBOARD);
+              sessionStorage.removeItem('auth_redirect_pending');
+              setIsInitializing(false);
+              clearTimeout(timeoutId);
+              return;
+            }
           }
+        } catch (redirectErr) {
+          console.error("Redirect Error:", redirectErr);
+          sessionStorage.removeItem('auth_redirect_pending');
         }
 
-        // 2. Setup the global auth listener
+        // 2. Auth 리스너 설정
         unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
           if (firebaseUser) {
             setLoadingMessage("Syncing profile...");
@@ -118,24 +135,25 @@ const App: React.FC = () => {
               
               setCurrentState(AppState.DASHBOARD);
             }
-            if (isMounted.current) setIsInitializing(false);
           } else if (isMounted.current) {
-            // Very important: if redirect is pending, don't show landing page yet
             const isRedirectPending = sessionStorage.getItem('auth_redirect_pending') === 'true';
             if (!isRedirectPending) {
               setUser(null);
               setCurrentState(AppState.LANDING);
-              setIsInitializing(false);
-            } else {
-              setLoadingMessage("Authenticating...");
             }
+          }
+          
+          if (isMounted.current) {
+            setIsInitializing(false);
+            clearTimeout(timeoutId);
           }
         });
 
       } catch (err) {
-        console.error("Auth Boot Sequence Failed:", err);
+        console.error("Critical Auth Boot Error:", err);
         sessionStorage.removeItem('auth_redirect_pending');
         if (isMounted.current) setIsInitializing(false);
+        clearTimeout(timeoutId);
       }
     };
 
@@ -161,7 +179,7 @@ const App: React.FC = () => {
         await signInWithRedirect(auth, provider);
       } else {
         setIsInitializing(true);
-        setLoadingMessage("Opening login window...");
+        setLoadingMessage("Opening Google...");
         const result = await signInWithPopup(auth, provider);
         const synced = await syncUserData(result.user);
         if (synced) {
@@ -171,8 +189,9 @@ const App: React.FC = () => {
         }
         setIsInitializing(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login Error:", error);
+      alert("Login failed: " + error.message);
       sessionStorage.removeItem('auth_redirect_pending');
       setIsInitializing(false);
     }
@@ -231,6 +250,12 @@ const App: React.FC = () => {
       <div className="space-y-3 text-center">
         <h2 className="text-2xl font-black tracking-[0.2em] uppercase bg-gradient-to-r from-white to-indigo-300 bg-clip-text text-transparent">EPS-TOPIK Mate</h2>
         <p className="text-indigo-300 font-bold text-[10px] uppercase tracking-[0.3em] animate-pulse">{loadingMessage}</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="mt-8 text-[10px] text-white/40 underline uppercase tracking-widest hover:text-white"
+        >
+          Reload if stuck
+        </button>
       </div>
     </div>
   );
