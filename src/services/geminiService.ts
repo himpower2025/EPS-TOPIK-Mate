@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Question, QuestionType, AnalyticsFeedback, ExamSession, ExamMode, PlanType } from '../types';
 import { STATIC_EXAM_DATA } from '../data/examData';
@@ -33,24 +32,22 @@ const cleanJson = (text: string | undefined): string =>
 export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number, plan: PlanType): Promise<Question[]> => {
   const ai = getAI();
   
-  // Use 'plan' to define specific workplace scenarios
-  const workplaceContext = plan === 'free' ? "Basic Service/Manufacturing" : "Heavy Industry, Construction, and Modern Agriculture Scenarios";
+  // Custom difficulty based on user plan
+  const difficultyContext = plan === 'free' ? "Standard Beginner Level" : "High-tier Workplace and Technical Industry Scenarios";
 
-  const prompt = `You are a legendary EPS-TOPIK Question Architect. 
-  TASK: Generate 20 high-fidelity exam questions for Round ${roundNumber}.
-  USER LEVEL: ${plan} (${workplaceContext}).
-  MODALITY: ${mode} (If LISTENING, only audio-based. If READING, only visual-text based).
+  const prompt = `You are an elite EPS-TOPIK Question Designer. 
+  TASK: Generate 20 high-fidelity questions for Round ${roundNumber}.
+  USER STATUS: ${plan} (${difficultyContext}).
+  TYPE: ${mode} (Match exactly).
 
-  ULTIMATE QUALITY GUIDELINES:
-  1. HYPER-REALISM: Create scenarios actually found in Korean factories, farms, and sites. No generic or repetitive content.
-  2. IMAGE PROMPT EXCELLENCE: The 'imagePrompt' must be an architecturally detailed description. 
-     - Poor: "A crane."
-     - Superior: "A high-angle 3D vector illustration of a yellow industrial tower crane lifting a steel beam in a busy Korean construction site with safety fences, white background, high contrast."
-  3. AUDIO SCRIPT DEPTH: For LISTENING, use 'Man:' and 'Woman:' tags. Include natural Korean pauses like '음...', '저...' for high realism. Script must be in the 'context' field.
-  4. NO BLANKS: Every single question MUST have a valid 'imagePrompt'.
-  5. LANGUAGE: Korean for exam content. Professional English for categories, explanations, and instructions.
+  CORE INSTRUCTIONS:
+  1. NO REDUNDANCY: Each question must feature a unique workplace scenario (Industrial, Agricultural, etc.).
+  2. IMAGE PROMPT PRECISION: Provide extremely descriptive 'imagePrompt' for an illustrator. 
+     - Ex: "A side-view 2D vector of a worker in a blue uniform wearing a white safety helmet and using a yellow electric drill on a wooden board."
+  3. AUDIO FIDELITY: For LISTENING, use 'Man:' and 'Woman:' tags in the 'context' field. Include realistic pauses or industrial background descriptions in the prompt.
+  4. LANGUAGE: Korean for exam content. Professional English for analysis and instructions.
 
-  JSON SCHEMA: Strictly follow the Question interface. No markdown garbage outside JSON.`;
+  JSON FORMAT REQUIRED.`;
 
   try {
     const response = await ai.models.generateContent({
@@ -82,7 +79,7 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
     const parsed = JSON.parse(cleanJson(response.text));
     return parsed.filter((q: Question) => mode === 'FULL' || q.type === mode);
   } catch (err) {
-    console.error("AI Question Engine Error:", err);
+    console.error("AI Generation Error:", err);
     return STATIC_EXAM_DATA.filter(q => mode === 'FULL' || q.type === mode).slice(0, 20);
   }
 };
@@ -94,7 +91,7 @@ export const generateImage = async (prompt: string): Promise<string | null> => {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: { 
-        parts: [{ text: `High-definition professional EPS-TOPIK exam visual. Clean line art style, vibrant industrial colors, white background. Subject: ${prompt}` }] 
+        parts: [{ text: `Professional EPS-TOPIK exam visual. Clean 2D educational art, high contrast, white background. ${prompt}` }] 
       },
       config: { imageConfig: { aspectRatio: "1:1" } }
     });
@@ -132,7 +129,7 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text: `문제를 잘 듣고 알맞은 답을 고르십시오. ${text}` }] }],
+      contents: [{ parts: [{ text: `잘 듣고 알맞은 것을 고르십시오. ${text}` }] }],
       config
     });
     
@@ -143,7 +140,7 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
     }
     return null;
   } catch (err) {
-    console.error("Speech generation error:", err);
+    console.error("Speech engine failed:", err);
     return null;
   }
 };
@@ -153,7 +150,7 @@ export const analyzePerformance = async (session: ExamSession): Promise<Analytic
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: `Perform a deep academic analysis on these EPS-TOPIK mock test results. Score: ${session.score}/${session.questions.length}. Identify weak grammatical points and suggest a 7-day study plan in professional English. Return JSON.`,
+      contents: `Perform an expert analysis on these results. Score: ${session.score}/${session.questions.length}. Provide tactical study advice in professional English. Return JSON.`,
       config: { responseMimeType: "application/json" }
     });
     return JSON.parse(cleanJson(response.text));
