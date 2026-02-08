@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Dashboard } from './components/Dashboard';
 import { SetSelector } from './components/SetSelector';
@@ -39,6 +38,7 @@ const App: React.FC = () => {
   const [examMode, setExamMode] = useState<ExamMode>('FULL');
   const [selectedSet, setSelectedSet] = useState(1);
   
+  // Guard states for mobile redirect loops
   const [isInitializing, setIsInitializing] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("Securing connection...");
   
@@ -86,10 +86,10 @@ const App: React.FC = () => {
     let unsubAuth: (() => void) | null = null;
 
     const startBootSequence = async () => {
-      // 15초 타임아웃
+      // 1. 강제 타임아웃 (15초 후 로딩 해제)
       const timeoutId = setTimeout(() => {
         if (isInitializing && isMounted.current) {
-          console.warn("Auth Timeout Reached");
+          console.warn("Auth process exceeded 15s - forcing release");
           setIsInitializing(false);
         }
       }, 15000);
@@ -98,27 +98,26 @@ const App: React.FC = () => {
         setLoadingMessage("Checking session...");
         await setPersistence(auth, browserLocalPersistence);
         
-        // 1. 리다이렉트 결과 처리 대기
-        setLoadingMessage("Finalizing Google Login...");
+        // 2. 리다이렉트 대기 여부 확인
+        const isRedirectPending = localStorage.getItem('auth_redirect_pending') === 'true';
+        
+        // 3. 리다이렉트 결과 처리 (모바일 로그인의 핵심)
+        setLoadingMessage("Finalizing login...");
         const redirectResult = await getRedirectResult(auth);
         
-        // 만약 리다이렉트 후 돌아온 거라면 무조건 플래그 삭제
-        if (localStorage.getItem('auth_redirect_pending')) {
-          localStorage.removeItem('auth_redirect_pending');
-        }
-
         if (redirectResult?.user && isMounted.current) {
           const synced = await syncUserData(redirectResult.user);
           if (synced) {
             setUser(synced);
             setCurrentState(AppState.DASHBOARD);
+            localStorage.removeItem('auth_redirect_pending');
             setIsInitializing(false);
             clearTimeout(timeoutId);
-            return;
+            return; // 리다이렉트 결과로 성공했다면 여기서 종료
           }
         }
 
-        // 2. Auth 리스너 설정
+        // 4. 일반 Auth 상태 리스너 (리다이렉트 실패 시나 자동 로그인용)
         unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
           if (!isMounted.current) return;
 
@@ -127,23 +126,32 @@ const App: React.FC = () => {
             const synced = await syncUserData(firebaseUser);
             if (synced) {
               setUser(synced);
+              localStorage.removeItem('auth_redirect_pending');
+              
               if (unsubSnapshot) unsubSnapshot();
               unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
                 if (s.exists() && isMounted.current) setUser(s.data() as User);
               });
+              
               setCurrentState(AppState.DASHBOARD);
+              setIsInitializing(false);
+              clearTimeout(timeoutId);
             }
           } else {
-            setUser(null);
-            setCurrentState(AppState.LANDING);
+            // 리다이렉트 대기 중일 때는 '사용자 없음' 리스너가 오더라도 Landing으로 보내지 않음
+            if (!isRedirectPending) {
+              setUser(null);
+              setCurrentState(AppState.LANDING);
+              setIsInitializing(false);
+              clearTimeout(timeoutId);
+            } else {
+              setLoadingMessage("Waiting for Google...");
+            }
           }
-          
-          setIsInitializing(false);
-          clearTimeout(timeoutId);
         });
 
       } catch (err) {
-        console.error("Boot sequence error:", err);
+        console.error("Boot Error:", err);
         localStorage.removeItem('auth_redirect_pending');
         if (isMounted.current) setIsInitializing(false);
         clearTimeout(timeoutId);
@@ -157,7 +165,7 @@ const App: React.FC = () => {
       if (unsubAuth) unsubAuth();
       if (unsubSnapshot) unsubSnapshot();
     };
-  }, [syncUserData]);
+  }, [syncUserData, isInitializing]);
 
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
@@ -166,13 +174,14 @@ const App: React.FC = () => {
     
     try {
       if (isMobile) {
+        // 리다이렉트 플래그 설정 (루프 방지)
         localStorage.setItem('auth_redirect_pending', 'true');
         setIsInitializing(true);
-        setLoadingMessage("Redirecting to Google...");
+        setLoadingMessage("Connecting to Google...");
         await signInWithRedirect(auth, provider);
       } else {
         setIsInitializing(true);
-        setLoadingMessage("Opening Google...");
+        setLoadingMessage("Opening Google Login...");
         const result = await signInWithPopup(auth, provider);
         const synced = await syncUserData(result.user);
         if (synced) {
@@ -246,7 +255,7 @@ const App: React.FC = () => {
           onClick={() => { localStorage.clear(); window.location.reload(); }} 
           className="mt-8 text-[10px] text-white/40 underline uppercase tracking-widest hover:text-white"
         >
-          Reset All & Reload
+          Reset Session & Reload
         </button>
       </div>
     </div>
