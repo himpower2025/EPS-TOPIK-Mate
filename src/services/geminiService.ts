@@ -14,17 +14,22 @@ function decodeBase64(base64: string): Uint8Array {
 }
 
 async function decodeAudioData(data: Uint8Array, ctx: AudioContext, sampleRate: number, numChannels: number): Promise<AudioBuffer> {
-  // Ensure we are reading the correct portion of the buffer
-  const dataInt16 = new Int16Array(data.buffer, data.byteOffset, data.byteLength / 2);
-  const frameCount = dataInt16.length / numChannels;
-  const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
-  for (let channel = 0; channel < numChannels; channel++) {
-    const channelData = buffer.getChannelData(channel);
-    for (let i = 0; i < frameCount; i++) {
-      channelData[i] = dataInt16[i * numChannels + channel] / 32768.0;
+  try {
+    // Try native decoding first (in case it's a WAV/MP3)
+    return await ctx.decodeAudioData(data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer);
+  } catch (e) {
+    // Fallback to manual PCM decoding
+    const dataInt16 = new Int16Array(data.buffer, data.byteOffset, Math.floor(data.byteLength / 2));
+    const frameCount = dataInt16.length / numChannels;
+    const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
+    for (let channel = 0; channel < numChannels; channel++) {
+      const channelData = buffer.getChannelData(channel);
+      for (let i = 0; i < frameCount; i++) {
+        channelData[i] = dataInt16[i * numChannels + channel] / 32768.0;
+      }
     }
+    return buffer;
   }
-  return buffer;
 }
 
 const cleanJson = (text: string | undefined): string => 
@@ -46,9 +51,31 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
       q.id.startsWith(setPrefix) && (mode === 'FULL' || q.type === mode)
     );
     
+    // 5. CATEGORIES (Use these English names ONLY):
+    const CATEGORY_MAP: Record<string, string> = {
+      "빈칸 채우기": "Fill in the Blanks",
+      "관계있는 단어": "Related Words",
+      "표지판": "Signboards",
+      "문장 이해": "Sentence Comprehension",
+      "듣기 이해": "Listening Comprehension",
+      "그림 선택": "Picture Selection",
+      "동작 파악": "Action Identification",
+      "위치 파악": "Location Identification",
+      "사람 수 세기": "Person Counting",
+      "시간 파악": "Time Identification",
+      "대화 응답": "Conversation Response",
+      "이야기 이해": "Story Comprehension",
+      "장소 파악": "Place Identification",
+      "날씨 파악": "Weather Identification",
+      "사물 파악": "Object Identification"
+    };
+
     // 해당 라운드 데이터가 DB에 존재하면 반환합니다.
     if (staticSet.length > 0) {
-      return [...staticSet].sort((a, b) => {
+      return staticSet.map(q => ({
+        ...q,
+        category: CATEGORY_MAP[q.category] || q.category
+      })).sort((a, b) => {
         // ID 순서대로 정렬 (예: s10_r_1, s10_r_2...)
         return a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' });
       });
@@ -147,7 +174,7 @@ export const generateImage = async (prompt: string): Promise<string | null> => {
   const ai = getAI();
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
+      model: 'gemini-3-pro-image-preview', // User specifically requested Nano Banana Pro
       contents: { 
         parts: [{ text: `Professional educational illustration for EPS-TOPIK exam. Clean 2D vector art, white background, high clarity. Subject: ${prompt}` }] 
       },
@@ -219,11 +246,12 @@ export const analyzePerformance = async (session: ExamSession): Promise<Analytic
       - Questions: ${JSON.stringify(session.questions.map(q => ({ category: q.category, correct: session.userAnswers[q.id] === q.correctAnswer })))}
 
       OUTPUT REQUIREMENTS:
-      - All text must be in STRICT ENGLISH.
-      - overallAssessment: 2-3 sentence summary.
-      - strengths: List of categories where they performed well.
-      - weaknesses: List of categories needing focus.
-      - studyPlan: Actionable 7-day plan.
+      - All text MUST be in STRICT ENGLISH. Do NOT use Korean in the response.
+      - Translate any Korean category names to English in your analysis.
+      - overallAssessment: 2-3 sentence summary in English.
+      - strengths: List of categories (in English) where they performed well.
+      - weaknesses: List of categories (in English) needing focus.
+      - studyPlan: Actionable 7-day plan in English.
 
       Return JSON.`,
       config: { 
