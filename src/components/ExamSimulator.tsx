@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Question, QuestionType, ExamSession, ExamMode, PlanType } from '../types';
-import { generateQuestionsBySet, generateSpeech, generateImage } from '../services/geminiService';
+import { generateQuestionsBySet, generateSpeech, generateImage, cleanText } from '../services/geminiService';
 import { CheckCircle, Clock, Menu, X, ChevronLeft, Headphones, Volume2, Sparkles, Image as ImageIcon } from 'lucide-react';
 import { LoadingSpinner } from './LoadingSpinner';
 
@@ -65,6 +65,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
 
     const loadVisuals = async () => {
+      // Always try to generate image if imagePrompt exists, even for DB questions
       if (q.imagePrompt) {
         setIsGeneratingVisuals(true);
         try {
@@ -101,7 +102,8 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
 
   const handlePlayAudio = async () => {
     const q = questions[currentIndex];
-    const script = q.context || q.questionText;
+    // Clean text to remove spoilers like [Answer]
+    const script = cleanText(q.context || q.questionText);
     if (!script || isPlaying) return;
     
     if (currentAudioSource.current) {
@@ -156,6 +158,10 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
   const isLast = currentIndex === questions.length - 1;
   const isListening = currentQ.type === QuestionType.LISTENING;
 
+  // Clean display text
+  const displayQuestionText = cleanText(currentQ.questionText);
+  const displayContext = cleanText(currentQ.context || "");
+
   if (!audioContextReady && isListening) {
     return (
       <div className="flex flex-col items-center justify-center h-full bg-indigo-950 text-white p-10 text-center pt-safe">
@@ -197,11 +203,11 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                         {isListening ? <Headphones className="w-3 h-3"/> : <ImageIcon className="w-3 h-3"/>}
                         {currentQ.type} Section
                     </div>
-                    <h2 className="text-xl md:text-2xl lg:text-3xl font-black text-gray-900 leading-tight mb-2 md:mb-4">{currentQ.questionText}</h2>
+                    <h2 className="text-xl md:text-2xl lg:text-3xl font-black text-gray-900 leading-tight mb-2 md:mb-4">{displayQuestionText}</h2>
                     <p className="text-[10px] md:text-xs text-gray-400 font-bold uppercase tracking-widest opacity-60">{currentQ.category}</p>
                 </div>
 
-                <div className="bg-white rounded-[2rem] md:rounded-[3rem] border-2 border-dashed border-gray-200 overflow-hidden shadow-sm flex flex-col items-center justify-center p-4 md:p-8 transition-all min-h-[300px] md:min-h-[400px]">
+                <div className="bg-white rounded-[2rem] md:rounded-[3rem] border-2 border-dashed border-gray-200 overflow-hidden shadow-sm flex flex-col items-center justify-center p-4 md:p-8 transition-all min-h-[250px] md:min-h-[400px]">
                     {isGeneratingVisuals && !questionImage ? (
                       <div className="flex flex-col items-center gap-4 md:gap-6 py-8 md:py-12 text-center animate-pulse">
                         <Sparkles className="w-12 h-12 md:w-16 md:h-16 text-indigo-400 animate-spin" />
@@ -211,7 +217,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                       <div className="w-full space-y-4 md:space-y-8">
                         {questionImage && (
                           <div className="w-full flex items-center justify-center">
-                            <img src={questionImage} className="max-h-[250px] md:max-h-[350px] w-auto object-contain rounded-2xl md:rounded-[2rem] shadow-2xl animate-fade-in" alt="Exam Visual" />
+                            <img src={questionImage} className="max-h-[200px] md:max-h-[350px] w-auto object-contain rounded-2xl md:rounded-[2rem] shadow-2xl animate-fade-in" alt="Exam Visual" referrerPolicy="no-referrer" />
                           </div>
                         )}
                         
@@ -220,9 +226,9 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                              <button 
                                onClick={handlePlayAudio} 
                                disabled={loadingAudio}
-                               className={`relative w-24 h-24 md:w-32 md:h-32 rounded-[2rem] md:rounded-[2.5rem] flex items-center justify-center shadow-2xl transition-all active:scale-95 ${isPlaying ? 'bg-indigo-600 text-white ring-8 ring-indigo-100' : 'bg-white text-indigo-600 border border-indigo-100 hover:border-indigo-300'} disabled:opacity-50`}
+                               className={`relative w-20 h-20 md:w-32 md:h-32 rounded-[1.5rem] md:rounded-[2.5rem] flex items-center justify-center shadow-2xl transition-all active:scale-95 ${isPlaying ? 'bg-indigo-600 text-white ring-8 ring-indigo-100' : 'bg-white text-indigo-600 border border-indigo-100 hover:border-indigo-300'} disabled:opacity-50`}
                              >
-                                {loadingAudio ? <div className="w-8 h-8 md:w-10 md:h-10 border-4 border-current border-t-transparent rounded-full animate-spin"/> : <Volume2 className="w-12 h-12 md:w-16 md:h-16" />}
+                                {loadingAudio ? <div className="w-8 h-8 md:w-10 md:h-10 border-4 border-current border-t-transparent rounded-full animate-spin"/> : <Volume2 className="w-10 h-10 md:w-16 md:h-16" />}
                              </button>
                              <div className="text-center">
                                 <p className="text-[10px] md:text-xs font-black text-indigo-900 uppercase tracking-[0.2em] mb-1 md:mb-2">{isPlaying ? "Now Playing" : loadingAudio ? "Generating Audio..." : "Tap to Listen"}</p>
@@ -232,9 +238,9 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                              </div>
                           </div>
                         ) : (
-                          !questionImage && currentQ.context && (
+                          !questionImage && displayContext && (
                             <div className="p-6 md:p-10 text-lg md:text-xl lg:text-2xl font-serif leading-relaxed text-gray-800 bg-indigo-50/30 rounded-2xl md:rounded-[2.5rem] w-full border border-indigo-100 italic shadow-inner text-center">
-                                "{currentQ.context}"
+                                "{displayContext}"
                             </div>
                           )
                         )}
@@ -250,13 +256,13 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                         <button 
                           key={idx} 
                           onClick={() => handleAnswer(idx)} 
-                          className={`w-full p-4 md:p-6 lg:p-8 rounded-2xl md:rounded-[2.5rem] text-left transition-all flex items-center gap-4 md:gap-8 border-2 shadow-sm active:scale-[0.99] ${isSelected ? 'border-indigo-600 bg-indigo-600 text-white shadow-2xl translate-x-2' : 'border-white bg-white text-gray-700 hover:border-indigo-100'}`}
+                          className={`w-full p-4 md:p-6 lg:p-8 rounded-xl md:rounded-[2.5rem] text-left transition-all flex items-center gap-4 md:gap-8 border-2 shadow-sm active:scale-[0.99] ${isSelected ? 'border-indigo-600 bg-indigo-600 text-white shadow-2xl translate-x-1 md:translate-x-2' : 'border-white bg-white text-gray-700 hover:border-indigo-100'}`}
                         >
-                          <div className={`w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center text-lg md:text-xl font-black shrink-0 ${isSelected ? 'bg-white text-indigo-600 shadow-lg' : 'bg-gray-50 text-gray-400'}`}>
+                          <div className={`w-8 h-8 md:w-14 md:h-14 rounded-lg md:rounded-2xl flex items-center justify-center text-sm md:text-xl font-black shrink-0 ${isSelected ? 'bg-white text-indigo-600 shadow-lg' : 'bg-gray-50 text-gray-400'}`}>
                             {idx + 1}
                           </div>
-                          <span className="text-base md:text-lg lg:text-xl font-bold flex-1 leading-tight">{option}</span>
-                          {isSelected && <CheckCircle className="w-6 h-6 md:w-8 md:h-8 text-indigo-200" />}
+                          <span className="text-sm md:text-lg lg:text-xl font-bold flex-1 leading-tight">{option}</span>
+                          {isSelected && <CheckCircle className="w-5 h-5 md:w-8 md:h-8 text-indigo-200" />}
                         </button>
                     );
                 })}
@@ -269,13 +275,13 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
               <button 
                 onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))} 
                 disabled={currentIndex === 0} 
-                className="px-6 md:px-8 py-4 md:py-5 rounded-2xl md:rounded-3xl bg-gray-100 text-gray-500 disabled:opacity-30 font-black active:scale-95 transition-all"
+                className="px-5 md:px-8 py-4 md:py-5 rounded-xl md:rounded-3xl bg-gray-100 text-gray-500 disabled:opacity-30 font-black active:scale-95 transition-all"
               >
                 <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
               </button>
               <button 
                 onClick={isLast ? handleSubmit : () => setCurrentIndex(p => p + 1)} 
-                className={`flex-1 ${isLast ? 'bg-green-600 shadow-green-100' : 'bg-indigo-600 shadow-indigo-100'} text-white font-black rounded-2xl md:rounded-3xl shadow-2xl active:scale-95 text-lg md:text-xl uppercase tracking-widest transition-all py-4 md:py-5`}
+                className={`flex-1 ${isLast ? 'bg-green-600 shadow-green-100' : 'bg-indigo-600 shadow-indigo-100'} text-white font-black rounded-xl md:rounded-3xl shadow-2xl active:scale-95 text-base md:text-xl uppercase tracking-widest transition-all py-4 md:py-5`}
               >
                 {isLast ? 'Complete Exam' : 'Next Question'}
               </button>

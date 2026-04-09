@@ -30,6 +30,14 @@ async function decodeAudioData(data: Uint8Array, ctx: AudioContext, sampleRate: 
 const cleanJson = (text: string | undefined): string => 
   (text ?? "").replace(/```json/g, '').replace(/```/g, '').replace(/\/\*.*?\*\//gs, '').trim();
 
+/**
+ * Removes text inside brackets [] which often contains answers or spoilers in the DB.
+ */
+export const cleanText = (text: string): string => {
+  if (!text) return "";
+  return text.replace(/\[.*?\]/g, '').trim();
+};
+
 export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number, plan: PlanType): Promise<Question[]> => {
   // 30세트 이하인 경우 먼저 정적 데이터(DB)에서 해당 라운드 데이터를 찾습니다.
   if (roundNumber <= 30) {
@@ -41,7 +49,7 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
     // 해당 라운드 데이터가 DB에 존재하면 반환합니다.
     if (staticSet.length > 0) {
       return [...staticSet].sort((a, b) => {
-        // ID 순서대로 정렬 (예: r_1, r_2...)
+        // ID 순서대로 정렬 (예: s10_r_1, s10_r_2...)
         return a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' });
       });
     }

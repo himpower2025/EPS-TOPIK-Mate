@@ -67,10 +67,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgr
               <div className="w-full max-w-lg space-y-4">
                 <button 
                   onClick={() => handlePracticeStart('FULL')} 
-                  className="bg-white text-indigo-900 w-full py-6 rounded-[2.5rem] font-black shadow-2xl flex items-center justify-center gap-6 transition-all active:scale-95 group hover:bg-indigo-50"
+                  className="bg-white text-indigo-900 w-full py-5 md:py-6 rounded-[2rem] md:rounded-[2.5rem] font-black shadow-2xl flex items-center justify-center gap-4 md:gap-6 transition-all active:scale-95 group hover:bg-indigo-50"
                 >
-                  <PlayCircle className="w-10 h-10 text-indigo-600 group-hover:scale-110 transition-transform" />
-                  <span className="text-3xl font-black uppercase tracking-tight">Full Mock Exam</span>
+                  <PlayCircle className="w-8 h-8 md:w-10 md:h-10 text-indigo-600 group-hover:scale-110 transition-transform" />
+                  <span className="text-xl md:text-3xl font-black uppercase tracking-tight">Full Mock Exam</span>
                 </button>
                 {!isPremium && (
                   <button 
