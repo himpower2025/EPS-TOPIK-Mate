@@ -14,8 +14,6 @@ import { ExamSession, User, ExamMode } from './types';
 import { auth, db } from './firebase';
 import { 
   signInWithPopup, 
-  signInWithRedirect, 
-  getRedirectResult,
   GoogleAuthProvider, 
   onAuthStateChanged, 
   signOut,
