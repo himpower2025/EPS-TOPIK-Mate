@@ -98,26 +98,7 @@ const App: React.FC = () => {
         setLoadingMessage("Checking session...");
         await setPersistence(auth, browserLocalPersistence);
         
-        // 2. 리다이렉트 대기 여부 확인
-        const isRedirectPending = localStorage.getItem('auth_redirect_pending') === 'true';
-        
-        // 3. 리다이렉트 결과 처리 (모바일 로그인의 핵심)
-        setLoadingMessage("Finalizing login...");
-        const redirectResult = await getRedirectResult(auth);
-        
-        if (redirectResult?.user && isMounted.current) {
-          const synced = await syncUserData(redirectResult.user);
-          if (synced) {
-            setUser(synced);
-            setCurrentState(AppState.DASHBOARD);
-            localStorage.removeItem('auth_redirect_pending');
-            setIsInitializing(false);
-            clearTimeout(timeoutId);
-            return; // 리다이렉트 결과로 성공했다면 여기서 종료
-          }
-        }
-
-        // 4. 일반 Auth 상태 리스너 (리다이렉트 실패 시나 자동 로그인용)
+        // 2. 일반 Auth 상태 리스너 (자동 로그인용)
         unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
           if (!isMounted.current) return;
 
@@ -126,7 +107,6 @@ const App: React.FC = () => {
             const synced = await syncUserData(firebaseUser);
             if (synced) {
               setUser(synced);
-              localStorage.removeItem('auth_redirect_pending');
               
               if (unsubSnapshot) unsubSnapshot();
               unsubSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (s) => {
@@ -138,21 +118,15 @@ const App: React.FC = () => {
               clearTimeout(timeoutId);
             }
           } else {
-            // 리다이렉트 대기 중일 때는 '사용자 없음' 리스너가 오더라도 Landing으로 보내지 않음
-            if (!isRedirectPending) {
-              setUser(null);
-              setCurrentState(AppState.LANDING);
-              setIsInitializing(false);
-              clearTimeout(timeoutId);
-            } else {
-              setLoadingMessage("Waiting for Google...");
-            }
+            setUser(null);
+            setCurrentState(AppState.LANDING);
+            setIsInitializing(false);
+            clearTimeout(timeoutId);
           }
         });
 
       } catch (err) {
         console.error("Boot Error:", err);
-        localStorage.removeItem('auth_redirect_pending');
         if (isMounted.current) setIsInitializing(false);
         clearTimeout(timeoutId);
       }
@@ -165,36 +139,32 @@ const App: React.FC = () => {
       if (unsubAuth) unsubAuth();
       if (unsubSnapshot) unsubSnapshot();
     };
-  }, [syncUserData, isInitializing]);
+  }, [syncUserData]);
 
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
     try {
-      if (isMobile) {
-        // 리다이렉트 플래그 설정 (루프 방지)
-        localStorage.setItem('auth_redirect_pending', 'true');
-        setIsInitializing(true);
-        setLoadingMessage("Connecting to Google...");
-        await signInWithRedirect(auth, provider);
-      } else {
-        setIsInitializing(true);
-        setLoadingMessage("Opening Google Login...");
-        const result = await signInWithPopup(auth, provider);
-        const synced = await syncUserData(result.user);
-        if (synced) {
-          setUser(synced);
-          setCurrentState(AppState.DASHBOARD);
-          setShowLoginModal(false);
-        }
-        setIsInitializing(false);
+      setIsInitializing(true);
+      setLoadingMessage("Opening Google Login...");
+      
+      // Always use popup in this environment to avoid iframe redirect issues
+      const result = await signInWithPopup(auth, provider);
+      const synced = await syncUserData(result.user);
+      if (synced) {
+        setUser(synced);
+        setCurrentState(AppState.DASHBOARD);
+        setShowLoginModal(false);
       }
+      setIsInitializing(false);
     } catch (error: any) {
       console.error("Login Error:", error);
-      localStorage.removeItem('auth_redirect_pending');
       setIsInitializing(false);
+      // If popup is blocked, we might want to show a message to the user
+      if (error.code === 'auth/popup-blocked') {
+        alert("Please allow popups for this site to sign in.");
+      }
     }
   };
 

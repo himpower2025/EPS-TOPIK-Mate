@@ -193,36 +193,37 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                         <span className="text-xs font-black text-gray-300 uppercase tracking-[0.3em]">AI Illustrator Rendering...</span>
                       </div>
                     ) : (
-                      <>
-                        {questionImage ? (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <img src={questionImage} className="max-h-[450px] w-auto object-contain rounded-[2rem] shadow-2xl animate-fade-in" alt="Exam Visual" />
+                      <div className="w-full space-y-8">
+                        {questionImage && (
+                          <div className="w-full flex items-center justify-center">
+                            <img src={questionImage} className="max-h-[350px] w-auto object-contain rounded-[2rem] shadow-2xl animate-fade-in" alt="Exam Visual" />
+                          </div>
+                        )}
+                        
+                        {isListening ? (
+                          <div className="flex flex-col items-center justify-center gap-6 w-full py-4">
+                             <button 
+                               onClick={handlePlayAudio} 
+                               disabled={loadingAudio}
+                               className={`relative w-32 h-32 rounded-[2.5rem] flex items-center justify-center shadow-2xl transition-all active:scale-95 ${isPlaying ? 'bg-indigo-600 text-white ring-8 ring-indigo-100' : 'bg-white text-indigo-600 border border-indigo-100 hover:border-indigo-300'} disabled:opacity-50`}
+                             >
+                                {loadingAudio ? <div className="w-10 h-10 border-4 border-current border-t-transparent rounded-full animate-spin"/> : <Volume2 className="w-16 h-16" />}
+                             </button>
+                             <div className="text-center">
+                                <p className="text-xs font-black text-indigo-900 uppercase tracking-[0.2em] mb-2">{isPlaying ? "Now Playing" : loadingAudio ? "Generating Audio..." : "Tap to Listen"}</p>
+                                <div className="flex gap-1 justify-center">
+                                   {[...Array(3)].map((_, i) => <div key={i} className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-indigo-500 animate-bounce' : 'bg-gray-200'}`} style={{animationDelay: `${i*0.2}s`}} />)}
+                                </div>
+                             </div>
                           </div>
                         ) : (
-                          !isListening && currentQ.context ? (
-                            <div className="p-10 text-xl md:text-2xl font-serif leading-relaxed text-gray-800 bg-indigo-50/30 rounded-[2.5rem] w-full border border-indigo-100 italic shadow-inner">
+                          !questionImage && currentQ.context && (
+                            <div className="p-10 text-xl md:text-2xl font-serif leading-relaxed text-gray-800 bg-indigo-50/30 rounded-[2.5rem] w-full border border-indigo-100 italic shadow-inner text-center">
                                 "{currentQ.context}"
                             </div>
-                          ) : (
-                            isListening && (
-                              <div className="flex flex-col items-center justify-center gap-8 w-full py-10">
-                                 <button 
-                                   onClick={handlePlayAudio} 
-                                   className={`relative w-40 h-40 rounded-[3rem] flex items-center justify-center shadow-2xl transition-all active:scale-95 ${isPlaying ? 'bg-indigo-600 text-white ring-8 ring-indigo-100' : 'bg-white text-indigo-600 border border-indigo-100 hover:border-indigo-300'}`}
-                                 >
-                                    {loadingAudio ? <div className="w-12 h-12 border-4 border-current border-t-transparent rounded-full animate-spin"/> : <Volume2 className="w-20 h-20" />}
-                                 </button>
-                                 <div className="text-center">
-                                    <p className="text-sm font-black text-indigo-900 uppercase tracking-[0.2em] mb-2">{isPlaying ? "Now Playing" : "Tap to Listen"}</p>
-                                    <div className="flex gap-1 justify-center">
-                                       {[...Array(3)].map((_, i) => <div key={i} className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-indigo-500 animate-bounce' : 'bg-gray-200'}`} style={{animationDelay: `${i*0.2}s`}} />)}
-                                    </div>
-                                 </div>
-                              </div>
-                            )
                           )
                         )}
-                      </>
+                      </div>
                     )}
                 </div>
             </div>

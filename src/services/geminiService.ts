@@ -14,7 +14,8 @@ function decodeBase64(base64: string): Uint8Array {
 }
 
 async function decodeAudioData(data: Uint8Array, ctx: AudioContext, sampleRate: number, numChannels: number): Promise<AudioBuffer> {
-  const dataInt16 = new Int16Array(data.buffer);
+  // Ensure we are reading the correct portion of the buffer
+  const dataInt16 = new Int16Array(data.buffer, data.byteOffset, data.byteLength / 2);
   const frameCount = dataInt16.length / numChannels;
   const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
   for (let channel = 0; channel < numChannels; channel++) {
@@ -35,6 +36,20 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
   // Custom difficulty based on user plan
   const difficultyContext = plan === 'free' ? "Standard Beginner Level" : "High-tier Workplace and Technical Industry Scenarios";
 
+  // Get some samples from static data to guide the AI
+  const samples = STATIC_EXAM_DATA
+    .filter(q => mode === 'FULL' || q.type === mode)
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 3)
+    .map(q => ({
+      type: q.type,
+      questionText: q.questionText,
+      context: q.context,
+      options: q.options,
+      correctAnswer: q.correctAnswer,
+      imagePrompt: q.imagePrompt
+    }));
+
   const prompt = `You are an elite EPS-TOPIK Question Designer. 
   TASK: Generate 20 high-fidelity questions for Round ${roundNumber}.
   USER STATUS: ${plan} (${difficultyContext}).
@@ -46,12 +61,14 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
      - Ex: "A side-view 2D vector of a worker in a blue uniform wearing a white safety helmet and using a yellow electric drill on a wooden board."
   3. AUDIO FIDELITY: For LISTENING, use 'Man:' and 'Woman:' tags in the 'context' field. Include realistic pauses or industrial background descriptions in the prompt.
   4. LANGUAGE: Korean for exam content. Professional English for analysis and instructions.
+  5. REFERENCE SAMPLES (Follow this style):
+     ${JSON.stringify(samples, null, 2)}
 
   JSON FORMAT REQUIRED.`;
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3-pro-preview",
+      model: "gemini-3.1-pro-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -76,11 +93,15 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
       }
     });
 
-    const parsed = JSON.parse(cleanJson(response.text));
+    const text = response.text;
+    if (!text) throw new Error("Empty AI response");
+    const parsed = JSON.parse(cleanJson(text));
     return parsed.filter((q: Question) => mode === 'FULL' || q.type === mode);
   } catch (err) {
     console.error("AI Generation Error:", err);
-    return STATIC_EXAM_DATA.filter(q => mode === 'FULL' || q.type === mode).slice(0, 20);
+    // Fallback to static data but shuffle it to feel "infinite"
+    const filtered = STATIC_EXAM_DATA.filter(q => mode === 'FULL' || q.type === mode);
+    return [...filtered].sort(() => Math.random() - 0.5).slice(0, 20);
   }
 };
 
@@ -151,9 +172,23 @@ export const analyzePerformance = async (session: ExamSession): Promise<Analytic
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `Perform an expert analysis on these results. Score: ${session.score}/${session.questions.length}. Provide tactical study advice in professional English. Return JSON.`,
-      config: { responseMimeType: "application/json" }
+      config: { 
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            overallAssessment: { type: Type.STRING },
+            strengths: { type: Type.ARRAY, items: { type: Type.STRING } },
+            weaknesses: { type: Type.ARRAY, items: { type: Type.STRING } },
+            studyPlan: { type: Type.STRING }
+          },
+          required: ["overallAssessment", "strengths", "weaknesses", "studyPlan"]
+        }
+      }
     });
-    return JSON.parse(cleanJson(response.text));
+    const text = response.text;
+    if (!text) return null;
+    return JSON.parse(cleanJson(text));
   } catch {
     return null;
   }
