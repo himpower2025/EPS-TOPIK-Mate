@@ -121,7 +121,12 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
         source.start(0);
         currentAudioSource.current = source;
         setIsPlaying(true);
-        source.onended = () => { setIsPlaying(false); setLoadingAudio(false); };
+        source.onended = () => { 
+          setIsPlaying(false); 
+          setLoadingAudio(false); 
+        };
+      } else {
+        setLoadingAudio(false);
       }
     } catch (err) { 
       console.error("Audio playback error:", err);

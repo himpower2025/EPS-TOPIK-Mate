@@ -2,7 +2,7 @@ import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Question, QuestionType, AnalyticsFeedback, ExamSession, ExamMode, PlanType } from '../types';
 import { STATIC_EXAM_DATA } from '../data/examData';
 
-const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+const getAI = () => new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 function decodeBase64(base64: string): Uint8Array {
   const binaryString = window.atob(base64);
@@ -40,7 +40,21 @@ const cleanJson = (text: string | undefined): string =>
  */
 export const cleanText = (text: string): string => {
   if (!text) return "";
-  return text.replace(/\[.*?\]/g, '').trim();
+  // Remove text in brackets
+  let cleaned = text.replace(/\[.*?\]/g, '').trim();
+  
+  // Remove everything after the last question mark if it looks like an answer leak
+  // (Questions should end with ? in EPS-TOPIK)
+  const questionMarkIndex = cleaned.lastIndexOf('?');
+  if (questionMarkIndex !== -1 && questionMarkIndex < cleaned.length - 1) {
+    const after = cleaned.substring(questionMarkIndex + 1).trim();
+    // If what's after is short (likely an answer) or contains common answer patterns
+    if (after.length > 0) {
+      cleaned = cleaned.substring(0, questionMarkIndex + 1);
+    }
+  }
+  
+  return cleaned;
 };
 
 export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number, plan: PlanType): Promise<Question[]> => {
@@ -74,7 +88,9 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
     if (staticSet.length > 0) {
       return staticSet.map(q => ({
         ...q,
-        category: CATEGORY_MAP[q.category] || q.category
+        category: CATEGORY_MAP[q.category] || q.category,
+        questionText: cleanText(q.questionText),
+        context: q.context ? cleanText(q.context) : undefined
       })).sort((a, b) => {
         // ID 순서대로 정렬 (예: s10_r_1, s10_r_2...)
         return a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' });
@@ -172,25 +188,38 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
 export const generateImage = async (prompt: string): Promise<string | null> => {
   if (!prompt) return null;
   const ai = getAI();
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-image-preview', // User specifically requested Nano Banana Pro
-      contents: { 
-        parts: [{ text: `Professional educational illustration for EPS-TOPIK exam. Clean 2D vector art, white background, high clarity. Subject: ${prompt}` }] 
-      },
-      config: { imageConfig: { aspectRatio: "1:1" } }
-    });
-    
-    for (const part of response.candidates?.[0]?.content?.parts || []) {
-      if (part.inlineData) {
-        return `data:image/png;base64,${part.inlineData.data}`;
+  
+  const tryGenerate = async (modelName: string) => {
+    try {
+      const response = await ai.models.generateContent({
+        model: modelName,
+        contents: { 
+          parts: [{ text: `Professional educational illustration for EPS-TOPIK exam. Clean 2D vector art, white background, high clarity. Subject: ${prompt}` }] 
+        },
+        config: { imageConfig: { aspectRatio: "1:1" } }
+      });
+      
+      for (const part of response.candidates?.[0]?.content?.parts || []) {
+        if (part.inlineData) {
+          return `data:image/png;base64,${part.inlineData.data}`;
+        }
       }
+      return null;
+    } catch (err) {
+      console.error(`Image generation failed with ${modelName}:`, err);
+      return null;
     }
-    return null;
-  } catch (err) {
-    console.error("Image generation failed:", err);
-    return null;
+  };
+
+  // Try Nano Banana Pro first (as requested)
+  let result = await tryGenerate('gemini-3-pro-image-preview');
+  
+  // Fallback to standard Flash Image if Pro fails or is restricted
+  if (!result) {
+    result = await tryGenerate('gemini-2.5-flash-image');
   }
+  
+  return result;
 };
 
 export const generateSpeech = async (text: string): Promise<AudioBuffer | null> => {
