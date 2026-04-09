@@ -48,13 +48,19 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
   }, [mode, setNumber, plan, onExit]);
 
   const initAudio = async () => {
-    if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+      }
+      if (audioContextRef.current.state === 'suspended') {
+        await audioContextRef.current.resume();
+      }
+      setAudioContextReady(true);
+      return true;
+    } catch (err) {
+      console.error("Failed to initialize AudioContext:", err);
+      return false;
     }
-    if (audioContextRef.current.state === 'suspended') {
-      await audioContextRef.current.resume();
-    }
-    setAudioContextReady(true);
   };
 
   useEffect(() => {
@@ -118,11 +124,18 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     
     setLoadingAudio(true);
     try {
-      if (!audioContextRef.current) await initAudio();
-      if (!audioContextRef.current) throw new Error("AudioContext not available");
+      const success = await initAudio();
+      if (!success || !audioContextRef.current) {
+        throw new Error("AudioContext initialization failed");
+      }
       
       const buffer = await generateSpeech(script, audioContextRef.current);
       if (buffer && audioContextRef.current) {
+        // Double check context state
+        if (audioContextRef.current.state === 'suspended') {
+          await audioContextRef.current.resume();
+        }
+        
         const source = audioContextRef.current.createBufferSource();
         source.buffer = buffer;
         source.connect(audioContextRef.current.destination);

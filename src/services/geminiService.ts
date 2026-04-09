@@ -191,15 +191,26 @@ export const generateImage = async (prompt: string): Promise<string | null> => {
   
   const tryGenerate = async (modelName: string) => {
     try {
+      // Enhanced prompt to be more descriptive and avoid safety filters
+      const enhancedPrompt = `A clear, high-quality educational illustration for a language exam. Style: Simple 2D vector art, clean lines, white background, no text. Subject: ${prompt}`;
+      
       const response = await ai.models.generateContent({
         model: modelName,
         contents: { 
-          parts: [{ text: `Professional educational illustration for EPS-TOPIK exam. Clean 2D vector art, white background, high clarity. Subject: ${prompt}` }] 
+          parts: [{ text: enhancedPrompt }] 
         },
-        config: { imageConfig: { aspectRatio: "1:1" } }
+        config: { 
+          imageConfig: { aspectRatio: "1:1" }
+        }
       });
       
-      for (const part of response.candidates?.[0]?.content?.parts || []) {
+      const candidates = response.candidates;
+      if (!candidates || candidates.length === 0 || !candidates[0].content) return null;
+      
+      const parts = candidates[0].content.parts;
+      if (!parts) return null;
+      
+      for (const part of parts) {
         if (part.inlineData) {
           return `data:image/png;base64,${part.inlineData.data}`;
         }
@@ -211,12 +222,12 @@ export const generateImage = async (prompt: string): Promise<string | null> => {
     }
   };
 
-  // Try Nano Banana Pro first (as requested)
-  let result = await tryGenerate('gemini-3-pro-image-preview');
+  // Try standard Flash Image first as it's more reliable in this environment
+  let result = await tryGenerate('gemini-2.5-flash-image');
   
-  // Fallback to standard Flash Image if Pro fails or is restricted
+  // Try Nano Banana Pro as fallback if Flash fails
   if (!result) {
-    result = await tryGenerate('gemini-2.5-flash-image');
+    result = await tryGenerate('gemini-3-pro-image-preview');
   }
   
   return result;
@@ -247,11 +258,14 @@ export const generateSpeech = async (text: string, ctx: AudioContext): Promise<A
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text: `Listen carefully and choose the correct answer. ${text}` }] }],
+      contents: [{ parts: [{ text: `Listen carefully. ${text}` }] }],
       config
     });
     
-    const audioData = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+    const candidates = response.candidates;
+    if (!candidates || candidates.length === 0 || !candidates[0].content) return null;
+    
+    const audioData = candidates[0].content.parts?.[0]?.inlineData?.data;
     if (audioData) {
       return await decodeAudioData(decodeBase64(audioData), ctx, 24000, 1);
     }
