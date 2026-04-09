@@ -31,6 +31,22 @@ const cleanJson = (text: string | undefined): string =>
   (text ?? "").replace(/```json/g, '').replace(/```/g, '').replace(/\/\*.*?\*\//gs, '').trim();
 
 export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number, plan: PlanType): Promise<Question[]> => {
+  // 30세트 이하인 경우 먼저 정적 데이터(DB)에서 해당 라운드 데이터를 찾습니다.
+  if (roundNumber <= 30) {
+    const setPrefix = `s${roundNumber}_`;
+    const staticSet = STATIC_EXAM_DATA.filter(q => 
+      q.id.startsWith(setPrefix) && (mode === 'FULL' || q.type === mode)
+    );
+    
+    // 해당 라운드 데이터가 DB에 존재하면 반환합니다.
+    if (staticSet.length > 0) {
+      return [...staticSet].sort((a, b) => {
+        // ID 순서대로 정렬 (예: r_1, r_2...)
+        return a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' });
+      });
+    }
+  }
+
   const ai = getAI();
   
   // Custom difficulty based on user plan
@@ -60,8 +76,12 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
   2. IMAGE PROMPT PRECISION: Provide extremely descriptive 'imagePrompt' for an illustrator. 
      - Ex: "A side-view 2D vector of a worker in a blue uniform wearing a white safety helmet and using a yellow electric drill on a wooden board."
   3. AUDIO FIDELITY: For LISTENING, use 'Man:' and 'Woman:' tags in the 'context' field. Include realistic pauses or industrial background descriptions in the prompt.
-  4. LANGUAGE: Korean for exam content. Professional English for analysis and instructions.
-  5. REFERENCE SAMPLES (Follow this style):
+  4. LANGUAGE: 
+     - Exam content (questionText, options, context): Korean.
+     - Metadata (category, explanation, imagePrompt): STRICTLY ENGLISH.
+  5. CATEGORIES (Use these English names ONLY):
+     - Fill in the Blanks, Related Words, Signboards, Sentence Comprehension, Listening Comprehension, Picture Selection, Action Identification, Location Identification, Person Counting, Time Identification, Conversation Response, Story Comprehension, Place Identification, Weather Identification, Object Identification.
+  6. REFERENCE SAMPLES (Follow this style):
      ${JSON.stringify(samples, null, 2)}
 
   JSON FORMAT REQUIRED.`;
@@ -95,8 +115,17 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
 
     const text = response.text;
     if (!text) throw new Error("Empty AI response");
-    const parsed = JSON.parse(cleanJson(text));
-    return parsed.filter((q: Question) => mode === 'FULL' || q.type === mode);
+    
+    let generated: Question[] = JSON.parse(cleanJson(text));
+    
+    // Fallback for missing imagePrompts or categories
+    generated = generated.map(q => ({
+      ...q,
+      category: q.category || "General",
+      imagePrompt: q.imagePrompt || (q.type === QuestionType.READING ? `A clear educational illustration of: ${q.questionText}` : undefined)
+    })).filter((q: Question) => mode === 'FULL' || q.type === mode);
+
+    return generated;
   } catch (err) {
     console.error("AI Generation Error:", err);
     // Fallback to static data but shuffle it to feel "infinite"
@@ -112,13 +141,17 @@ export const generateImage = async (prompt: string): Promise<string | null> => {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: { 
-        parts: [{ text: `Professional EPS-TOPIK exam visual. Clean 2D educational art, high contrast, white background. ${prompt}` }] 
+        parts: [{ text: `Professional educational illustration for EPS-TOPIK exam. Clean 2D vector art, white background, high clarity. Subject: ${prompt}` }] 
       },
       config: { imageConfig: { aspectRatio: "1:1" } }
     });
     
-    const part = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-    return part?.inlineData ? `data:image/png;base64,${part.inlineData.data}` : null;
+    for (const part of response.candidates?.[0]?.content?.parts || []) {
+      if (part.inlineData) {
+        return `data:image/png;base64,${part.inlineData.data}`;
+      }
+    }
+    return null;
   } catch (err) {
     console.error("Image generation failed:", err);
     return null;
@@ -150,7 +183,7 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text: `잘 듣고 알맞은 것을 고르십시오. ${text}` }] }],
+      contents: [{ parts: [{ text: `Listen carefully and choose the correct answer. ${text}` }] }],
       config
     });
     
@@ -171,7 +204,20 @@ export const analyzePerformance = async (session: ExamSession): Promise<Analytic
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: `Perform an expert analysis on these results. Score: ${session.score}/${session.questions.length}. Provide tactical study advice in professional English. Return JSON.`,
+      contents: `Perform an expert analysis on these results. Score: ${session.score}/${session.questions.length}. 
+      
+      SESSION DATA:
+      - Mode: ${session.mode}
+      - Questions: ${JSON.stringify(session.questions.map(q => ({ category: q.category, correct: session.userAnswers[q.id] === q.correctAnswer })))}
+
+      OUTPUT REQUIREMENTS:
+      - All text must be in STRICT ENGLISH.
+      - overallAssessment: 2-3 sentence summary.
+      - strengths: List of categories where they performed well.
+      - weaknesses: List of categories needing focus.
+      - studyPlan: Actionable 7-day plan.
+
+      Return JSON.`,
       config: { 
         responseMimeType: "application/json",
         responseSchema: {

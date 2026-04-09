@@ -60,7 +60,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgr
               ) : (
                 <div className="flex flex-col items-center gap-4 mb-10">
                    <p className="text-indigo-200 text-lg font-medium opacity-80">Ready to master Korean?</p>
-                   <span className="bg-white/10 px-4 py-1.5 rounded-full text-[10px] font-black text-indigo-300 border border-white/10 uppercase tracking-widest">Trial Mode: Round 10 Available</span>
+                   <span className="bg-white/10 px-4 py-1.5 rounded-full text-[10px] font-black text-indigo-300 border border-white/10 uppercase tracking-widest">Trial Mode: Official Database Available</span>
                 </div>
               )}
               
@@ -112,8 +112,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onModeSelect, onUpgr
         </div>
       </div>
       
-      <div className="text-center py-8 text-[10px] text-gray-400 font-black uppercase tracking-[0.4em] border-t border-gray-100 shrink-0 bg-white">
-        © EPS MATE • Your Partner for Korean Career
+      <div className="text-center py-10 text-[10px] text-gray-400 font-black uppercase tracking-[0.4em] border-t border-gray-100 shrink-0 bg-white">
+        <div className="mb-2">© EPS MATE • Your Partner for Korean Career</div>
+        <div className="text-indigo-600/60 font-black tracking-[0.5em]">Developed by Himpower Pvt. Ltd.</div>
       </div>
     </div>
   );

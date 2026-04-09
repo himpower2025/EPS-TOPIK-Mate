@@ -84,7 +84,7 @@ const App: React.FC = () => {
     let unsubAuth: (() => void) | null = null;
 
     const startBootSequence = async () => {
-      // 1. 강제 타임아웃 (15초 후 로딩 해제)
+      // 1. Force timeout (release loading after 15s)
       const timeoutId = setTimeout(() => {
         if (isInitializing && isMounted.current) {
           console.warn("Auth process exceeded 15s - forcing release");
@@ -96,7 +96,7 @@ const App: React.FC = () => {
         setLoadingMessage("Checking session...");
         await setPersistence(auth, browserLocalPersistence);
         
-        // 2. 일반 Auth 상태 리스너 (자동 로그인용)
+        // 2. Standard Auth state listener (for auto-login)
         unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
           if (!isMounted.current) return;
 

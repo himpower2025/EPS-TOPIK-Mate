@@ -15,10 +15,10 @@ export const SetSelector: React.FC<SetSelectorProps> = ({ mode, plan, onSelect, 
   
   const getMaxSets = () => {
     if (!isPremium) return 1;
-    if (plan === '1m') return 5; 
-    if (plan === '3m') return 20; 
-    if (plan === '6m') return 50; 
-    return 5;
+    if (plan === '1m') return 30; // 1개월권도 기본 30세트는 다 볼 수 있게 변경
+    if (plan === '3m') return 60; // 30세트 DB + 30세트 AI
+    if (plan === '6m') return 100; // 30세트 DB + 70세트 AI
+    return 30;
   };
 
   const maxSets = getMaxSets();
@@ -54,13 +54,8 @@ export const SetSelector: React.FC<SetSelectorProps> = ({ mode, plan, onSelect, 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {Array.from({ length: maxSets }, (_, i) => {
             const setNum = i + 1;
-            let isAiGenerated = false;
-
-            if (plan === '3m' && mode === 'FULL' && setNum > 10) isAiGenerated = true;
-            if (plan === '6m') {
-               if ((mode === 'READING' || mode === 'LISTENING') && setNum > 15) isAiGenerated = true;
-               if (mode === 'FULL' && setNum > 15) isAiGenerated = true;
-            }
+            // 30세트까지는 무조건 Official Database (DB 데이터)
+            const isAiGenerated = setNum > 30;
 
             return (
               <button

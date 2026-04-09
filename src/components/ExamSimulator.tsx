@@ -67,13 +67,27 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     const loadVisuals = async () => {
       if (q.imagePrompt) {
         setIsGeneratingVisuals(true);
-        const img = await generateImage(q.imagePrompt);
-        setQuestionImage(img);
-        setIsGeneratingVisuals(false);
+        try {
+          const img = await generateImage(q.imagePrompt);
+          setQuestionImage(img);
+        } catch (err) {
+          console.error("Image generation failed:", err);
+        } finally {
+          setIsGeneratingVisuals(false);
+        }
       }
     };
     loadVisuals();
 
+    // Reset audio state for new question
+    if (currentAudioSource.current) {
+      try { currentAudioSource.current.stop(); } catch {}
+      currentAudioSource.current = null;
+    }
+    setIsPlaying(false);
+    setLoadingAudio(false);
+
+    // Auto-play listening questions if audio context is ready
     if (q.type === QuestionType.LISTENING && audioContextReady) {
       handlePlayAudio();
     }
@@ -107,7 +121,8 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
         setIsPlaying(true);
         source.onended = () => { setIsPlaying(false); setLoadingAudio(false); };
       }
-    } catch { 
+    } catch (err) { 
+      console.error("Audio playback error:", err);
       setIsPlaying(false); 
       setLoadingAudio(false); 
     }
@@ -155,70 +170,70 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
   return (
     <div className="flex flex-col h-full bg-gray-50 font-sans overflow-hidden">
       <div className="bg-white border-b border-gray-200 pt-safe shrink-0 shadow-sm z-30">
-        <div className="px-6 py-4 flex justify-between items-center max-w-screen-xl mx-auto w-full">
-            <div className="flex items-center gap-4">
+        <div className="px-4 md:px-6 py-3 md:py-4 flex justify-between items-center max-w-screen-xl mx-auto w-full">
+            <div className="flex items-center gap-2 md:gap-4">
               <button onClick={() => setIsDrawerOpen(true)} className="p-2 -ml-2 text-gray-400 hover:text-indigo-600 active:bg-indigo-50 rounded-full transition-all">
                 <Menu className="w-6 h-6" />
               </button>
-              <div className="hidden sm:block">
-                <span className="text-xs font-black uppercase text-indigo-900 tracking-widest bg-indigo-50 px-3 py-1 rounded-full">Round {setNumber}</span>
+              <div className="hidden xs:block">
+                <span className="text-[10px] md:text-xs font-black uppercase text-indigo-900 tracking-widest bg-indigo-50 px-2 md:px-3 py-1 rounded-full">Round {setNumber}</span>
               </div>
-              <span className="text-sm font-black text-gray-900">Q {currentIndex + 1} / {questions.length}</span>
+              <span className="text-xs md:text-sm font-black text-gray-900">Q {currentIndex + 1} / {questions.length}</span>
             </div>
             
-            <div className="flex items-center gap-3 bg-indigo-950 text-white px-5 py-2.5 rounded-2xl shadow-lg border border-white/10">
-              <Clock className="w-4 h-4 text-indigo-400" />
-              <span className="font-mono font-bold text-lg leading-none">{Math.floor(timeLeft/60)}:{(timeLeft%60).toString().padStart(2,'0')}</span>
+            <div className="flex items-center gap-2 md:gap-3 bg-indigo-950 text-white px-3 md:px-5 py-1.5 md:py-2.5 rounded-xl md:rounded-2xl shadow-lg border border-white/10">
+              <Clock className="w-3 h-3 md:w-4 md:h-4 text-indigo-400" />
+              <span className="font-mono font-bold text-base md:text-lg leading-none">{Math.floor(timeLeft/60)}:{(timeLeft%60).toString().padStart(2,'0')}</span>
             </div>
         </div>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-10 pb-40 hide-scrollbar">
-         <div className="max-w-screen-xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-10 pb-40 hide-scrollbar">
+         <div className="max-w-screen-xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 items-start">
             
-            <div className="space-y-6">
-                <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-gray-100">
-                    <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-6 border ${isListening ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-green-50 text-green-700 border-green-100'}`}>
+            <div className="space-y-4 md:space-y-6">
+                <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] shadow-sm border border-gray-100">
+                    <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-4 md:mb-6 border ${isListening ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-green-50 text-green-700 border-green-100'}`}>
                         {isListening ? <Headphones className="w-3 h-3"/> : <ImageIcon className="w-3 h-3"/>}
                         {currentQ.type} Section
                     </div>
-                    <h2 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight mb-4">{currentQ.questionText}</h2>
-                    <p className="text-xs text-gray-400 font-bold uppercase tracking-widest opacity-60">{currentQ.category}</p>
+                    <h2 className="text-xl md:text-2xl lg:text-3xl font-black text-gray-900 leading-tight mb-2 md:mb-4">{currentQ.questionText}</h2>
+                    <p className="text-[10px] md:text-xs text-gray-400 font-bold uppercase tracking-widest opacity-60">{currentQ.category}</p>
                 </div>
 
-                <div className="bg-white rounded-[3rem] border-2 border-dashed border-gray-200 overflow-hidden shadow-sm flex flex-col items-center justify-center p-8 transition-all min-h-[400px]">
+                <div className="bg-white rounded-[2rem] md:rounded-[3rem] border-2 border-dashed border-gray-200 overflow-hidden shadow-sm flex flex-col items-center justify-center p-4 md:p-8 transition-all min-h-[300px] md:min-h-[400px]">
                     {isGeneratingVisuals && !questionImage ? (
-                      <div className="flex flex-col items-center gap-6 py-12 text-center animate-pulse">
-                        <Sparkles className="w-16 h-16 text-indigo-400 animate-spin" />
-                        <span className="text-xs font-black text-gray-300 uppercase tracking-[0.3em]">AI Illustrator Rendering...</span>
+                      <div className="flex flex-col items-center gap-4 md:gap-6 py-8 md:py-12 text-center animate-pulse">
+                        <Sparkles className="w-12 h-12 md:w-16 md:h-16 text-indigo-400 animate-spin" />
+                        <span className="text-[10px] md:text-xs font-black text-gray-300 uppercase tracking-[0.3em]">AI Illustrator Rendering...</span>
                       </div>
                     ) : (
-                      <div className="w-full space-y-8">
+                      <div className="w-full space-y-4 md:space-y-8">
                         {questionImage && (
                           <div className="w-full flex items-center justify-center">
-                            <img src={questionImage} className="max-h-[350px] w-auto object-contain rounded-[2rem] shadow-2xl animate-fade-in" alt="Exam Visual" />
+                            <img src={questionImage} className="max-h-[250px] md:max-h-[350px] w-auto object-contain rounded-2xl md:rounded-[2rem] shadow-2xl animate-fade-in" alt="Exam Visual" />
                           </div>
                         )}
                         
                         {isListening ? (
-                          <div className="flex flex-col items-center justify-center gap-6 w-full py-4">
+                          <div className="flex flex-col items-center justify-center gap-4 md:gap-6 w-full py-2 md:py-4">
                              <button 
                                onClick={handlePlayAudio} 
                                disabled={loadingAudio}
-                               className={`relative w-32 h-32 rounded-[2.5rem] flex items-center justify-center shadow-2xl transition-all active:scale-95 ${isPlaying ? 'bg-indigo-600 text-white ring-8 ring-indigo-100' : 'bg-white text-indigo-600 border border-indigo-100 hover:border-indigo-300'} disabled:opacity-50`}
+                               className={`relative w-24 h-24 md:w-32 md:h-32 rounded-[2rem] md:rounded-[2.5rem] flex items-center justify-center shadow-2xl transition-all active:scale-95 ${isPlaying ? 'bg-indigo-600 text-white ring-8 ring-indigo-100' : 'bg-white text-indigo-600 border border-indigo-100 hover:border-indigo-300'} disabled:opacity-50`}
                              >
-                                {loadingAudio ? <div className="w-10 h-10 border-4 border-current border-t-transparent rounded-full animate-spin"/> : <Volume2 className="w-16 h-16" />}
+                                {loadingAudio ? <div className="w-8 h-8 md:w-10 md:h-10 border-4 border-current border-t-transparent rounded-full animate-spin"/> : <Volume2 className="w-12 h-12 md:w-16 md:h-16" />}
                              </button>
                              <div className="text-center">
-                                <p className="text-xs font-black text-indigo-900 uppercase tracking-[0.2em] mb-2">{isPlaying ? "Now Playing" : loadingAudio ? "Generating Audio..." : "Tap to Listen"}</p>
+                                <p className="text-[10px] md:text-xs font-black text-indigo-900 uppercase tracking-[0.2em] mb-1 md:mb-2">{isPlaying ? "Now Playing" : loadingAudio ? "Generating Audio..." : "Tap to Listen"}</p>
                                 <div className="flex gap-1 justify-center">
-                                   {[...Array(3)].map((_, i) => <div key={i} className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-indigo-500 animate-bounce' : 'bg-gray-200'}`} style={{animationDelay: `${i*0.2}s`}} />)}
+                                   {[...Array(3)].map((_, i) => <div key={i} className={`w-1 h-1 md:w-1.5 md:h-1.5 rounded-full ${isPlaying ? 'bg-indigo-500 animate-bounce' : 'bg-gray-200'}`} style={{animationDelay: `${i*0.2}s`}} />)}
                                 </div>
                              </div>
                           </div>
                         ) : (
                           !questionImage && currentQ.context && (
-                            <div className="p-10 text-xl md:text-2xl font-serif leading-relaxed text-gray-800 bg-indigo-50/30 rounded-[2.5rem] w-full border border-indigo-100 italic shadow-inner text-center">
+                            <div className="p-6 md:p-10 text-lg md:text-xl lg:text-2xl font-serif leading-relaxed text-gray-800 bg-indigo-50/30 rounded-2xl md:rounded-[2.5rem] w-full border border-indigo-100 italic shadow-inner text-center">
                                 "{currentQ.context}"
                             </div>
                           )
@@ -228,20 +243,20 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 h-full content-start">
+            <div className="grid grid-cols-1 gap-3 md:gap-4 h-full content-start">
                 {currentQ.options.map((option, idx) => {
                     const isSelected = answers[currentQ.id] === idx;
                     return (
                         <button 
                           key={idx} 
                           onClick={() => handleAnswer(idx)} 
-                          className={`w-full p-6 md:p-10 rounded-[2.5rem] text-left transition-all flex items-center gap-8 border-2 shadow-sm active:scale-[0.99] ${isSelected ? 'border-indigo-600 bg-indigo-600 text-white shadow-2xl translate-x-2' : 'border-white bg-white text-gray-700 hover:border-indigo-100'}`}
+                          className={`w-full p-4 md:p-6 lg:p-8 rounded-2xl md:rounded-[2.5rem] text-left transition-all flex items-center gap-4 md:gap-8 border-2 shadow-sm active:scale-[0.99] ${isSelected ? 'border-indigo-600 bg-indigo-600 text-white shadow-2xl translate-x-2' : 'border-white bg-white text-gray-700 hover:border-indigo-100'}`}
                         >
-                          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black shrink-0 ${isSelected ? 'bg-white text-indigo-600 shadow-lg' : 'bg-gray-50 text-gray-400'}`}>
+                          <div className={`w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center text-lg md:text-xl font-black shrink-0 ${isSelected ? 'bg-white text-indigo-600 shadow-lg' : 'bg-gray-50 text-gray-400'}`}>
                             {idx + 1}
                           </div>
-                          <span className="text-xl md:text-2xl font-bold flex-1 leading-tight">{option}</span>
-                          {isSelected && <CheckCircle className="w-8 h-8 text-indigo-200" />}
+                          <span className="text-base md:text-lg lg:text-xl font-bold flex-1 leading-tight">{option}</span>
+                          {isSelected && <CheckCircle className="w-6 h-6 md:w-8 md:h-8 text-indigo-200" />}
                         </button>
                     );
                 })}
@@ -249,18 +264,18 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
          </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-2xl border-t border-gray-100 p-6 pb-safe z-40">
-          <div className="max-w-screen-xl mx-auto flex gap-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-2xl border-t border-gray-100 p-4 md:p-6 pb-safe z-40">
+          <div className="max-w-screen-xl mx-auto flex gap-3 md:gap-4">
               <button 
                 onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))} 
                 disabled={currentIndex === 0} 
-                className="px-8 py-5 rounded-3xl bg-gray-100 text-gray-500 disabled:opacity-30 font-black active:scale-95 transition-all"
+                className="px-6 md:px-8 py-4 md:py-5 rounded-2xl md:rounded-3xl bg-gray-100 text-gray-500 disabled:opacity-30 font-black active:scale-95 transition-all"
               >
-                <ChevronLeft className="w-8 h-8" />
+                <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
               </button>
               <button 
                 onClick={isLast ? handleSubmit : () => setCurrentIndex(p => p + 1)} 
-                className={`flex-1 ${isLast ? 'bg-green-600 shadow-green-100' : 'bg-indigo-600 shadow-indigo-100'} text-white font-black rounded-3xl shadow-2xl active:scale-95 text-xl uppercase tracking-widest transition-all py-5`}
+                className={`flex-1 ${isLast ? 'bg-green-600 shadow-green-100' : 'bg-indigo-600 shadow-indigo-100'} text-white font-black rounded-2xl md:rounded-3xl shadow-2xl active:scale-95 text-lg md:text-xl uppercase tracking-widest transition-all py-4 md:py-5`}
               >
                 {isLast ? 'Complete Exam' : 'Next Question'}
               </button>
