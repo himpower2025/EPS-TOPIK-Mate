@@ -222,7 +222,7 @@ export const generateImage = async (prompt: string): Promise<string | null> => {
   return result;
 };
 
-export const generateSpeech = async (text: string): Promise<AudioBuffer | null> => {
+export const generateSpeech = async (text: string, ctx: AudioContext): Promise<AudioBuffer | null> => {
   const ai = getAI();
   const isDialogue = text.includes("Man:") || text.includes("Woman:") || text.includes("남:") || text.includes("여:");
   
@@ -253,7 +253,6 @@ export const generateSpeech = async (text: string): Promise<AudioBuffer | null> 
     
     const audioData = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
     if (audioData) {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
       return await decodeAudioData(decodeBase64(audioData), ctx, 24000, 1);
     }
     return null;

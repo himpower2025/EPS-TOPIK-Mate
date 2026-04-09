@@ -73,6 +73,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
           setQuestionImage(img);
         } catch (err) {
           console.error("Image generation failed:", err);
+          setQuestionImage(null);
         } finally {
           setIsGeneratingVisuals(false);
         }
@@ -89,9 +90,14 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     setLoadingAudio(false);
 
     // Auto-play listening questions if audio context is ready
-    if (q.type === QuestionType.LISTENING && audioContextReady) {
-      handlePlayAudio();
-    }
+    // Use a small delay to ensure state is settled
+    const timer = setTimeout(() => {
+      if (q.type === QuestionType.LISTENING && audioContextReady && !isPlaying && !loadingAudio) {
+        handlePlayAudio();
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
   }, [currentIndex, questions, audioContextReady, loading]);
 
   useEffect(() => {
@@ -104,7 +110,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     const q = questions[currentIndex];
     // Clean text to remove spoilers like [Answer]
     const script = cleanText(q.context || q.questionText);
-    if (!script || isPlaying) return;
+    if (!script || isPlaying || loadingAudio) return;
     
     if (currentAudioSource.current) {
       try { currentAudioSource.current.stop(); } catch {}
@@ -113,7 +119,9 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     setLoadingAudio(true);
     try {
       if (!audioContextRef.current) await initAudio();
-      const buffer = await generateSpeech(script);
+      if (!audioContextRef.current) throw new Error("AudioContext not available");
+      
+      const buffer = await generateSpeech(script, audioContextRef.current);
       if (buffer && audioContextRef.current) {
         const source = audioContextRef.current.createBufferSource();
         source.buffer = buffer;
@@ -220,10 +228,31 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                       </div>
                     ) : (
                       <div className="w-full space-y-4 md:space-y-8">
-                        {questionImage && (
+                        {questionImage ? (
                           <div className="w-full flex items-center justify-center">
                             <img src={questionImage} className="max-h-[200px] md:max-h-[350px] w-auto object-contain rounded-2xl md:rounded-[2rem] shadow-2xl animate-fade-in" alt="Exam Visual" referrerPolicy="no-referrer" />
                           </div>
+                        ) : (
+                          currentQ.imagePrompt && !isListening && (
+                            <div className="flex flex-col items-center gap-4 py-8">
+                              <p className="text-gray-400 text-sm font-medium">Image failed to load</p>
+                              <button 
+                                onClick={() => {
+                                  const q = questions[currentIndex];
+                                  if (q.imagePrompt) {
+                                    setIsGeneratingVisuals(true);
+                                    generateImage(q.imagePrompt).then(img => {
+                                      setQuestionImage(img);
+                                      setIsGeneratingVisuals(false);
+                                    }).catch(() => setIsGeneratingVisuals(false));
+                                  }
+                                }}
+                                className="px-6 py-2 bg-indigo-50 text-indigo-600 rounded-full text-xs font-black uppercase tracking-widest hover:bg-indigo-100 transition-all"
+                              >
+                                Retry Loading Image
+                              </button>
+                            </div>
+                          )
                         )}
                         
                         {isListening ? (
