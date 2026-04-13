@@ -15,10 +15,8 @@ function decodeBase64(base64: string): Uint8Array {
 
 async function decodeAudioData(data: Uint8Array, ctx: AudioContext, sampleRate: number, numChannels: number): Promise<AudioBuffer> {
   try {
-    // Try native decoding first (in case it's a WAV/MP3)
     return await ctx.decodeAudioData(data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer);
   } catch (e) {
-    // Fallback to manual PCM decoding
     const dataInt16 = new Int16Array(data.buffer, data.byteOffset, Math.floor(data.byteLength / 2));
     const frameCount = dataInt16.length / numChannels;
     const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
@@ -32,40 +30,29 @@ async function decodeAudioData(data: Uint8Array, ctx: AudioContext, sampleRate: 
   }
 }
 
-const cleanJson = (text: string | undefined): string => 
+const cleanJson = (text: string | undefined): string =>
   (text ?? "").replace(/```json/g, '').replace(/```/g, '').replace(/\/\*.*?\*\//gs, '').trim();
 
-/**
- * Removes text inside brackets [] which often contains answers or spoilers in the DB.
- */
 export const cleanText = (text: string): string => {
   if (!text) return "";
-  // Remove text in brackets
   let cleaned = text.replace(/\[.*?\]/g, '').trim();
-  
-  // Remove everything after the last question mark if it looks like an answer leak
-  // (Questions should end with ? in EPS-TOPIK)
   const questionMarkIndex = cleaned.lastIndexOf('?');
   if (questionMarkIndex !== -1 && questionMarkIndex < cleaned.length - 1) {
     const after = cleaned.substring(questionMarkIndex + 1).trim();
-    // If what's after is short (likely an answer) or contains common answer patterns
     if (after.length > 0) {
       cleaned = cleaned.substring(0, questionMarkIndex + 1);
     }
   }
-  
   return cleaned;
 };
 
 export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number, plan: PlanType): Promise<Question[]> => {
-  // 30세트 이하인 경우 먼저 정적 데이터(DB)에서 해당 라운드 데이터를 찾습니다.
   if (roundNumber <= 30) {
     const setPrefix = `s${roundNumber}_`;
-    const staticSet = STATIC_EXAM_DATA.filter(q => 
+    const staticSet = STATIC_EXAM_DATA.filter(q =>
       q.id.startsWith(setPrefix) && (mode === 'FULL' || q.type === mode)
     );
-    
-    // 5. CATEGORIES (Use these English names ONLY):
+
     const CATEGORY_MAP: Record<string, string> = {
       "빈칸 채우기": "Fill in the Blanks",
       "관계있는 단어": "Related Words",
@@ -84,7 +71,6 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
       "사물 파악": "Object Identification"
     };
 
-    // 해당 라운드 데이터가 DB에 존재하면 반환합니다.
     if (staticSet.length > 0) {
       return staticSet.map(q => ({
         ...q,
@@ -92,18 +78,15 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
         questionText: cleanText(q.questionText),
         context: q.context ? cleanText(q.context) : undefined
       })).sort((a, b) => {
-        // ID 순서대로 정렬 (예: s10_r_1, s10_r_2...)
         return a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' });
       });
     }
   }
 
   const ai = getAI();
-  
-  // Custom difficulty based on user plan
+
   const difficultyContext = plan === 'free' ? "Standard Beginner Level" : "High-tier Workplace and Technical Industry Scenarios";
 
-  // Get some samples from static data to guide the AI
   const samples = STATIC_EXAM_DATA
     .filter(q => mode === 'FULL' || q.type === mode)
     .sort(() => Math.random() - 0.5)
@@ -139,7 +122,8 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3.1-pro-preview",
+      // ✅ 수정: gemini-3.1-pro-preview → 실제 존재하는 모델로 변경
+      model: "gemini-2.5-pro-preview-06-05",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -166,10 +150,9 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
 
     const text = response.text;
     if (!text) throw new Error("Empty AI response");
-    
+
     let generated: Question[] = JSON.parse(cleanJson(text));
-    
-    // Fallback for missing imagePrompts or categories
+
     generated = generated.map(q => ({
       ...q,
       category: q.category || "General",
@@ -179,64 +162,72 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
     return generated;
   } catch (err) {
     console.error("AI Generation Error:", err);
-    // Fallback to static data but shuffle it to feel "infinite"
     const filtered = STATIC_EXAM_DATA.filter(q => mode === 'FULL' || q.type === mode);
     return [...filtered].sort(() => Math.random() - 0.5).slice(0, 20);
   }
 };
 
+// ============================================================
+// ✅ 핵심 수정: generateImage 함수 전면 재작성
+// 변경 이유:
+//   1. 'gemini-2.5-flash-image', 'gemini-3-pro-image-preview' → 존재하지 않는 모델명
+//   2. generateContent() + imageConfig → 이미지 생성 API가 아님
+//   3. 올바른 방법: generateImages() + 'imagen-3.0-generate-002' 모델 사용
+// ============================================================
 export const generateImage = async (prompt: string): Promise<string | null> => {
   if (!prompt) return null;
   const ai = getAI();
-  
-  const tryGenerate = async (modelName: string) => {
-    try {
-      // Enhanced prompt to be more descriptive and avoid safety filters
-      const enhancedPrompt = `A clear, high-quality educational illustration for a language exam. Style: Simple 2D vector art, clean lines, white background, no text. Subject: ${prompt}`;
-      
-      const response = await ai.models.generateContent({
-        model: modelName,
-        contents: { 
-          parts: [{ text: enhancedPrompt }] 
-        },
-        config: { 
-          imageConfig: { aspectRatio: "1:1" }
-        }
-      });
-      
-      const candidates = response.candidates;
-      if (!candidates || candidates.length === 0 || !candidates[0].content) return null;
-      
-      const parts = candidates[0].content.parts;
-      if (!parts) return null;
-      
-      for (const part of parts) {
-        if (part.inlineData) {
-          return `data:image/png;base64,${part.inlineData.data}`;
-        }
-      }
-      return null;
-    } catch (err) {
-      console.error(`Image generation failed with ${modelName}:`, err);
-      return null;
-    }
-  };
 
-  // Try standard Flash Image first as it's more reliable in this environment
-  let result = await tryGenerate('gemini-2.5-flash-image');
-  
-  // Try Nano Banana Pro as fallback if Flash fails
-  if (!result) {
-    result = await tryGenerate('gemini-3-pro-image-preview');
+  const enhancedPrompt = `A clear, high-quality educational illustration for a Korean language exam.
+Style: Simple 2D vector art, clean lines, white background, no decorative text overlays.
+Subject: ${prompt}`;
+
+  // 1차 시도: Imagen 3 (가장 안정적)
+  try {
+    const response = await ai.models.generateImages({
+      model: 'imagen-3.0-generate-002',
+      prompt: enhancedPrompt,
+      config: {
+        numberOfImages: 1,
+        aspectRatio: '1:1',
+        safetyFilterLevel: 'BLOCK_LOW_AND_ABOVE',
+      }
+    });
+
+    const imageBytes = response.generatedImages?.[0]?.image?.imageBytes;
+    if (imageBytes) {
+      return `data:image/png;base64,${imageBytes}`;
+    }
+  } catch (err) {
+    console.warn('Imagen 3 failed, trying Imagen 3 Fast:', err);
   }
-  
-  return result;
+
+  // 2차 시도: Imagen 3 Fast (속도 우선 폴백)
+  try {
+    const response = await ai.models.generateImages({
+      model: 'imagen-3.0-fast-generate-001',
+      prompt: enhancedPrompt,
+      config: {
+        numberOfImages: 1,
+        aspectRatio: '1:1',
+      }
+    });
+
+    const imageBytes = response.generatedImages?.[0]?.image?.imageBytes;
+    if (imageBytes) {
+      return `data:image/png;base64,${imageBytes}`;
+    }
+  } catch (err) {
+    console.error('All image generation models failed:', err);
+  }
+
+  return null;
 };
 
 export const generateSpeech = async (text: string, ctx: AudioContext): Promise<AudioBuffer | null> => {
   const ai = getAI();
   const isDialogue = text.includes("Man:") || text.includes("Woman:") || text.includes("남:") || text.includes("여:");
-  
+
   try {
     const config: any = {
       responseModalities: [Modality.AUDIO],
@@ -261,10 +252,10 @@ export const generateSpeech = async (text: string, ctx: AudioContext): Promise<A
       contents: [{ parts: [{ text: `Listen carefully. ${text}` }] }],
       config
     });
-    
+
     const candidates = response.candidates;
     if (!candidates || candidates.length === 0 || !candidates[0].content) return null;
-    
+
     const audioData = candidates[0].content.parts?.[0]?.inlineData?.data;
     if (audioData) {
       return await decodeAudioData(decodeBase64(audioData), ctx, 24000, 1);
@@ -280,7 +271,8 @@ export const analyzePerformance = async (session: ExamSession): Promise<Analytic
   const ai = getAI();
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      // ✅ 수정: gemini-3-flash-preview → 실제 존재하는 모델로 변경
+      model: "gemini-2.5-flash-preview-05-20",
       contents: `Perform an expert analysis on these results. Score: ${session.score}/${session.questions.length}. 
       
       SESSION DATA:
@@ -296,7 +288,7 @@ export const analyzePerformance = async (session: ExamSession): Promise<Analytic
       - studyPlan: Actionable 7-day plan in English.
 
       Return JSON.`,
-      config: { 
+      config: {
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
