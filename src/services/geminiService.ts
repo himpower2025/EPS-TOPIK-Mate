@@ -190,7 +190,6 @@ Subject: ${prompt}`;
       config: {
         numberOfImages: 1,
         aspectRatio: '1:1',
-        safetyFilterLevel: 'BLOCK_LOW_AND_ABOVE',
       }
     });
 
