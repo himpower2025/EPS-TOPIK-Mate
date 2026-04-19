@@ -1,4 +1,3 @@
-
 export enum QuestionType {
   READING = 'READING',
   LISTENING = 'LISTENING'
@@ -18,7 +17,8 @@ export interface Question {
   explanation: string;
   sourceRef?: string;
   // Metadata for AI Visual Generation
-  imagePrompt?: string; // Prompt for the main question context image (signs, charts, objects)
+  imagePrompt?: string;       // Prompt for the main question context image (signs, charts, objects)
+  imageUrl?: string;          // ✅ 추가: 로컬 이미지 파일 경로 (있으면 AI 생성 건너뜀)
   optionImagePrompts?: string[]; // Array of 4 prompts for questions where each option is a different image
 }
 

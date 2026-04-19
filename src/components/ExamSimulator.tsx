@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Question, QuestionType, ExamSession, ExamMode, PlanType } from '../types';
-import { generateQuestionsBySet, generateSpeech, generateImage, cleanText } from '../services/geminiService';
+import { generateQuestionsBySet, generateSpeech, generateImage, cleanText, prepareAudioScript } from '../services/geminiService';
 import { CheckCircle, Clock, Menu, X, ChevronLeft, Headphones, Volume2, Sparkles, Image as ImageIcon } from 'lucide-react';
 import { LoadingSpinner } from './LoadingSpinner';
 
@@ -71,13 +71,11 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
 
     const loadVisuals = async () => {
-      // ✅ 수정: imageUrl(로컬 파일) 있으면 AI 생성 없이 즉시 표시
-      //          imageUrl 없고 imagePrompt만 있으면 AI로 생성
-      const imageUrl = (q as any).imageUrl as string | undefined;
-      if (imageUrl || q.imagePrompt) {
+      // imageUrl(로컬 파일) 있으면 즉시 표시, 없으면 AI 생성
+      if (q.imageUrl || q.imagePrompt) {
         setIsGeneratingVisuals(true);
         try {
-          const img = await generateImage(q.imagePrompt || '', imageUrl);
+          const img = await generateImage(q.imagePrompt || '', q.imageUrl);
           setQuestionImage(img);
         } catch (err) {
           console.error("Image generation failed:", err);
@@ -113,7 +111,9 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
 
   const handlePlayAudio = async () => {
     const q = questions[currentIndex];
-    const script = cleanText(q.context || q.questionText);
+    const rawScript = q.context || q.questionText;
+    const { script } = prepareAudioScript(rawScript);
+
     if (!script || isPlaying || loadingAudio) return;
 
     if (currentAudioSource.current) {
@@ -127,12 +127,12 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
         throw new Error("AudioContext initialization failed");
       }
 
-      const buffer = await generateSpeech(script, audioContextRef.current);
+      const buffer = await generateSpeech(rawScript, audioContextRef.current);
+
       if (buffer && audioContextRef.current) {
         if (audioContextRef.current.state === 'suspended') {
           await audioContextRef.current.resume();
         }
-
         const source = audioContextRef.current.createBufferSource();
         source.buffer = buffer;
         source.connect(audioContextRef.current.destination);
@@ -190,7 +190,12 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
         <Headphones className="w-20 h-20 mb-8 text-indigo-300 animate-pulse" />
         <h2 className="text-3xl font-black mb-4">Listening Test Ready</h2>
         <p className="mb-12 text-indigo-200/70 font-medium">Please turn on your sound for a realistic exam experience.</p>
-        <button onClick={initAudio} className="bg-white text-indigo-900 px-12 py-5 rounded-[2.5rem] font-black text-xl shadow-2xl active:scale-95">Begin Audio</button>
+        <button
+          onClick={initAudio}
+          className="bg-white text-indigo-900 px-12 py-5 rounded-[2.5rem] font-black text-xl shadow-2xl active:scale-95"
+        >
+          Begin Audio
+        </button>
       </div>
     );
   }
@@ -200,18 +205,27 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
       <div className="bg-white border-b border-gray-200 pt-safe shrink-0 shadow-sm z-30">
         <div className="px-4 md:px-6 py-3 md:py-4 flex justify-between items-center max-w-screen-xl mx-auto w-full">
           <div className="flex items-center gap-2 md:gap-4">
-            <button onClick={() => setIsDrawerOpen(true)} className="p-2 -ml-2 text-gray-400 hover:text-indigo-600 active:bg-indigo-50 rounded-full transition-all">
+            <button
+              onClick={() => setIsDrawerOpen(true)}
+              className="p-2 -ml-2 text-gray-400 hover:text-indigo-600 active:bg-indigo-50 rounded-full transition-all"
+            >
               <Menu className="w-6 h-6" />
             </button>
             <div className="hidden xs:block">
-              <span className="text-[10px] md:text-xs font-black uppercase text-indigo-900 tracking-widest bg-indigo-50 px-2 md:px-3 py-1 rounded-full">Round {setNumber}</span>
+              <span className="text-[10px] md:text-xs font-black uppercase text-indigo-900 tracking-widest bg-indigo-50 px-2 md:px-3 py-1 rounded-full">
+                Round {setNumber}
+              </span>
             </div>
-            <span className="text-xs md:text-sm font-black text-gray-900">Q {currentIndex + 1} / {questions.length}</span>
+            <span className="text-xs md:text-sm font-black text-gray-900">
+              Q {currentIndex + 1} / {questions.length}
+            </span>
           </div>
 
           <div className="flex items-center gap-2 md:gap-3 bg-indigo-950 text-white px-3 md:px-5 py-1.5 md:py-2.5 rounded-xl md:rounded-2xl shadow-lg border border-white/10">
             <Clock className="w-3 h-3 md:w-4 md:h-4 text-indigo-400" />
-            <span className="font-mono font-bold text-base md:text-lg leading-none">{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
+            <span className="font-mono font-bold text-base md:text-lg leading-none">
+              {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+            </span>
           </div>
         </div>
       </div>
@@ -225,15 +239,21 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                 {isListening ? <Headphones className="w-3 h-3" /> : <ImageIcon className="w-3 h-3" />}
                 {currentQ.type} Section
               </div>
-              <h2 className="text-xl md:text-2xl lg:text-3xl font-black text-gray-900 leading-tight mb-2 md:mb-4">{displayQuestionText}</h2>
-              <p className="text-[10px] md:text-xs text-gray-400 font-bold uppercase tracking-widest opacity-60">{currentQ.category}</p>
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-black text-gray-900 leading-tight mb-2 md:mb-4">
+                {displayQuestionText}
+              </h2>
+              <p className="text-[10px] md:text-xs text-gray-400 font-bold uppercase tracking-widest opacity-60">
+                {currentQ.category}
+              </p>
             </div>
 
             <div className="bg-white rounded-[2rem] md:rounded-[3rem] border-2 border-dashed border-gray-200 overflow-hidden shadow-sm flex flex-col items-center justify-center p-4 md:p-8 transition-all min-h-[250px] md:min-h-[400px]">
               {isGeneratingVisuals && !questionImage ? (
                 <div className="flex flex-col items-center gap-4 md:gap-6 py-8 md:py-12 text-center animate-pulse">
                   <Sparkles className="w-12 h-12 md:w-16 md:h-16 text-indigo-400 animate-spin" />
-                  <span className="text-[10px] md:text-xs font-black text-gray-300 uppercase tracking-[0.3em]">Loading Visual...</span>
+                  <span className="text-[10px] md:text-xs font-black text-gray-300 uppercase tracking-[0.3em]">
+                    Loading Visual...
+                  </span>
                 </div>
               ) : (
                 <div className="w-full space-y-4 md:space-y-8">
@@ -247,17 +267,15 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                       />
                     </div>
                   ) : (
-                    // ✅ imageUrl 또는 imagePrompt 있으면 Retry 버튼 표시
-                    ((currentQ as any).imageUrl || currentQ.imagePrompt) && !isListening && (
+                    (currentQ.imageUrl || currentQ.imagePrompt) && !isListening && (
                       <div className="flex flex-col items-center gap-4 py-8">
                         <p className="text-gray-400 text-sm font-medium">Image failed to load</p>
                         <button
                           onClick={() => {
                             const q = questions[currentIndex];
-                            const imageUrl = (q as any).imageUrl as string | undefined;
-                            if (imageUrl || q.imagePrompt) {
+                            if (q.imageUrl || q.imagePrompt) {
                               setIsGeneratingVisuals(true);
-                              generateImage(q.imagePrompt || '', imageUrl)
+                              generateImage(q.imagePrompt || '', q.imageUrl)
                                 .then(img => {
                                   setQuestionImage(img);
                                   setIsGeneratingVisuals(false);
@@ -280,12 +298,23 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                         disabled={loadingAudio}
                         className={`relative w-20 h-20 md:w-32 md:h-32 rounded-[1.5rem] md:rounded-[2.5rem] flex items-center justify-center shadow-2xl transition-all active:scale-95 ${isPlaying ? 'bg-indigo-600 text-white ring-8 ring-indigo-100' : 'bg-white text-indigo-600 border border-indigo-100 hover:border-indigo-300'} disabled:opacity-50`}
                       >
-                        {loadingAudio ? <div className="w-8 h-8 md:w-10 md:h-10 border-4 border-current border-t-transparent rounded-full animate-spin" /> : <Volume2 className="w-10 h-10 md:w-16 md:h-16" />}
+                        {loadingAudio
+                          ? <div className="w-8 h-8 md:w-10 md:h-10 border-4 border-current border-t-transparent rounded-full animate-spin" />
+                          : <Volume2 className="w-10 h-10 md:w-16 md:h-16" />
+                        }
                       </button>
                       <div className="text-center">
-                        <p className="text-[10px] md:text-xs font-black text-indigo-900 uppercase tracking-[0.2em] mb-1 md:mb-2">{isPlaying ? "Now Playing" : loadingAudio ? "Generating Audio..." : "Tap to Listen"}</p>
+                        <p className="text-[10px] md:text-xs font-black text-indigo-900 uppercase tracking-[0.2em] mb-1 md:mb-2">
+                          {isPlaying ? "Now Playing" : loadingAudio ? "Generating Audio..." : "Tap to Listen"}
+                        </p>
                         <div className="flex gap-1 justify-center">
-                          {[...Array(3)].map((_, i) => <div key={i} className={`w-1 h-1 md:w-1.5 md:h-1.5 rounded-full ${isPlaying ? 'bg-indigo-500 animate-bounce' : 'bg-gray-200'}`} style={{ animationDelay: `${i * 0.2}s` }} />)}
+                          {[...Array(3)].map((_, i) => (
+                            <div
+                              key={i}
+                              className={`w-1 h-1 md:w-1.5 md:h-1.5 rounded-full ${isPlaying ? 'bg-indigo-500 animate-bounce' : 'bg-gray-200'}`}
+                              style={{ animationDelay: `${i * 0.2}s` }}
+                            />
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -342,11 +371,16 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
 
       {isDrawerOpen && (
         <div className="fixed inset-0 z-[60] flex">
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={() => setIsDrawerOpen(false)}></div>
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
+            onClick={() => setIsDrawerOpen(false)}
+          />
           <div className="relative w-80 md:w-96 bg-white h-full shadow-2xl flex flex-col pt-safe animate-slide-in-right">
             <div className="p-8 border-b border-gray-100 flex justify-between items-center">
               <h3 className="font-black text-2xl text-gray-900 uppercase tracking-tight">Status</h3>
-              <button onClick={() => setIsDrawerOpen(false)} className="p-2 bg-gray-50 rounded-full"><X className="w-6 h-6" /></button>
+              <button onClick={() => setIsDrawerOpen(false)} className="p-2 bg-gray-50 rounded-full">
+                <X className="w-6 h-6" />
+              </button>
             </div>
             <div className="flex-1 overflow-y-auto p-8 grid grid-cols-4 gap-4 hide-scrollbar">
               {questions.map((q, idx) => (

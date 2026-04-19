@@ -13,9 +13,16 @@ function decodeBase64(base64: string): Uint8Array {
   return bytes;
 }
 
-async function decodeAudioData(data: Uint8Array, ctx: AudioContext, sampleRate: number, numChannels: number): Promise<AudioBuffer> {
+async function decodeAudioData(
+  data: Uint8Array,
+  ctx: AudioContext,
+  sampleRate: number,
+  numChannels: number
+): Promise<AudioBuffer> {
   try {
-    return await ctx.decodeAudioData(data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer);
+    return await ctx.decodeAudioData(
+      data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer
+    );
   } catch (e) {
     const dataInt16 = new Int16Array(data.buffer, data.byteOffset, Math.floor(data.byteLength / 2));
     const frameCount = dataInt16.length / numChannels;
@@ -33,24 +40,74 @@ async function decodeAudioData(data: Uint8Array, ctx: AudioContext, sampleRate: 
 const cleanJson = (text: string | undefined): string =>
   (text ?? "").replace(/```json/g, '').replace(/```/g, '').replace(/\/\*.*?\*\//gs, '').trim();
 
+// ============================================================
+// ✅ cleanText 수정
+// 기존: 물음표(?) 뒤 내용을 전부 잘라버려서 듣기 스크립트가 손상됨
+// 수정: 대괄호 안 정답 힌트만 제거, 스크립트 내용은 보존
+// ============================================================
 export const cleanText = (text: string): string => {
   if (!text) return "";
-  let cleaned = text.replace(/\[.*?\]/g, '').trim();
-  const questionMarkIndex = cleaned.lastIndexOf('?');
-  if (questionMarkIndex !== -1 && questionMarkIndex < cleaned.length - 1) {
-    const after = cleaned.substring(questionMarkIndex + 1).trim();
-    if (after.length > 0) {
-      cleaned = cleaned.substring(0, questionMarkIndex + 1);
-    }
-  }
-  return cleaned;
+  // 대괄호 안의 정답 힌트만 제거 (예: [정답: 2번])
+  return text.replace(/\[.*?\]/g, '').trim();
 };
 
-export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number, plan: PlanType): Promise<Question[]> => {
+// ============================================================
+// ✅ 새로운 함수: 듣기 스크립트 전처리
+// 역할:
+//   1. "대본:" 접두어 제거
+//   2. DB의 다양한 대화 태그를 TTS가 인식하는 Man:/Woman: 형식으로 통일
+//   3. 단일 발화인지 대화형인지 판별
+// ============================================================
+export const prepareAudioScript = (rawText: string): { script: string; isDialogue: boolean } => {
+  if (!rawText) return { script: '', isDialogue: false };
+
+  // 1단계: 대괄호 힌트 제거
+  let text = rawText.replace(/\[.*?\]/g, '').trim();
+
+  // 2단계: "대본:" 접두어 제거
+  text = text.replace(/^대본:\s*/i, '').trim();
+
+  // 3단계: 말줄임표(...) 정리 — TTS가 자연스럽게 읽도록
+  text = text.replace(/\.\.\./g, '. ');
+
+  // 4단계: 대화 태그 통일 (DB에 있는 모든 패턴 → Man:/Woman:)
+  // 패턴: 가:/나:, 남:/여:, 남자:/여자:, Man:/Woman: 등
+  const dialoguePatterns = [
+    // 가:/나: 패턴 — 가=남자, 나=여자로 매핑
+    { from: /\n?가\s*:\s*/g, to: '\nMan: ' },
+    { from: /\n?나\s*:\s*/g, to: '\nWoman: ' },
+    // 남:/여: 패턴
+    { from: /\n?남\s*:\s*/g, to: '\nMan: ' },
+    { from: /\n?여\s*:\s*/g, to: '\nWoman: ' },
+    // 남자:/여자: 패턴
+    { from: /\n?남자\s*:\s*/g, to: '\nMan: ' },
+    { from: /\n?여자\s*:\s*/g, to: '\nWoman: ' },
+    // 이미 Man:/Woman: 형식인 경우 (AI 생성 문제)
+    { from: /\n?Man\s*:\s*/g, to: '\nMan: ' },
+    { from: /\n?Woman\s*:\s*/g, to: '\nWoman: ' },
+  ];
+
+  let processed = text;
+  for (const { from, to } of dialoguePatterns) {
+    processed = processed.replace(from, to);
+  }
+  processed = processed.trim();
+
+  // 5단계: 대화형 여부 판별
+  const isDialogue = processed.includes('Man: ') || processed.includes('Woman: ');
+
+  return { script: processed, isDialogue };
+};
+
+export const generateQuestionsBySet = async (
+  mode: ExamMode,
+  roundNumber: number,
+  plan: PlanType
+): Promise<Question[]> => {
   if (roundNumber <= 30) {
     const setPrefix = `s${roundNumber}_`;
-    const staticSet = STATIC_EXAM_DATA.filter(q =>
-      q.id.startsWith(setPrefix) && (mode === 'FULL' || q.type === mode)
+    const staticSet = STATIC_EXAM_DATA.filter(
+      q => q.id.startsWith(setPrefix) && (mode === 'FULL' || q.type === mode)
     );
 
     const CATEGORY_MAP: Record<string, string> = {
@@ -72,19 +129,26 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
     };
 
     if (staticSet.length > 0) {
-      return staticSet.map(q => ({
-        ...q,
-        category: CATEGORY_MAP[q.category] || q.category,
-        questionText: cleanText(q.questionText),
-        context: q.context ? cleanText(q.context) : undefined
-      })).sort((a, b) => {
-        return a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' });
-      });
+      return staticSet
+        .map(q => ({
+          ...q,
+          category: CATEGORY_MAP[q.category] || q.category,
+          questionText: cleanText(q.questionText),
+          // ✅ 듣기 문제의 context는 cleanText 대신 원본 보존
+          // (prepareAudioScript에서 처리)
+          context: q.context ?? undefined
+        }))
+        .sort((a, b) =>
+          a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' })
+        );
     }
   }
 
   const ai = getAI();
-  const difficultyContext = plan === 'free' ? "Standard Beginner Level" : "High-tier Workplace and Technical Industry Scenarios";
+  const difficultyContext =
+    plan === 'free'
+      ? "Standard Beginner Level"
+      : "High-tier Workplace and Technical Industry Scenarios";
 
   const samples = STATIC_EXAM_DATA
     .filter(q => mode === 'FULL' || q.type === mode)
@@ -99,22 +163,28 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
       imagePrompt: q.imagePrompt
     }));
 
-  const prompt = `You are an elite EPS-TOPIK Question Designer. 
+  const prompt = `You are an elite EPS-TOPIK Question Designer.
   TASK: Generate 20 high-fidelity questions for Round ${roundNumber}.
   USER STATUS: ${plan} (${difficultyContext}).
   TYPE: ${mode} (Match exactly).
 
   CORE INSTRUCTIONS:
-  1. NO REDUNDANCY: Each question must feature a unique workplace scenario (Industrial, Agricultural, etc.).
-  2. IMAGE PROMPT PRECISION: Provide extremely descriptive 'imagePrompt' for an illustrator. 
-     - Ex: "A side-view 2D vector of a worker in a blue uniform wearing a white safety helmet and using a yellow electric drill on a wooden board."
-  3. AUDIO FIDELITY: For LISTENING, use 'Man:' and 'Woman:' tags in the 'context' field.
-  4. LANGUAGE: 
-     - Exam content (questionText, options, context): Korean.
+  1. NO REDUNDANCY: Each question must feature a unique workplace scenario.
+  2. IMAGE PROMPT PRECISION: Provide extremely descriptive 'imagePrompt' for an illustrator.
+  3. AUDIO FORMAT: For LISTENING questions, write dialogue using ONLY these tags:
+     - Single speaker: plain Korean text
+     - Two speakers: use "Man: [text]" and "Woman: [text]" tags on separate lines
+     Do NOT use 가:/나: or 남:/여: tags. Use Man:/Woman: ONLY.
+  4. LANGUAGE:
+     - Exam content (questionText, options, context): Korean text, but dialogue tags in English (Man:/Woman:)
      - Metadata (category, explanation, imagePrompt): STRICTLY ENGLISH.
   5. CATEGORIES (Use these English names ONLY):
-     - Fill in the Blanks, Related Words, Signboards, Sentence Comprehension, Listening Comprehension, Picture Selection, Action Identification, Location Identification, Person Counting, Time Identification, Conversation Response, Story Comprehension, Place Identification, Weather Identification, Object Identification.
-  6. REFERENCE SAMPLES (Follow this style):
+     Fill in the Blanks, Related Words, Signboards, Sentence Comprehension,
+     Listening Comprehension, Picture Selection, Action Identification,
+     Location Identification, Person Counting, Time Identification,
+     Conversation Response, Story Comprehension, Place Identification,
+     Weather Identification, Object Identification.
+  6. REFERENCE SAMPLES:
      ${JSON.stringify(samples, null, 2)}
 
   JSON FORMAT REQUIRED.`;
@@ -150,11 +220,17 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
     if (!text) throw new Error("Empty AI response");
 
     let generated: Question[] = JSON.parse(cleanJson(text));
-    generated = generated.map(q => ({
-      ...q,
-      category: q.category || "General",
-      imagePrompt: q.imagePrompt || (q.type === QuestionType.READING ? `A clear educational illustration of: ${q.questionText}` : undefined)
-    })).filter((q: Question) => mode === 'FULL' || q.type === mode);
+    generated = generated
+      .map(q => ({
+        ...q,
+        category: q.category || "General",
+        imagePrompt:
+          q.imagePrompt ||
+          (q.type === QuestionType.READING
+            ? `A clear educational illustration of: ${q.questionText}`
+            : undefined)
+      }))
+      .filter((q: Question) => mode === 'FULL' || q.type === mode);
 
     return generated;
   } catch (err) {
@@ -165,24 +241,13 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
 };
 
 // ============================================================
-// ✅ generateImage 핵심 수정
-//
-// 우선순위:
-//   1순위: imageUrl 있음 → 로컬 파일 즉시 반환 (비용 0원, 속도 즉시)
-//   2순위: imageUrl 없음 → Imagen AI로 생성 (기존 방식)
-//   3순위: AI도 실패 → null 반환
+// ✅ generateImage — imageUrl 있으면 로컬 파일 즉시 반환
 // ============================================================
 export const generateImage = async (
   prompt: string,
-  imageUrl?: string   // DB의 imageUrl 필드값을 여기에 전달
+  imageUrl?: string
 ): Promise<string | null> => {
-
-  // 1순위: 로컬 파일 경로가 있으면 바로 반환 — AI 호출 전혀 없음
-  if (imageUrl) {
-    return imageUrl;
-  }
-
-  // imagePrompt도 없으면 포기
+  if (imageUrl) return imageUrl;
   if (!prompt) return null;
 
   const ai = getAI();
@@ -190,7 +255,6 @@ export const generateImage = async (
 Style: Simple 2D vector art, clean lines, white background, no decorative text overlays.
 Subject: ${prompt}`;
 
-  // 2순위: Imagen 3
   try {
     const response = await ai.models.generateImages({
       model: 'imagen-3.0-generate-002',
@@ -203,7 +267,6 @@ Subject: ${prompt}`;
     console.warn('Imagen 3 failed, trying Fast:', err);
   }
 
-  // 3순위: Imagen 3 Fast
   try {
     const response = await ai.models.generateImages({
       model: 'imagen-3.0-fast-generate-001',
@@ -219,32 +282,65 @@ Subject: ${prompt}`;
   return null;
 };
 
-export const generateSpeech = async (text: string, ctx: AudioContext): Promise<AudioBuffer | null> => {
+// ============================================================
+// ✅ generateSpeech 전면 수정
+//
+// 변경 사항:
+//   1. prepareAudioScript()로 스크립트 전처리 (대화태그 통일)
+//   2. 단일 발화: Kore 목소리 (한국어 여성)
+//   3. 대화형: Puck(남) + Kore(여) 멀티스피커
+//   4. TTS 프롬프트에 한국어 자연스러운 억양 지시 추가
+// ============================================================
+export const generateSpeech = async (
+  rawText: string,
+  ctx: AudioContext
+): Promise<AudioBuffer | null> => {
   const ai = getAI();
-  const isDialogue = text.includes("Man:") || text.includes("Woman:") || text.includes("남:") || text.includes("여:");
+
+  const { script, isDialogue } = prepareAudioScript(rawText);
+
+  if (!script) return null;
 
   try {
-    const config: any = {
-      responseModalities: [Modality.AUDIO],
-      speechConfig: {
-        voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } }
-      }
-    };
+    let config: any;
 
     if (isDialogue) {
-      config.speechConfig = {
-        multiSpeakerVoiceConfig: {
-          speakerVoiceConfigs: [
-            { speaker: 'Man', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Puck' } } },
-            { speaker: 'Woman', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } }
-          ]
+      // 대화형: 남성(Puck) + 여성(Kore) 멀티스피커
+      config = {
+        responseModalities: [Modality.AUDIO],
+        speechConfig: {
+          multiSpeakerVoiceConfig: {
+            speakerVoiceConfigs: [
+              {
+                speaker: 'Man',
+                voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Puck' } }
+              },
+              {
+                speaker: 'Woman',
+                voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } }
+              }
+            ]
+          }
+        }
+      };
+    } else {
+      // 단일 발화: Kore (한국어에 최적화된 목소리)
+      config = {
+        responseModalities: [Modality.AUDIO],
+        speechConfig: {
+          voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } }
         }
       };
     }
 
+    // TTS 지시: 한국어 자연스러운 속도와 억양으로 읽도록
+    const ttsInstruction = isDialogue
+      ? `다음은 EPS-TOPIK 한국어 시험 듣기 문제입니다. 두 사람이 자연스럽게 대화하는 것처럼 읽어주세요. 적당한 속도로 또렷하게 발음해주세요.\n\n${script}`
+      : `다음은 EPS-TOPIK 한국어 시험 듣기 문제입니다. 자연스럽고 또렷한 한국어로 읽어주세요.\n\n${script}`;
+
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text: `Listen carefully. ${text}` }] }],
+      contents: [{ parts: [{ text: ttsInstruction }] }],
       config
     });
 
@@ -252,7 +348,9 @@ export const generateSpeech = async (text: string, ctx: AudioContext): Promise<A
     if (!candidates || candidates.length === 0 || !candidates[0].content) return null;
 
     const audioData = candidates[0].content.parts?.[0]?.inlineData?.data;
-    if (audioData) return await decodeAudioData(decodeBase64(audioData), ctx, 24000, 1);
+    if (audioData) {
+      return await decodeAudioData(decodeBase64(audioData), ctx, 24000, 1);
+    }
     return null;
   } catch (err) {
     console.error("Speech engine failed:", err);
@@ -260,24 +358,30 @@ export const generateSpeech = async (text: string, ctx: AudioContext): Promise<A
   }
 };
 
-export const analyzePerformance = async (session: ExamSession): Promise<AnalyticsFeedback | null> => {
+export const analyzePerformance = async (
+  session: ExamSession
+): Promise<AnalyticsFeedback | null> => {
   const ai = getAI();
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-05-20",
-      contents: `Perform an expert analysis on these results. Score: ${session.score}/${session.questions.length}. 
+      contents: `Perform an expert analysis on these results. Score: ${session.score}/${session.questions.length}.
       
       SESSION DATA:
       - Mode: ${session.mode}
-      - Questions: ${JSON.stringify(session.questions.map(q => ({ category: q.category, correct: session.userAnswers[q.id] === q.correctAnswer })))}
+      - Questions: ${JSON.stringify(
+        session.questions.map(q => ({
+          category: q.category,
+          correct: session.userAnswers[q.id] === q.correctAnswer
+        }))
+      )}
 
       OUTPUT REQUIREMENTS:
-      - All text MUST be in STRICT ENGLISH. Do NOT use Korean in the response.
-      - Translate any Korean category names to English in your analysis.
-      - overallAssessment: 2-3 sentence summary in English.
-      - strengths: List of categories (in English) where they performed well.
-      - weaknesses: List of categories (in English) needing focus.
-      - studyPlan: Actionable 7-day plan in English.
+      - All text MUST be in STRICT ENGLISH.
+      - overallAssessment: 2-3 sentence summary.
+      - strengths: Categories where they performed well.
+      - weaknesses: Categories needing focus.
+      - studyPlan: Actionable 7-day plan.
 
       Return JSON.`,
       config: {
