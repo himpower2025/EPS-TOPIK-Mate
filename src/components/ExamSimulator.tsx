@@ -21,6 +21,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
   const [timeLeft, setTimeLeft] = useState(mode === 'FULL' ? 50 * 60 : 30 * 60);
   const [loadingAudio, setLoadingAudio] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   const [questionImage, setQuestionImage] = useState<string | null>(null);
   const [isGeneratingVisuals, setIsGeneratingVisuals] = useState(false);
@@ -157,15 +158,16 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     setAnswers(prev => ({ ...prev, [questions[currentIndex].id]: idx }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (latestAnswers?: Record<string, number>) => {
+    const finalAnswers = latestAnswers ?? answers;
     let score = 0;
-    questions.forEach(q => { if (answers[q.id] === q.correctAnswer) score++; });
+    questions.forEach(q => { if (finalAnswers[q.id] === q.correctAnswer) score++; });
     onComplete({
       id: Date.now().toString(),
       mode,
       setNumber,
       questions,
-      userAnswers: answers,
+      userAnswers: finalAnswers,
       score,
       completedAt: new Date().toISOString()
     });
@@ -361,7 +363,15 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
             <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
           </button>
           <button
-            onClick={isLast ? handleSubmit : () => setCurrentIndex(p => p + 1)}
+            onClick={() => {
+              if (isLast) {
+                // Flush the latest state snapshot directly to avoid async timing issue
+                const finalAnswers = { ...answers };
+                handleSubmit(finalAnswers);
+              } else {
+                setCurrentIndex(p => p + 1);
+              }
+            }}
             className={`flex-1 ${isLast ? 'bg-green-600 shadow-green-100' : 'bg-indigo-600 shadow-indigo-100'} text-white font-black rounded-xl md:rounded-3xl shadow-2xl active:scale-95 text-base md:text-xl uppercase tracking-widest transition-all py-4 md:py-5`}
           >
             {isLast ? 'Complete Exam' : 'Next Question'}
@@ -392,6 +402,45 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                   {idx + 1}
                 </button>
               ))}
+            </div>
+            {/* Return to Dashboard button at the bottom of drawer */}
+            <div className="p-6 border-t border-gray-100 shrink-0">
+              <button
+                onClick={() => { setIsDrawerOpen(false); setShowExitConfirm(true); }}
+                className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border-2 border-red-100 text-red-500 font-black text-sm uppercase tracking-widest hover:bg-red-50 active:scale-95 transition-all"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Return to Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Exit Confirmation Modal */}
+      {showExitConfirm && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-[2.5rem] shadow-2xl p-8 w-full max-w-sm text-center">
+            <div className="w-16 h-16 bg-red-50 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6">
+              <X className="w-8 h-8 text-red-400" />
+            </div>
+            <h3 className="text-2xl font-black text-gray-900 mb-2">Exit Exam?</h3>
+            <p className="text-gray-400 text-sm font-medium mb-8 leading-relaxed">
+              Your progress will be lost.<br />Are you sure you want to return to the dashboard?
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={onExit}
+                className="w-full py-4 bg-red-500 text-white font-black rounded-2xl uppercase tracking-widest active:scale-95 transition-all"
+              >
+                Yes, Exit
+              </button>
+              <button
+                onClick={() => setShowExitConfirm(false)}
+                className="w-full py-4 bg-gray-100 text-gray-500 font-black rounded-2xl uppercase tracking-widest active:scale-95 transition-all"
+              >
+                Keep Going
+              </button>
             </div>
           </div>
         </div>
