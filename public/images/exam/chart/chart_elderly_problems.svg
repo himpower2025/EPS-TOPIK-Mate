@@ -1,0 +1,36 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <rect width="400" height="300" fill="white"/>
+  <text x="200" y="28" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a1a2e">노인들이 겪는 어려운 문제 (%)</text>
+  <line x1="60" y1="40" x2="60" y2="230" stroke="#333" stroke-width="1.5"/>
+  <line x1="60" y1="230" x2="380" y2="230" stroke="#333" stroke-width="1.5"/>
+  <text x="53" y="234" text-anchor="end" font-size="9" fill="#555">0</text>
+  <text x="53" y="194" text-anchor="end" font-size="9" fill="#555">10</text>
+  <text x="53" y="154" text-anchor="end" font-size="9" fill="#555">20</text>
+  <text x="53" y="114" text-anchor="end" font-size="9" fill="#555">30</text>
+  <text x="53" y="74" text-anchor="end" font-size="9" fill="#555">40</text>
+  <text x="53" y="42" text-anchor="end" font-size="9" fill="#555">50</text>
+  <line x1="58" y1="190" x2="380" y2="190" stroke="#eee" stroke-width="1"/>
+  <line x1="58" y1="150" x2="380" y2="150" stroke="#eee" stroke-width="1"/>
+  <line x1="58" y1="110" x2="380" y2="110" stroke="#eee" stroke-width="1"/>
+  <line x1="58" y1="70" x2="380" y2="70" stroke="#eee" stroke-width="1"/>
+  <!-- 생활비 부족 45% → 180px (최대50%=200px) -->
+  <rect x="70" y="50" width="55" height="180" fill="#e74c3c"/>
+  <text x="97" y="46" text-anchor="middle" font-size="10" font-weight="bold" fill="#e74c3c">45%</text>
+  <text x="97" y="248" text-anchor="middle" font-size="9" fill="#333">생활비</text>
+  <text x="97" y="259" text-anchor="middle" font-size="9" fill="#333">부족</text>
+  <!-- 건강문제 30% → 120px -->
+  <rect x="150" y="110" width="55" height="120" fill="#e67e22"/>
+  <text x="177" y="106" text-anchor="middle" font-size="10" fill="#e67e22">30%</text>
+  <text x="177" y="248" text-anchor="middle" font-size="9" fill="#333">건강</text>
+  <text x="177" y="259" text-anchor="middle" font-size="9" fill="#333">문제</text>
+  <!-- 할일없음 15% → 60px -->
+  <rect x="230" y="170" width="55" height="60" fill="#3498db"/>
+  <text x="257" y="166" text-anchor="middle" font-size="10" fill="#3498db">15%</text>
+  <text x="257" y="248" text-anchor="middle" font-size="9" fill="#333">할 일이</text>
+  <text x="257" y="259" text-anchor="middle" font-size="9" fill="#333">없음</text>
+  <!-- 외로움 5% → 20px -->
+  <rect x="310" y="210" width="55" height="20" fill="#95a5a6"/>
+  <text x="337" y="206" text-anchor="middle" font-size="10" fill="#95a5a6">5%</text>
+  <text x="337" y="248" text-anchor="middle" font-size="9" fill="#333">외로움</text>
+  <text x="200" y="280" text-anchor="middle" font-size="10" fill="#888">(단위: %)</text>
+</svg>

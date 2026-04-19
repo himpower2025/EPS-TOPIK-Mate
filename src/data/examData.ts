@@ -1,4 +1,3 @@
-
 import { Question, QuestionType } from '../types';
 
 /**
@@ -18,7 +17,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["출발하겠습니다", "도착하겠습니다", "숙박하겠습니다", "탑승하겠습니다"],
     correctAnswer: 1,
     explanation: "9시에 서울을 출발하여 9시 50분에 제주도에 이르는 것이므로 '도착'이 문맥상 맞습니다.",
-    imagePrompt: "An airplane cabin interior with a digital monitor showing a flight path from Seoul to Jeju Island."
+    imagePrompt: "An airplane cabin interior with a digital monitor showing a flight path from Seoul to Jeju Island.",
+    imageUrl: "/images/exam/transport/transport_airplane.png"
   },
   {
     id: "s1_r_2",
@@ -29,7 +29,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["두세요", "드세요", "주세요", "사세요"],
     correctAnswer: 1,
     explanation: "약을 복용하라는 의미의 높임말인 '드세요'가 적절합니다.",
-    imagePrompt: "A friendly pharmacist handing a medicine bag to a customer with a '30 min after meal' instruction icon."
+    imagePrompt: "A friendly pharmacist handing a medicine bag to a customer with a '30 min after meal' instruction icon.",
+    imageUrl: "/images/exam/health/health_pharmacist.png"
   },
   {
     id: "s1_r_3",
@@ -40,7 +41,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["봄 음식", "여름 음식", "가을 음식", "겨울 음식"],
     correctAnswer: 1,
     explanation: "나열된 음식들은 모두 한국에서 무더운 여름에 즐겨 먹는 대표적인 음식들입니다.",
-    imagePrompt: "A vibrant collage of Korean summer delicacies: Ginseng chicken soup, cold noodles, soy milk noodles, and red bean shaved ice."
+    imagePrompt: "A vibrant collage of Korean summer delicacies: Ginseng chicken soup, cold noodles, soy milk noodles, and red bean shaved ice.",
+    imageUrl: "/images/exam/food/food_korean_summer.png"
   },
   {
     id: "s1_r_4",
@@ -51,7 +53,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["근심하다", "의심하다", "확인하다", "질문하다"],
     correctAnswer: 0,
     explanation: "'걱정하다'와 '근심하다'는 유의어 관계입니다.",
-    imagePrompt: "A simple line art of a person looking anxious with a thought bubble showing tangled knots."
+    imagePrompt: "A simple line art of a person looking anxious with a thought bubble showing tangled knots.",
+    imageUrl: "/images/exam/job/job_two_workers_talking.png"
   },
   {
     id: "s1_r_5",
@@ -62,7 +65,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["입어", "닫아", "들어", "빌려"],
     correctAnswer: 2,
     explanation: "무거운 물건을 대신 들어주겠다는 제안이 가장 자연스럽습니다.",
-    imagePrompt: "A person helpfully reaching out to take a heavy backpack from another person."
+    imagePrompt: "A person helpfully reaching out to take a heavy backpack from another person.",
+    imageUrl: "/images/exam/factory/factory_worker_lifting.png"
   },
   {
     id: "s1_r_6",
@@ -73,7 +77,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["마셨어요", "떠났어요", "막혔어요", "도착했어요"],
     correctAnswer: 2,
     explanation: "지각의 사유로 교통 정체(길이 막힘)를 언급하는 상황입니다.",
-    imagePrompt: "A street view with many cars stuck in heavy traffic during rush hour."
+    imagePrompt: "A street view with many cars stuck in heavy traffic during rush hour.",
+    imageUrl: "/images/exam/transport/transport_traffic_jam.png"
   },
   {
     id: "s1_r_7",
@@ -84,7 +89,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["살", "탈", "맡길", "찾을"],
     correctAnswer: 2,
     explanation: "보관함에 물건을 두는 행위는 '맡기다'라고 표현합니다.",
-    imagePrompt: "Modern metal storage lockers in a Korean subway station with a digital payment kiosk."
+    imagePrompt: "Modern metal storage lockers in a Korean subway station with a digital payment kiosk.",
+    imageUrl: "/images/exam/transport/transport_subway_locker.png"
   },
   {
     id: "s1_r_8",
@@ -95,7 +101,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["쉬운 곳에", "넓은 곳에", "좁은 곳에", "맞는 곳에"],
     correctAnswer: 0,
     explanation: "안전과 효율을 위해 공구는 꺼내 쓰기 '쉬운 곳에' 보관해야 합니다.",
-    imagePrompt: "A well-organized industrial tool rack with shadows indicating where each tool (hammer, wrench) belongs."
+    imagePrompt: "A well-organized industrial tool rack with shadows indicating where each tool (hammer, wrench) belongs.",
+    imageUrl: "/images/exam/factory/factory_tools_rack.png"
   },
   {
     id: "s1_r_9",
@@ -105,7 +112,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["떠들면 안 됩니다.", "만지면 안 됩니다.", "들어오면 안 됩니다.", "뛰어다니면 안 됩니다."],
     correctAnswer: 3,
     explanation: "노란색 삼각형 내 달리는 person 그림에 금지 표시가 있고 '뛰지말것'이라고 적혀 있습니다.",
-    imagePrompt: "Yellow triangular warning sign, a black silhouette of a running person inside, overlaid with a bold red circle and diagonal slash. Text below: 위험! 뛰지말것"
+    imagePrompt: "Yellow triangular warning sign, a black silhouette of a running person inside, overlaid with a bold red circle and diagonal slash. Text below: 위험! 뛰지말것",
+    imageUrl: "/images/exam/sign/sign_no_running.png"
   },
   {
     id: "s1_r_10",
@@ -132,7 +140,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["월요일", "수요일", "토요일", "일요일"],
     correctAnswer: 1,
     explanation: "수요일에만 오후 7시부터 9시까지 야간 진료가 있습니다.",
-    imagePrompt: "A hospital clinic hours table in Korean, highlighting Wednesday (수요일) evening care hours."
+    imagePrompt: "A hospital clinic hours table in Korean, highlighting Wednesday (수요일) evening care hours.",
+    imageUrl: "/images/exam/health/health_clinic_hours.png"
   },
   {
     id: "s1_r_12",
@@ -142,7 +151,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["3월", "4월", "5월", "6월"],
     correctAnswer: 2,
     explanation: "그래프에서 5월이 7,000명으로 가장 높게 나타납니다.",
-    imagePrompt: "A vertical bar chart titled '상반기 박물관 관람 현황'. 1월: 3000, 2월: 2000, 3월: 5000, 4월: 4500, 5월: 7000, 6월: 6000. May (5월) bar is tallest."
+    imagePrompt: "A vertical bar chart titled '상반기 박물관 관람 현황'. 1월: 3000, 2월: 2000, 3월: 5000, 4월: 4500, 5월: 7000, 6월: 6000. May (5월) bar is tallest.",
+    imageUrl: "/images/exam/chart/chart_museum_bar.svg"
   },
   {
     id: "s1_r_13",
@@ -153,7 +163,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["살고", "짓고", "팔고", "구하고"],
     correctAnswer: 3,
     explanation: "살 집을 알아보는 것을 '집을 구하다'라고 표현합니다.",
-    imagePrompt: "A person looking at various housing flyers at a real estate agent's window (부동산)."
+    imagePrompt: "A person looking at various housing flyers at a real estate agent's window (부동산).",
+    imageUrl: "/images/exam/food/life_real_estate.png"
   },
   {
     id: "s1_r_14",
@@ -164,7 +175,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["취직할", "결혼할", "이사할", "출근할"],
     correctAnswer: 1,
     explanation: "딸이 있다는 답변으로 보아 결혼 시기를 묻는 것이 적절합니다.",
-    imagePrompt: "Two people chatting in an office, one person showing a photo of his two daughters."
+    imagePrompt: "Two people chatting in an office, one person showing a photo of his two daughters.",
+    imageUrl: "/images/exam/daily/daily_couple_wedding.png"
   },
   {
     id: "s1_r_15",
@@ -175,7 +187,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["업무 파악", "재고 파악", "업무 계획", "재고 정리"],
     correctAnswer: 1,
     explanation: "물건의 남은 양을 확인하라는 지시이므로 '재고 파악'이 핵심입니다.",
-    imagePrompt: "A warehouse worker with a checklist counting cardboard boxes on high industrial shelves."
+    imagePrompt: "A warehouse worker with a checklist counting cardboard boxes on high industrial shelves.",
+    imageUrl: "/images/exam/factory/factory_warehouse_boxes.png"
   },
   {
     id: "s1_r_16",
@@ -186,7 +199,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["근로 계약", "급여 내역", "임금 계약", "세금 내용"],
     correctAnswer: 1,
     explanation: "계약 금액과 실제 수령액의 차이인 '급여 내역(실수령액)'에 대해 설명하고 있습니다.",
-    imagePrompt: "A Korean salary slip (급여명세서) showing deductions for national pension and health insurance."
+    imagePrompt: "A Korean salary slip (급여명세서) showing deductions for national pension and health insurance.",
+    imageUrl: "/images/exam/bank/document_salary_slip.png"
   },
   {
     id: "s1_r_17",
@@ -202,7 +216,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     ],
     correctAnswer: 1,
     explanation: "지훈 씨가 실수한 바로 씨에게 '너무 속상해하지 마세요'라며 격려하고 돕겠다고 말합니다.",
-    imagePrompt: "A senior carpenter comforting a junior apprentice over a piece of wrongly drilled wood."
+    imagePrompt: "A senior carpenter comforting a junior apprentice over a piece of wrongly drilled wood.",
+    imageUrl: "/images/exam/job/job_carpenter.png"
   },
   {
     id: "s1_r_18",
@@ -229,7 +244,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["표준근로 계약서", "성실근무 계약서", "표준노동 계약서", "취업근무 계약서"],
     correctAnswer: 0,
     explanation: "인적사항 및 근무 조건을 기록한 문서는 '표준근로 계약서'입니다.",
-    imagePrompt: "An official Korean document with the title '표준근로계약서' at the top."
+    imagePrompt: "An official Korean document with the title '표준근로계약서' at the top.",
+    imageUrl: "/images/exam/bank/document_labor_contract.png"
   },
   {
     id: "s1_r_20",
@@ -240,7 +256,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["아파트", "주택", "원룸", "고시원"],
     correctAnswer: 3,
     explanation: "저렴한 가격에 공동 시설을 사용하는 소형 주거 공간은 '고시원'입니다.",
-    imagePrompt: "A hallway in a Goshiwon building with small numbered doors and a shared kitchenette."
+    imagePrompt: "A hallway in a Goshiwon building with small numbered doors and a shared kitchenette.",
+    imageUrl: "/images/exam/food/life_goshiwon.png"
   },
 
   // --- [듣기(LISTENING) 제1세트 21-40] ---
@@ -316,7 +333,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["집 안에 있어요.", "집 밖에 있어요.", "집 위에 있어요.", "집 아래 있어요."],
     correctAnswer: 1,
     explanation: "남자가 집 앞 마당(밖)에 서 있는 그림입니다.",
-    imagePrompt: "A simple house with a yard; a man is standing on the grass outside while a woman waves from inside the house."
+    imagePrompt: "A simple house with a yard; a man is standing on the grass outside while a woman waves from inside the house.",
+    imageUrl: "/images/exam/weather/weather_summer_rain.png"
   },
   {
     id: "s1_l_27",
@@ -354,7 +372,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["맑지만 곧 흐려질 것 같아요.", "흐려서 곧 비가 올 것 같아요.", "비가 오고 바람이 많이 불어요.", "비가 오지만 곧 그칠 것 같아요."],
     correctAnswer: 1,
     explanation: "하늘에 어두운 구름이 가득하고 바람이 부는 흐린 날씨입니다.",
-    imagePrompt: "A woman looking up at an overcast dark gray sky with heavy rain clouds and wind blowing her hair."
+    imagePrompt: "A woman looking up at an overcast dark gray sky with heavy rain clouds and wind blowing her hair.",
+    imageUrl: "/images/exam/weather/weather_summer_rain.png"
   },
   {
     id: "s1_l_30",
@@ -451,7 +470,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["한국 음식", "중국 음식", "일본 음식", "인도 음식"],
     correctAnswer: 3,
     explanation: "카레를 좋아한다고 했으므로 인도 음식점에 가기로 결정했습니다.",
-    imagePrompt: "Two people sitting at a dining table with a menu showing 'Indian Curry' dishes."
+    imagePrompt: "Two people sitting at a dining table with a menu showing 'Indian Curry' dishes.",
+    imageUrl: "/images/exam/food/food_indian_curry.png"
   },
   {
     id: "s1_l_39",
@@ -462,7 +482,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["똑똑합니다.", "노래를 잘합니다.", "공부를 잘합니다.", "컴퓨터를 잘합니다."],
     correctAnswer: 1,
     explanation: "여동생이 똑똑하고 공부, 컴퓨터를 잘한다고 했으나 노래에 대한 언급은 없습니다.",
-    imagePrompt: "A smart-looking female student studying with a laptop and books."
+    imagePrompt: "A smart-looking female student studying with a laptop and books.",
+    imageUrl: "/images/exam/daily/daily_computer_class.png"
   },
   {
     id: "s1_l_40",
@@ -487,7 +508,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["끄고", "꺼서", "쉬고", "내서"],
     correctAnswer: 0,
     explanation: "나가기 전에 전등을 소등해야 하므로 '끄고'가 적절합니다.",
-    imagePrompt: "A hand turning off a light switch next to a door in an industrial workplace."
+    imagePrompt: "A hand turning off a light switch next to a door in an industrial workplace.",
+    imageUrl: "/images/exam/factory/factory_power_plug.png"
   },
   {
     id: "s2_r_2",
@@ -497,7 +519,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["걸려요", "내려요", "나와요", "나가요"],
     correctAnswer: 2,
     explanation: "공공요금이 청구되는 것을 '나오다'라고 표현합니다.",
-    imagePrompt: "A Korean gas bill (가스요금 고지서) showing an amount around 10,000 KRW."
+    imagePrompt: "A Korean gas bill (가스요금 고지서) showing an amount around 10,000 KRW.",
+    imageUrl: "/images/exam/bank/document_gas_bill.png"
   },
   {
     id: "s2_r_3",
@@ -508,7 +531,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["불교", "기독교", "천주교", "이슬람교"],
     correctAnswer: 3,
     explanation: "나열된 키워드들은 모두 이슬람교의 특징입니다.",
-    imagePrompt: "A beautiful mosque (사원) with Islamic patterns and a Holy Quran (코란) on a stand."
+    imagePrompt: "A beautiful mosque (사원) with Islamic patterns and a Holy Quran (코란) on a stand.",
+    imageUrl: "/images/exam/daily/daily_mosque.png"
   },
   {
     id: "s2_r_4",
@@ -519,7 +543,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["분주하다", "분실하다", "간단하다", "이해하다"],
     correctAnswer: 2,
     explanation: "'복잡하다'의 반의어는 '단순하다' 또는 '간단하다'입니다.",
-    imagePrompt: "A split screen: left side is a tangled mess of lines (복잡), right side is a single clean line (간단)."
+    imagePrompt: "A split screen: left side is a tangled mess of lines (복잡), right side is a single clean line (간단).",
+    imageUrl: "/images/exam/daily/daily_promise_pinky.png"
   },
   {
     id: "s2_r_5",
@@ -529,7 +554,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["간", "난", "한", "된"],
     correctAnswer: 1,
     explanation: "기계 등이 정상 작동하지 않을 때 '고장이 나다'라고 합니다.",
-    imagePrompt: "A person looking worried at an open refrigerator with water leaking or warm contents."
+    imagePrompt: "A person looking worried at an open refrigerator with water leaking or warm contents.",
+    imageUrl: "/images/exam/factory/factory_machine_repair.png"
   },
   {
     id: "s2_r_6",
@@ -539,7 +565,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["먹지", "사지", "남기지", "끝내지"],
     correctAnswer: 2,
     explanation: "쓰레기를 줄이기 위해 음식을 '남기지' 말아야 한다는 내용입니다.",
-    imagePrompt: "A clean, empty bowl and plate, symbolizing no food waste."
+    imagePrompt: "A clean, empty bowl and plate, symbolizing no food waste.",
+    imageUrl: "/images/exam/food/food_no_waste.png"
   },
   {
     id: "s2_r_7",
@@ -549,7 +576,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["내리실", "올라 갈", "앉으실", "내려 올"],
     correctAnswer: 0,
     explanation: "지하철에서 하차할 때 발 끼임 사고를 주의하라는 안내 방송 문구입니다.",
-    imagePrompt: "A subway platform screen door with a yellow warning sticker showing a foot gap between train and platform."
+    imagePrompt: "A subway platform screen door with a yellow warning sticker showing a foot gap between train and platform.",
+    imageUrl: "/images/exam/transport/transport_subway_gap.png"
   },
   {
     id: "s2_r_8",
@@ -559,7 +587,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["놓쳤어요", "떠났어요", "잃었어요", "버렸어요"],
     correctAnswer: 0,
     explanation: "타야 할 교통수단을 제시간에 타지 못한 것을 '놓치다'라고 합니다.",
-    imagePrompt: "A worker running towards a departing commuter bus, looking disappointed."
+    imagePrompt: "A worker running towards a departing commuter bus, looking disappointed.",
+    imageUrl: "/images/exam/transport/transport_bus_missed.png"
   },
   {
     id: "s2_r_9",
@@ -574,7 +603,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     ],
     correctAnswer: 2,
     explanation: "정비 및 관리를 철저히 하라는 의미의 표지입니다.",
-    imagePrompt: "A mechanic in coveralls using a wrench to tighten a bolt on a machine. Text above: '정비철저', Text below: '조이고 기름치고 닦자'."
+    imagePrompt: "A mechanic in coveralls using a wrench to tighten a bolt on a machine. Text above: '정비철저', Text below: '조이고 기름치고 닦자'.",
+    imageUrl: "/images/exam/factory/factory_machine_repair.png"
   },
   {
     id: "s2_r_10",
@@ -589,7 +619,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     ],
     correctAnswer: 3,
     explanation: "공사 중이므로 주차를 금지한다는 내용입니다.",
-    imagePrompt: "A portable construction sign board. Text: '공사중 주차금지'. Red prohibition circle with slash. Bottom text: '현장소장'."
+    imagePrompt: "A portable construction sign board. Text: '공사중 주차금지'. Red prohibition circle with slash. Bottom text: '현장소장'.",
+    imageUrl: "/images/exam/sign/sign_no_parking.png"
   },
   {
     id: "s2_r_11",
@@ -599,7 +630,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["몸이 아픈 것", "돈이 부족한 것", "친구가 없는 것", "할 일이 없는 것"],
     correctAnswer: 1,
     explanation: "그래프에서 '생활비 부족(약 45%)'이 가장 높은 비중을 차지합니다.",
-    imagePrompt: "Bar chart titled '노인들이 겪는 어려운 문제'. Bars: 생활비 부족 (45%), 건강문제 (30%), 할 일이 없음 (15%), 외로움 (5%). The '생활비 부족' bar is the tallest."
+    imagePrompt: "Bar chart titled '노인들이 겪는 어려운 문제'. Bars: 생활비 부족 (45%), 건강문제 (30%), 할 일이 없음 (15%), 외로움 (5%). The '생활비 부족' bar is the tallest.",
+    imageUrl: "/images/exam/chart/chart_elderly_problems.svg"
   },
   {
     id: "s2_r_12",
@@ -609,7 +641,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["집을 구하는 일", "머리를 자르는 일", "편지를 부치는 일", "이 치료를 받는 일"],
     correctAnswer: 2,
     explanation: "안내도에 우체국은 없으므로 편지를 부치는 일은 할 수 없습니다.",
-    imagePrompt: "A building directory sign. 5F: 강남여행사, 4F: 한국치과/한강내과, 3F: 서울은행, 2F: 수진미용실, 1F: 행복약국/하나부동산, B1: 주차장."
+    imagePrompt: "A building directory sign. 5F: 강남여행사, 4F: 한국치과/한강내과, 3F: 서울은행, 2F: 수진미용실, 1F: 행복약국/하나부동산, B1: 주차장.",
+    imageUrl: "/images/exam/chart/chart_building_directory.svg"
   },
   {
     id: "s2_r_13",
@@ -619,7 +652,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["항생제", "두통약", "소화제", "치통약"],
     correctAnswer: 1,
     explanation: "머리 통증(두통)에 먹는 약은 '두통약'입니다.",
-    imagePrompt: "A person holding their head in pain, looking at a box of tablets labeled '두통약'."
+    imagePrompt: "A person holding their head in pain, looking at a box of tablets labeled '두통약'.",
+    imageUrl: "/images/exam/health/health_headache.png"
   },
   {
     id: "s2_r_14",
@@ -629,7 +663,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["개", "손", "통", "마리"],
     correctAnswer: 3,
     explanation: "생선을 세는 단위는 '마리'입니다. (두 마리를 한 세트로 '손'이라 하기도 하지만 단수 형태에선 마리가 일반적)",
-    imagePrompt: "A fishmonger at a traditional market pointing to a single silver fish on ice with a price tag of 2,000 KRW."
+    imagePrompt: "A fishmonger at a traditional market pointing to a single silver fish on ice with a price tag of 2,000 KRW.",
+    imageUrl: "/images/exam/food/life_traditional_market.png"
   },
   {
     id: "s2_r_15",
@@ -640,7 +675,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["정상", "증상", "회복", "잠복"],
     correctAnswer: 1,
     explanation: "질병의 징후를 나타내는 말을 '증상'이라고 합니다.",
-    imagePrompt: "An illustration of common cold symptoms: thermometer, tissue box (콧물), and a person shivering (몸이 떨림)."
+    imagePrompt: "An illustration of common cold symptoms: thermometer, tissue box (콧물), and a person shivering (몸이 떨림).",
+    imageUrl: "/images/exam/health/health_symptoms.png"
   },
   {
     id: "s2_r_16",
@@ -651,7 +687,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["병원 진료과", "약국 조제", "학교 수업", "회사 근무"],
     correctAnswer: 0,
     explanation: "나열된 단어들은 모두 병원의 전문 진료 과목들입니다.",
-    imagePrompt: "A hospital hallway sign showing icons for internal medicine, dentistry, dermatology, etc."
+    imagePrompt: "A hospital hallway sign showing icons for internal medicine, dentistry, dermatology, etc.",
+    imageUrl: "/images/exam/health/health_hospital_sign.png"
   },
   {
     id: "s2_r_17",
@@ -667,7 +704,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     ],
     correctAnswer: 0,
     explanation: "신분증으로 여권을 제출했으므로 신분증을 가지고 온 것이 맞습니다.",
-    imagePrompt: "A foreigner (Rihan) at a bank counter handing over his passport to an employee."
+    imagePrompt: "A foreigner (Rihan) at a bank counter handing over his passport to an employee.",
+    imageUrl: "/images/exam/bank/bank_counter.png"
   },
   {
     id: "s2_r_18",
@@ -683,7 +721,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     ],
     correctAnswer: 3,
     explanation: "컴퓨터망을 통해 배달 여부가 즉시 조회된다고 설명되어 있습니다.",
-    imagePrompt: "An EMS express shipping box with a barcode and a computer screen showing tracking information."
+    imagePrompt: "An EMS express shipping box with a barcode and a computer screen showing tracking information.",
+    imageUrl: "/images/exam/bank/document_ems_tracking.png"
   },
   {
     id: "s2_r_19",
@@ -694,7 +733,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["고향음식", "고향날씨", "휴가계획", "여행경험"],
     correctAnswer: 1,
     explanation: "고향의 기온과 강수량 등을 설명하고 있으므로 '고향날씨'가 맞습니다.",
-    imagePrompt: "A tropical beach in Boracay with palm trees, illustrating a hot and humid climate."
+    imagePrompt: "A tropical beach in Boracay with palm trees, illustrating a hot and humid climate.",
+    imageUrl: "/images/exam/weather/weather_tropical_beach.png"
   },
   {
     id: "s2_r_20",
@@ -705,7 +745,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["취미", "날씨", "여행", "날자"],
     correctAnswer: 1,
     explanation: "사계절의 기후 특징을 설명하는 '날씨'에 대한 내용입니다.",
-    imagePrompt: "A split image: one side showing heavy rain and green trees (summer), the other side showing snow and a thermometer below zero (winter)."
+    imagePrompt: "A split image: one side showing heavy rain and green trees (summer), the other side showing snow and a thermometer below zero (winter).",
+    imageUrl: "/images/exam/weather/weather_split_seasons.png"
   },
 
   // ==========================================
@@ -720,7 +761,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["그제", "어제", "내일", "모레"],
     correctAnswer: 3,
     explanation: "토요일 다음 다음 날(토-일-월)은 '모레'입니다.",
-    imagePrompt: "A 2024 calendar page showing Saturday as today, with Monday highlighted as day after tomorrow."
+    imagePrompt: "A 2024 calendar page showing Saturday as today, with Monday highlighted as day after tomorrow.",
+    imageUrl: "/images/exam/chart/chart_calendar.png"
   },
   {
     id: "s3_r_2",
@@ -731,7 +773,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["이", "배", "머리", "다리"],
     correctAnswer: 2,
     explanation: "두통약(Headache pill)을 먹었으므로 아픈 곳은 '머리'입니다.",
-    imagePrompt: "A person waking up in bed holding their head in pain with a pill bottle on the nightstand."
+    imagePrompt: "A person waking up in bed holding their head in pain with a pill bottle on the nightstand.",
+    imageUrl: "/images/exam/health/health_headache.png"
   },
   {
     id: "s3_r_3",
@@ -742,7 +785,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["약속", "숙제", "운동", "운전"],
     correctAnswer: 0,
     explanation: "'약속(Promise)'은 하다, 지키다, 어기다와 함께 쓰입니다.",
-    imagePrompt: "An abstract illustration of two pinky fingers hooked together for a promise."
+    imagePrompt: "An abstract illustration of two pinky fingers hooked together for a promise.",
+    imageUrl: "/images/exam/daily/daily_promise_pinky.png"
   },
   {
     id: "s3_r_4",
@@ -753,7 +797,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["바닥", "중간", "정상", "아래"],
     correctAnswer: 2,
     explanation: "산의 가장 높은 곳을 뜻하는 꼭대기와 '정상'은 비슷한 말입니다.",
-    imagePrompt: "A mountain peak with a small flag at the very top, labeled '정상'."
+    imagePrompt: "A mountain peak with a small flag at the very top, labeled '정상'.",
+    imageUrl: "/images/exam/weather/weather_mountain_peak.png"
   },
   {
     id: "s3_r_5",
@@ -764,7 +809,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["친구", "손님", "가족", "주인"],
     correctAnswer: 1,
     explanation: "식당에 줄을 서서 기다리는 사람들은 '손님(Customer)'입니다.",
-    imagePrompt: "A busy restaurant with a long line of people waiting outside the entrance."
+    imagePrompt: "A busy restaurant with a long line of people waiting outside the entrance.",
+    imageUrl: "/images/exam/food/food_restaurant_queue.png"
   },
   {
     id: "s3_r_6",
@@ -775,7 +821,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["송금", "통장", "환전", "여권"],
     correctAnswer: 0,
     explanation: "외국에 돈을 보내는 행위는 '송금(Remittance)'입니다.",
-    imagePrompt: "A bank teller counter with a remittance form for Nepal and a stack of money."
+    imagePrompt: "A bank teller counter with a remittance form for Nepal and a stack of money.",
+    imageUrl: "/images/exam/bank/bank_counter.png"
   },
   {
     id: "s3_r_7",
@@ -786,7 +833,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["약속", "시간", "일자", "자신"],
     correctAnswer: 1,
     explanation: "함께 식사할 수 있는지 묻는 맥락에서 '시간'이 있는지 묻는 것이 자연스럽습니다.",
-    imagePrompt: "Two colleagues talking near a water cooler, one pointing at their watch."
+    imagePrompt: "Two colleagues talking near a water cooler, one pointing at their watch.",
+    imageUrl: "/images/exam/job/job_two_workers_talking.png"
   },
   {
     id: "s3_r_8",
@@ -797,7 +845,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["시", "분", "번", "시간"],
     correctAnswer: 3,
     explanation: "10시에서 11시까지 기다리는 양은 '한 시간'입니다.",
-    imagePrompt: "A digital railway board showing a train to Gwangju departing at 11:00, with a nearby clock at 10:00."
+    imagePrompt: "A digital railway board showing a train to Gwangju departing at 11:00, with a nearby clock at 10:00.",
+    imageUrl: "/images/exam/chart/chart_clock_10.png"
   },
   {
     id: "s3_r_9",
@@ -812,7 +861,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     ],
     correctAnswer: 3,
     explanation: "일방통행(One-way) 표지판에 대한 설명입니다.",
-    imagePrompt: "Red circular sign with a thick horizontal white bar in the center. Text below: 일방통행"
+    imagePrompt: "Red circular sign with a thick horizontal white bar in the center. Text below: 일방통행",
+    imageUrl: "/images/exam/sign/sign_one_way.png"
   },
   {
     id: "s3_r_10",
@@ -827,7 +877,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     ],
     correctAnswer: 2,
     explanation: "과적금지(No Overloading) 표지판에 대한 설명입니다.",
-    imagePrompt: "Illustration of a cargo truck with goods stacked precariously high and unstable. Text above: 과적금지"
+    imagePrompt: "Illustration of a cargo truck with goods stacked precariously high and unstable. Text above: 과적금지",
+    imageUrl: "/images/exam/sign/sign_overload_warning.png"
   },
   {
     id: "s3_r_11",
@@ -837,7 +888,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["쓰레기통", "식수대", "종이타월", "화장실"],
     correctAnswer: 1,
     explanation: "물을 마시는 식수대(Drinking water) 표지판을 찾는 문제입니다.",
-    imagePrompt: "Four circular blue icons: 1. Person putting trash in bin. 2. A person drinking from a water fountain. 3. A hand pulling a paper towel. 4. Restroom silhouette."
+    imagePrompt: "Four circular blue icons: 1. Person putting trash in bin. 2. A person drinking from a water fountain. 3. A hand pulling a paper towel. 4. Restroom silhouette.",
+    imageUrl: "/images/exam/sign/sign_public_rules 1.png"
   },
   {
     id: "s3_r_12",
@@ -847,7 +899,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["서울", "부산", "경주", "제주도"],
     correctAnswer: 0,
     explanation: "그래프에서 서울이 82.8%로 가장 높은 수치를 보입니다.",
-    imagePrompt: "A pie chart titled '외국인이 좋아하는 한국의 관광지'. Seoul: 82.8%, Busan: 20.1%, Folk Village: 13.3%, Jeju: 10.1%, Gyeongju: 8.4%."
+    imagePrompt: "A pie chart titled '외국인이 좋아하는 한국의 관광지'. Seoul: 82.8%, Busan: 20.1%, Folk Village: 13.3%, Jeju: 10.1%, Gyeongju: 8.4%.",
+    imageUrl: "/images/exam/chart/chart_tourist_spots.svg"
   },
   {
     id: "s3_r_13",
@@ -858,7 +911,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["무서운", "친절한", "어려운", "재미있는"],
     correctAnswer: 1,
     explanation: "남을 잘 도와주고 잘 가르쳐주는 성격은 '친절하다(Kind)'입니다.",
-    imagePrompt: "A friendly person smiling and helping another colleague carry books."
+    imagePrompt: "A friendly person smiling and helping another colleague carry books.",
+    imageUrl: "/images/exam/job/job_two_workers_talking.png"
   },
   {
     id: "s3_r_14",
@@ -869,7 +923,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["어려우니까", "가벼우니까", "더러우니까", "피곤하니까"],
     correctAnswer: 3,
     explanation: "야근을 했으므로 몸 상태는 '피곤하다(Tired)'입니다.",
-    imagePrompt: "A man arriving home late at night, yawning and dropping his bag near his bed."
+    imagePrompt: "A man arriving home late at night, yawning and dropping his bag near his bed.",
+    imageUrl: "/images/exam/factory/factory_tired_worker.png"
   },
   {
     id: "s3_r_15",
@@ -880,7 +935,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["용접시간", "용접시의 안전", "용접재료", "쉬운 용접방법"],
     correctAnswer: 1,
     explanation: "보안경, 안전장갑 등 용접 시 지켜야 할 안전 수칙에 관한 글입니다.",
-    imagePrompt: "A welder wearing a protective mask, safety gloves, and long sleeves in a factory setting."
+    imagePrompt: "A welder wearing a protective mask, safety gloves, and long sleeves in a factory setting.",
+    imageUrl: "/images/exam/factory/factory_welding.png"
   },
   {
     id: "s3_r_16",
@@ -913,7 +969,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["월급", "수당", "보너스", "퇴직금"],
     correctAnswer: 0,
     explanation: "일한 대가로 정기적으로 받는 돈은 '월급(Salary)'입니다.",
-    imagePrompt: "A person checking their bank app on a phone showing a large incoming deposit titled '급여' (Salary)."
+    imagePrompt: "A person checking their bank app on a phone showing a large incoming deposit titled '급여' (Salary).",
+    imageUrl: "/images/exam/bank/document_salary_slip.png"
   },
   {
     id: "s3_r_19",
@@ -1000,7 +1057,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["비누입니다.", "수건입니다.", "치약입니다.", "샴푸입니다."],
     correctAnswer: 0,
     explanation: "그림에 비누 세 장이 묘사되어 있습니다.",
-    imagePrompt: "Three bars of white soap stacked together."
+    imagePrompt: "Three bars of white soap stacked together.",
+    imageUrl: "/images/exam/daily/daily_soap_bars.png"
   },
   {
     id: "s3_l_26",
@@ -1011,7 +1069,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["경찰입니다.", "의사입니다.", "요리사입니다.", "택시 기사입니다."],
     correctAnswer: 0,
     explanation: "제복을 입은 경찰관 사진이 묘사되어 있습니다.",
-    imagePrompt: "A policeman in a dark blue uniform standing in front of a white patrol car."
+    imagePrompt: "A policeman in a dark blue uniform standing in front of a white patrol car.",
+    imageUrl: "/images/exam/job/job_police_officer.png"
   },
   {
     id: "s3_l_27",
@@ -1022,7 +1081,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["불을 끄고 있습니다.", "세차를 하고 있습니다.", "세수를 하고 있습니다.", "운전을 하고 있습니다."],
     correctAnswer: 1,
     explanation: "남자가 거품 묻은 스펀지로 차를 닦는 그림입니다.",
-    imagePrompt: "A man washing his silver passenger car with a bucket of soapy water and a sponge."
+    imagePrompt: "A man washing his silver passenger car with a bucket of soapy water and a sponge.",
+    imageUrl: "/images/exam/factory/factory_warehouse_boxes.png"
   },
   {
     id: "s3_l_28",
@@ -1033,7 +1093,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["경찰서입니다.", "소방서입니다.", "우체국입니다.", "기차역입니다."],
     correctAnswer: 0,
     explanation: "경찰서 건물 전경 사진이 묘사되어 있습니다.",
-    imagePrompt: "Exterior of a Korean Police Station building with the emblem and Korean sign '경찰서'."
+    imagePrompt: "Exterior of a Korean Police Station building with the emblem and Korean sign '경찰서'.",
+    imageUrl: "/images/exam/job/job_police_station.png"
   },
   {
     id: "s3_l_29",
@@ -1060,7 +1121,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     ],
     correctAnswer: 3,
     explanation: "여자는 9시 출근 전에 7시부터 학원에서 컴퓨터를 배운다고 했습니다.",
-    imagePrompt: "A woman sitting in a classroom with a computer monitor, looking at her watch at 7:30 AM."
+    imagePrompt: "A woman sitting in a classroom with a computer monitor, looking at her watch at 7:30 AM.",
+    imageUrl: "/images/exam/daily/daily_computer_class.png"
   },
   {
     id: "s3_l_31",
@@ -1148,7 +1210,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["물", "김치", "참치", "돼지고기"],
     correctAnswer: 2,
     explanation: "대본에서 물, 김치, 돼지고기는 언급되었으나 참치는 언급되지 않았습니다.",
-    imagePrompt: "A pot of boiling Kimchi stew with pork chunks and tofu on a kitchen stove."
+    imagePrompt: "A pot of boiling Kimchi stew with pork chunks and tofu on a kitchen stove.",
+    imageUrl: "/images/exam/food/food_kimchi_stew.png"
   },
   {
     id: "s3_l_39",
@@ -1159,7 +1222,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["오늘 오전 8시", "오늘 오후 8시", "내일 오전 8시", "내일 오후 8시"],
     correctAnswer: 2,
     explanation: "내일부터 출근하되 오전 8시까지 오기로 했습니다.",
-    imagePrompt: "A man and woman shaking hands in a clean factory workshop with a clock showing 8:00 AM nearby."
+    imagePrompt: "A man and woman shaking hands in a clean factory workshop with a clock showing 8:00 AM nearby.",
+    imageUrl: "/images/exam/factory/factory_worker_lifting.png"
   },
   {
     id: "s3_l_40",
@@ -1170,7 +1234,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["일을 하겠습니다.", "여행을 가겠습니다.", "극장에 가겠습니다.", "운동을 하겠습니다."],
     correctAnswer: 2,
     explanation: "영화표 두 장으로 영화를 보러 가기로 했으므로 극장에 가는 것이 맞습니다.",
-    imagePrompt: "Two cinema tickets side-by-side on a dark background."
+    imagePrompt: "Two cinema tickets side-by-side on a dark background.",
+    imageUrl: "/images/exam/daily/daily_cinema_tickets.png"
   },
 
 
@@ -1202,7 +1267,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["피곤해서", "피곤하니까", "가뿐해서", "가뿐하니까"],
     correctAnswer: 1,
     explanation: "이유를 나타내며 뒤에 명령형('-세요')이 올 때 사용하는 '~니까'가 적절합니다.",
-    imagePrompt: "A man looking exhausted, arriving home late at night, pointing to his bed."
+    imagePrompt: "A man looking exhausted, arriving home late at night, pointing to his bed.",
+    imageUrl: "/images/exam/factory/factory_tired_worker.png"
   },
   {
     id: "s4_r_3",
@@ -1213,7 +1279,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["건설현장", "생산현장", "자재생산", "자재보관"],
     correctAnswer: 0,
     explanation: "나열된 작업들은 건축 및 토목 공사 현장의 주요 공정입니다.",
-    imagePrompt: "A busy construction site with workers assembling rebar and wooden forms for concrete."
+    imagePrompt: "A busy construction site with workers assembling rebar and wooden forms for concrete.",
+    imageUrl: "/images/exam/factory/factory_warehouse_boxes.png"
   },
   {
     id: "s4_r_4",
@@ -1224,7 +1291,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["합하다", "세어보다", "구별하다", "재어보다"],
     correctAnswer: 2,
     explanation: "'분류하다'는 성질이나 종류에 따라 나누는 것으로 '구별하다'와 의미가 비슷합니다.",
-    imagePrompt: "A worker sorting various boxes into different sections in a warehouse."
+    imagePrompt: "A worker sorting various boxes into different sections in a warehouse.",
+    imageUrl: "/images/exam/factory/factory_sorting_boxes.png"
   },
   {
     id: "s4_r_5",
@@ -1234,7 +1302,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["분주합니다", "소용합니다", "조심합니다", "필요합니다"],
     correctAnswer: 3,
     explanation: "통장 개설 시 필수 조건을 설명하므로 '필요합니다'가 정답입니다.",
-    imagePrompt: "A person at a bank counter showing their ID card to a bank clerk."
+    imagePrompt: "A person at a bank counter showing their ID card to a bank clerk.",
+    imageUrl: "/images/exam/bank/bank_counter.png"
   },
   {
     id: "s4_r_6",
@@ -1244,7 +1313,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["쉽습니다", "한가합니다", "남습니다", "분주합니다"],
     correctAnswer: 1,
     explanation: "바쁘다는 말의 반대 상황을 설명하는 '한가합니다'가 적절합니다.",
-    imagePrompt: "A worker taking a relaxed break, sitting on a bench with a calm expression."
+    imagePrompt: "A worker taking a relaxed break, sitting on a bench with a calm expression.",
+    imageUrl: "/images/exam/factory/factory_break_time.png"
   },
   {
     id: "s4_r_7",
@@ -1254,7 +1324,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["힘들", "쉬울", "많을", "접을"],
     correctAnswer: 0,
     explanation: "어려운 작업 환경을 설명하며 추측하는 말이므로 '힘들'이 적절합니다.",
-    imagePrompt: "Heavy industrial work environment, worker lifting a box with effort."
+    imagePrompt: "Heavy industrial work environment, worker lifting a box with effort.",
+    imageUrl: "/images/exam/factory/factory_heavy_machinery..png"
   },
   {
     id: "s4_r_8",
@@ -1264,7 +1335,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["잘", "가끔", "늘", "방금"],
     correctAnswer: 1,
     explanation: "빈도가 낮음을 나타내는 부사인 '가끔'이 적절합니다.",
-    imagePrompt: "A worker looking at a smartphone thinking about family abroad."
+    imagePrompt: "A worker looking at a smartphone thinking about family abroad.",
+    imageUrl: "/images/exam/daily/daily_phone_family.png"
   },
   {
     id: "s4_r_9",
@@ -1275,7 +1347,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["옷을 많이 살 수 있습니다.", "여름 물건을 싸게 살 수 있습니다.", "모든 봄옷을 싸게 살 수 있습니다.", "봄옷을 50% 싸게 살 수 있습니다."],
     correctAnswer: 2,
     explanation: "봄 상품 세일은 봄철 옷을 저렴하게 판매함을 의미합니다.",
-    imagePrompt: "A clothing store entrance with a banner saying 'Spring Sale' (봄 상품 세일) in Korean."
+    imagePrompt: "A clothing store entrance with a banner saying 'Spring Sale' (봄 상품 세일) in Korean.",
+    imageUrl: "/images/exam/food/food_restaurant_queue.png"
   },
   {
     id: "s4_r_10",
@@ -1286,7 +1359,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["15 만원", "20 만원", "155 만원", "190 만원"],
     correctAnswer: 2,
     explanation: "급여 명세서상 '실수령액'은 155만원으로 명시되어 있습니다.",
-    imagePrompt: "A pie chart labeled 'Salary Breakdown' with sections for Tax, Savings, and Net Pay (실수령액 155만원)."
+    imagePrompt: "A pie chart labeled 'Salary Breakdown' with sections for Tax, Savings, and Net Pay (실수령액 155만원).",
+    imageUrl: "/images/exam/chart/chart_salary_breakdown.svg"
   },
   {
     id: "s4_r_11",
@@ -1297,7 +1371,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["울릉도", "거제도", "강화도", "제주도"],
     correctAnswer: 3,
     explanation: "남쪽에 위치하고 바다로 둘러싸여 있으며 비행기/배로 가는 곳은 제주도입니다.",
-    imagePrompt: "A map of South Korea with an arrow pointing to the southernmost large island, Jeju."
+    imagePrompt: "A map of South Korea with an arrow pointing to the southernmost large island, Jeju.",
+    imageUrl: "/images/exam/transport/transport_jeju_map.png"
   },
   {
     id: "s4_r_12",
@@ -1308,7 +1383,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["점검중 스위치 넣지마시오", "수리중 운전하지마시오", "고장 손대지 마시오", "점검중 송전하지 마시오"],
     correctAnswer: 2,
     explanation: "고장이니 만지지 말라는 내용은 '고장 손대지 마시오' 표지판과 일치합니다.",
-    imagePrompt: "A yellow caution sign with the text '고장 손대지 마시오' (Out of order, Do not touch)."
+    imagePrompt: "A yellow caution sign with the text '고장 손대지 마시오' (Out of order, Do not touch).",
+    imageUrl: "/images/exam/sign/sign_broken_do_not_touch.png"
   },
   {
     id: "s4_r_13",
@@ -1318,7 +1394,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["계속", "잠깐", "자주", "가끔"],
     correctAnswer: 0,
     explanation: "중단 없이 진행된 상태를 나타내는 '계속'이 문맥상 적절합니다.",
-    imagePrompt: "A tired worker at a workstation with a calendar showing a full week of work marked."
+    imagePrompt: "A tired worker at a workstation with a calendar showing a full week of work marked.",
+    imageUrl: "/images/exam/factory/factory_tired_worker.png"
   },
   {
     id: "s4_r_14",
@@ -1339,7 +1416,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["물품 생산", "물품 배송", "재고 조사", "재고 파악"],
     correctAnswer: 1,
     explanation: "포장된 상품을 차에 실어 출발시키는 과정은 '물품 배송'을 의미합니다.",
-    imagePrompt: "A courier loading boxes onto a delivery truck."
+    imagePrompt: "A courier loading boxes onto a delivery truck.",
+    imageUrl: "/images/exam/factory/factory_delivery_truck.png"
   },
   {
     id: "s4_r_16",
@@ -1350,7 +1428,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["농업", "공업", "어업", "축산업"],
     correctAnswer: 0,
     explanation: "밭에서 농기구를 사용하여 작물을 수확하는 것은 '농업'의 일부입니다.",
-    imagePrompt: "A farmer in a sweet potato field with a hand shovel (ho-mi) and baskets."
+    imagePrompt: "A farmer in a sweet potato field with a hand shovel (ho-mi) and baskets.",
+    imageUrl: "/images/exam/job/job_farmer.png"
   },
   {
     id: "s4_r_17",
@@ -1361,7 +1440,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["봄철 농사", "여름철 농사", "가을철 농사", "겨울철 농사"],
     correctAnswer: 1,
     explanation: "잡초 제거, 농약 살포, 김장 배추 심기는 주로 여름철에서 초가을로 넘어가는 시기의 농사일입니다.",
-    imagePrompt: "Agricultural field work during a hot summer day, removing weeds and spraying."
+    imagePrompt: "Agricultural field work during a hot summer day, removing weeds and spraying.",
+    imageUrl: "/images/exam/job/job_farmer.png"
   },
   {
     id: "s4_r_18",
@@ -1372,7 +1452,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["칭찬하는 말", "수다스런 말", "평가하는 말", "얌전스런 말"],
     correctAnswer: 0,
     explanation: "동료와 상사를 기분 좋게 하는 말은 '칭찬'을 의미합니다.",
-    imagePrompt: "Two colleagues smiling and giving a thumbs up at an office."
+    imagePrompt: "Two colleagues smiling and giving a thumbs up at an office.",
+    imageUrl: "/images/exam/job/job_two_workers_talking.png"
   },
   {
     id: "s4_r_19",
@@ -1383,7 +1464,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["사업자 등록", "외국인 등록", "주민 등록", "의료 보험"],
     correctAnswer: 1,
     explanation: "입국 후 90일 이내에 외국인이 거주 지소 관할에서 수행하는 절차는 '외국인 등록'입니다.",
-    imagePrompt: "An Alien Registration Card (ARC) layout with a Korean flag icon."
+    imagePrompt: "An Alien Registration Card (ARC) layout with a Korean flag icon.",
+    imageUrl: "/images/exam/bank/document_alien_card.png"
   },
   {
     id: "s4_r_20",
@@ -1394,7 +1476,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["공장의 위험한 기계들", "공장의 작업 환경", "조작하기 쉬운 기계들", "공장의 휴식 환경"],
     correctAnswer: 0,
     explanation: "기계 사용의 편리함과 그에 따른 위험성을 설명하고 있습니다.",
-    imagePrompt: "Factory floor with various heavy machinery and safety warning signs."
+    imagePrompt: "Factory floor with various heavy machinery and safety warning signs.",
+    imageUrl: "/images/exam/factory/factory_heavy_machinery..png"
   },
   {
     id: "s4_l_21",
@@ -1612,7 +1695,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["산", "강", "바다", "극장"],
     correctAnswer: 0,
     explanation: "도봉산에 등산을 가기로 했으므로 정답은 '산'입니다.",
-    imagePrompt: "A beautiful mountain trail with hikers."
+    imagePrompt: "A beautiful mountain trail with hikers.",
+    imageUrl: "/images/exam/transport/transport_mountain_hiking.png"
   },
   {
     id: "s4_l_39",
@@ -1623,7 +1707,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["토요일 오전 8시", "토요일 오전 10시", "일요일 오전 8시", "일요일 오전 10시"],
     correctAnswer: 3,
     explanation: "일요일 아침 10시에 만나기로 약속했습니다.",
-    imagePrompt: "A wall clock pointing to exactly 10:00."
+    imagePrompt: "A wall clock pointing to exactly 10:00.",
+    imageUrl: "/images/exam/chart/chart_clock_10.png"
   },
   {
     id: "s4_l_40",
@@ -1674,7 +1759,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["공장", "산업", "달력", "일과"],
     correctAnswer: 2,
     explanation: "나열된 단어들은 날짜와 시간을 확인하는 '달력'과 관계가 깊습니다.",
-    imagePrompt: "A wall calendar showing dates, weeks, and marked holidays."
+    imagePrompt: "A wall calendar showing dates, weeks, and marked holidays.",
+    imageUrl: "/images/exam/chart/chart_calendar.png"
   },
   {
     id: "s5_r_4",
@@ -1707,7 +1793,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["전원", "가스", "유류", "물"],
     correctAnswer: 0,
     explanation: "기계의 플러그를 뽑는 것은 '전원'을 차단하는 행위입니다.",
-    imagePrompt: "A hand pulling a power plug from a wall outlet to cut the electricity."
+    imagePrompt: "A hand pulling a power plug from a wall outlet to cut the electricity.",
+    imageUrl: "/images/exam/factory/factory_power_plug.png"
   },
   {
     id: "s5_r_7",
@@ -1718,7 +1805,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["작업복", "귀마개", "안전화", "보호구"],
     correctAnswer: 1,
     explanation: "큰 소음으로부터 청력을 보호하기 위해서는 '귀마개'를 착용해야 합니다.",
-    imagePrompt: "A worker wearing industrial noise-canceling earplugs in a loud factory."
+    imagePrompt: "A worker wearing industrial noise-canceling earplugs in a loud factory.",
+    imageUrl: "/images/exam/factory/factory_earplugs.png"
   },
   {
     id: "s5_r_8",
@@ -1729,7 +1817,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["손님, 어디까지 가십니까?", "53번 버스 요금이 얼마입니까?", "여기서 시청까지 얼마나 걸립니까?", "시청에 가려면 몇 번 버스를 타야 하지요?"],
     correctAnswer: 3,
     explanation: "버스의 번호를 알려주는 대답이므로 '몇 번 버스'를 묻는 질문이 적절합니다.",
-    imagePrompt: "A person asking for directions near a bus stop sign."
+    imagePrompt: "A person asking for directions near a bus stop sign.",
+    imageUrl: "/images/exam/transport/transport_bus_stop.png"
   },
   {
     id: "s5_r_9",
@@ -1739,7 +1828,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["뛰어다니면 안 됩니다.", "장갑을 끼면 안 됩니다.", "담배를 피우면 안 됩니다.", "이야기를 하면 안 됩니다."],
     correctAnswer: 2,
     explanation: "화기엄금(불꽃 사용 금지) 구역에서는 흡연이 엄격히 금지됩니다.",
-    imagePrompt: "A white sign with a red border saying '화기엄금' (No Open Flames) and '용접 작업중' (Welding in progress)."
+    imagePrompt: "A white sign with a red border saying '화기엄금' (No Open Flames) and '용접 작업중' (Welding in progress).",
+    imageUrl: "/images/exam/factory/factory_welding.png"
   },
   {
     id: "s5_r_10",
@@ -1749,7 +1839,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["과속 운전하면 안 됩니다.", "길을 건너가면 안 됩니다.", "음주운전 하면 안 됩니다.", "공사를 하면 안 됩니다."],
     correctAnswer: 0,
     explanation: "'속도를 줄이시오'라는 문구는 과속 금지를 의미합니다.",
-    imagePrompt: "A black rectangular road sign saying '사고많은곳' (Accident Prone Area) and '속도를 줄이시오' (Reduce Speed)."
+    imagePrompt: "A black rectangular road sign saying '사고많은곳' (Accident Prone Area) and '속도를 줄이시오' (Reduce Speed).",
+    imageUrl: "/images/exam/sign/sign_slow_down_accident.png"
   },
   {
     id: "s5_r_11",
@@ -1760,7 +1851,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["3,000원", "35,000원", "37,000원", "40,000원"],
     correctAnswer: 0,
     explanation: "영수증 하단에 '거스름돈 3,000원'이 명시되어 있습니다.",
-    imagePrompt: "A retail receipt showing itemized list, total 37,000, paid 40,000, and change 3,000 (거스름돈 3,000원)."
+    imagePrompt: "A retail receipt showing itemized list, total 37,000, paid 40,000, and change 3,000 (거스름돈 3,000원).",
+    imageUrl: "/images/exam/bank/document_receipt.png"
   },
   {
     id: "s5_r_12",
@@ -1771,7 +1863,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["자기 자신의 능력을 높이는 것", "아프지 않고 건강하게 사는 것", "돈을 많이 벌어 부자가 되는 것", "가족과 편안하고 행복하게 사는 것"],
     correctAnswer: 3,
     explanation: "41%로 가장 높은 수치를 기록한 소망은 '가정의 행복'입니다.",
-    imagePrompt: "A circular pie chart titled '새해에 바라는 것' showing Family Happiness as the largest slice at 41%."
+    imagePrompt: "A circular pie chart titled '새해에 바라는 것' showing Family Happiness as the largest slice at 41%.",
+    imageUrl: "/images/exam/chart/chart_new_year_wishes.svg"
   },
   {
     id: "s5_r_13",
@@ -1925,7 +2018,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["눈", "손", "발", "머리"],
     correctAnswer: 3,
     explanation: "머리를 짚고 괴로워하는 동작은 두통(머리 아픔)을 의미합니다.",
-    imagePrompt: "A man in a clinic holding his head in pain while facing a doctor."
+    imagePrompt: "A man in a clinic holding his head in pain while facing a doctor.",
+    imageUrl: "/images/exam/health/health_headache.png"
   },
   {
     id: "s5_l_27",
@@ -2125,7 +2219,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["비슷하다", "부족하다", "동일하다", "만족하다"],
     correctAnswer: 1,
     explanation: "'모자라다'는 수량이나 정도가 채워지지 않은 상태로 '부족하다'와 의미가 같습니다.",
-    imagePrompt: "An empty measuring cup or a half-filled bowl representing insufficiency."
+    imagePrompt: "An empty measuring cup or a half-filled bowl representing insufficiency.",
+    imageUrl: "/images/exam/food/food_no_waste.png"
   },
   {
     id: "s6_r_5",
@@ -2169,7 +2264,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["명", "잔", "시간", "마리"],
     correctAnswer: 3,
     explanation: "생선이나 동물을 세는 단위는 '마리'입니다.",
-    imagePrompt: "A fishmonger at a market stall with fresh fish on ice."
+    imagePrompt: "A fishmonger at a market stall with fresh fish on ice.",
+    imageUrl: "/images/exam/food/life_traditional_market.png"
   },
   {
     id: "s6_r_9",
@@ -2200,7 +2296,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["고용보험", "국민연금", "의료보험", "주민세"],
     correctAnswer: 1,
     explanation: "막대그래프에서 국민연금이 가장 높은 수치를 나타내고 있습니다.",
-    imagePrompt: "A bar chart of salary deductions (공제내역) where '국민연금' (National Pension) is the tallest bar."
+    imagePrompt: "A bar chart of salary deductions (공제내역) where '국민연금' (National Pension) is the tallest bar.",
+    imageUrl: "/images/exam/bank/document_salary_slip.png"
   },
   {
     id: "s6_r_12",
@@ -2277,7 +2374,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["이 사람의 고향은 제주도입니다.", "서울이 제주도보다 더 따뜻합니다.", "제주도는 따뜻해서 바람이 불지 않습니다.", "이 사람은 다음 주에 제주도에 가려고 합니다."],
     correctAnswer: 0,
     explanation: "첫 문장에서 고향이 제주도임을 직접 언급하고 있습니다.",
-    imagePrompt: "A scenic view of Jeju Island with palm trees and a windy beach."
+    imagePrompt: "A scenic view of Jeju Island with palm trees and a windy beach.",
+    imageUrl: "/images/exam/weather/weather_tropical_beach.png"
   },
   {
     id: "s6_r_19",
@@ -2288,7 +2386,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["직각자", "줄자", "수평대", "연마기"],
     correctAnswer: 2,
     explanation: "수평 여부를 확인하는 공구는 '수평대'입니다.",
-    imagePrompt: "A carpenter's level (bubble level) sitting on a wooden beam."
+    imagePrompt: "A carpenter's level (bubble level) sitting on a wooden beam.",
+    imageUrl: "/images/exam/job/job_carpenter.png"
   },
   {
     id: "s6_r_20",
@@ -2299,7 +2398,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["굴삭기", "용접기", "전기드릴", "샌딩기"],
     correctAnswer: 1,
     explanation: "열을 이용해 금속을 접합하거나 절단하는 장비는 '용접기'입니다.",
-    imagePrompt: "A welding machine with sparks flying as it joins two metal plates."
+    imagePrompt: "A welding machine with sparks flying as it joins two metal plates.",
+    imageUrl: "/images/exam/factory/factory_welding.png"
   },
 
   // --- [듣기 세트 6: 21~40] ---
@@ -2334,7 +2434,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["1번 버스", "5번 버스", "7번 버스", "10번 버스"],
     correctAnswer: 2,
     explanation: "대화에서 7번 버스를 타라고 안내했습니다.",
-    imagePrompt: "A woman asking a man for directions at a bus stop with a route map."
+    imagePrompt: "A woman asking a man for directions at a bus stop with a route map.",
+    imageUrl: "/images/exam/transport/transport_bus_stop.png"
   },
   {
     id: "s6_l_24",
@@ -2356,7 +2457,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["바쁩니다.", "비쌉니다.", "한가합니다.", "복잡합니다."],
     correctAnswer: 3,
     explanation: "차가 빽빽하게 줄지어 있는 상황은 '복잡하다'고 표현합니다.",
-    imagePrompt: "A multi-lane city road packed with cars and buses in a traffic jam."
+    imagePrompt: "A multi-lane city road packed with cars and buses in a traffic jam.",
+    imageUrl: "/images/exam/transport/transport_traffic_jam.png"
   },
   {
     id: "s6_l_26",
@@ -2621,7 +2723,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["공사장으로 가려면 우회전하십시오.", "공사 중에는 주차를 하지 마십시오.", "공사를 하고 있으니 돌아가십시오.", "공사장에서는 안전모를 착용하십시오."],
     correctAnswer: 2,
     explanation: "'우회하세요'는 공사 구간을 피해 다른 길로 돌아가라는 뜻입니다.",
-    imagePrompt: "A yellow construction sign with a person shoveling and the text '우회하세요' (Detour)."
+    imagePrompt: "A yellow construction sign with a person shoveling and the text '우회하세요' (Detour).",
+    imageUrl: "/images/exam/sign/sign_construction_detour.png"
   },
   {
     id: "s7_r_10",
@@ -2631,7 +2734,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["공사 중이니까 이 길로만 다닐 수 있습니다.", "보호구를 착용하지 않으면 들어갈 수 없습니다.", "공사를 하고 있으니까 빨리 운전하면 안 됩니다.", "여기에서 일하는 사람만 들어갈 수 있습니다."],
     correctAnswer: 3,
     explanation: "'공사관계자이외 출입금지'는 현장 인력만 출입이 가능하다는 의미입니다.",
-    imagePrompt: "A sign saying '출입금지' (No Entry) and '공사관계자이외' (Authorized Personnel Only)."
+    imagePrompt: "A sign saying '출입금지' (No Entry) and '공사관계자이외' (Authorized Personnel Only).",
+    imageUrl: "/images/exam/sign/sign_no_entry_authorized.png"
   },
   {
     id: "s7_r_11",
@@ -2641,7 +2745,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["1월", "2월", "3월", "6월"],
     correctAnswer: 0,
     explanation: "그래프에서 1월의 막대가 약 30만 원으로 가장 낮게 표시되어 있습니다.",
-    imagePrompt: "A bar chart of monthly living expenses from January to June, with January as the lowest bar."
+    imagePrompt: "A bar chart of monthly living expenses from January to June, with January as the lowest bar.",
+    imageUrl: "/images/exam/chart/chart_museum_bar.svg"
   },
   {
     id: "s7_r_12",
@@ -2651,7 +2756,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["라면", "칼국수", "비빔밥", "순두부"],
     correctAnswer: 2,
     explanation: "메뉴판에서 5,000원으로 가장 가격이 높은 음식은 '비빔밥'입니다.",
-    imagePrompt: "A restaurant menu showing: Ramen 3,000, Kalguksu 4,000, Bibimbap 5,000, Sundubu 4,500."
+    imagePrompt: "A restaurant menu showing: Ramen 3,000, Kalguksu 4,000, Bibimbap 5,000, Sundubu 4,500.",
+    imageUrl: "/images/exam/chart/chart_restaurant_menu.svg"
   },
   {
     id: "s7_r_13",
@@ -2838,7 +2944,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["은행", "경찰서", "우체국", "소방서"],
     correctAnswer: 1,
     explanation: "지도의 거리상 학교에서 가장 인접한 경찰서를 고릅니다.",
-    imagePrompt: "A simple map showing 'School' at the center, with 'Police Station' being the closest building."
+    imagePrompt: "A simple map showing 'School' at the center, with 'Police Station' being the closest building.",
+    imageUrl: "/images/exam/job/job_police_station.png"
   },
   {
     id: "s7_l_30",
@@ -2989,7 +3096,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["공장", "산업", "달력", "일과"],
     correctAnswer: 2,
     explanation: "요일, 주말 등 날짜와 관련된 정보는 '달력'에서 확인합니다.",
-    imagePrompt: "A Korean wall calendar showing various dates and holidays."
+    imagePrompt: "A Korean wall calendar showing various dates and holidays.",
+    imageUrl: "/images/exam/chart/chart_calendar.png"
   },
   {
     id: "s8_r_4",
@@ -3022,7 +3130,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["전원", "가스", "유류", "물"],
     correctAnswer: 0,
     explanation: "전기 공급을 끊는 것은 '전원 차단'입니다.",
-    imagePrompt: "A hand pulling a power plug out of a wall socket."
+    imagePrompt: "A hand pulling a power plug out of a wall socket.",
+    imageUrl: "/images/exam/factory/factory_power_plug.png"
   },
   {
     id: "s8_r_7",
@@ -3033,7 +3142,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["작업복", "귀마개", "안전화", "보안경"],
     correctAnswer: 1,
     explanation: "소음으로부터 귀를 보호하는 장구는 '귀마개'입니다.",
-    imagePrompt: "A worker wearing industrial earplugs in a noisy factory setting."
+    imagePrompt: "A worker wearing industrial earplugs in a noisy factory setting.",
+    imageUrl: "/images/exam/factory/factory_earplugs.png"
   },
   {
     id: "s8_r_8",
@@ -3044,7 +3154,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["손님, 어디까지 가십니까?", "53번 버스 요금이 얼마입니까?", "여기서 시청까지 얼마나 걸립니까?", "시청에 가려면 몇 번 버스를 타야 하지요?"],
     correctAnswer: 3,
     explanation: "버스 번호를 알려주었으므로 '몇 번 버스'를 타는지 묻는 질문이 맞습니다.",
-    imagePrompt: "A person asking for directions at a bus stop."
+    imagePrompt: "A person asking for directions at a bus stop.",
+    imageUrl: "/images/exam/transport/transport_bus_stop.png"
   },
   {
     id: "s8_r_9",
@@ -3054,7 +3165,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["뛰어다니면 안 됩니다.", "장갑을 끼면 안 됩니다.", "담배를 피우면 안 됩니다.", "이야기를 하면 안 됩니다."],
     correctAnswer: 2,
     explanation: "'화기엄금' 지역에서는 불꽃이 튀는 행위나 흡연이 금지됩니다.",
-    imagePrompt: "A white sign with red borders saying '화기엄금' (No Open Flames) and '용접 작업중'."
+    imagePrompt: "A white sign with red borders saying '화기엄금' (No Open Flames) and '용접 작업중'.",
+    imageUrl: "/images/exam/factory/factory_welding.png"
   },
   {
     id: "s8_r_10",
@@ -3064,7 +3176,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["과속 운전하면 안 됩니다.", "길을 건너가면 안 됩니다.", "음주운전 하면 안 됩니다.", "공사를 하면 안 됩니다."],
     correctAnswer: 0,
     explanation: "'속도를 줄이시오'는 과속하지 말라는 뜻입니다.",
-    imagePrompt: "A road sign saying '사고많은곳' (High Accident Area) and '속도를 줄이시오' (Reduce Speed)."
+    imagePrompt: "A road sign saying '사고많은곳' (High Accident Area) and '속도를 줄이시오' (Reduce Speed).",
+    imageUrl: "/images/exam/sign/sign_slow_down_accident.png"
   },
   {
     id: "s8_r_11",
@@ -3074,7 +3187,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["3,000원", "35,000원", "37,000원", "40,000원"],
     correctAnswer: 0,
     explanation: "영수증에 '거스름돈 3,000원'이라고 명시되어 있습니다.",
-    imagePrompt: "A receipt showing: Pants 35,000, Hat 2,000, Total 37,000, Received 40,000, Change 3,000."
+    imagePrompt: "A receipt showing: Pants 35,000, Hat 2,000, Total 37,000, Received 40,000, Change 3,000.",
+    imageUrl: "/images/exam/bank/document_receipt.png"
   },
   {
     id: "s8_r_12",
@@ -3084,7 +3198,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["자기 자신의 능력을 높이는 것", "아프지 않고 건강하게 사는 것", "돈을 많이 벌어 부자가 되는 것", "가족과 편안하고 행복하게 사는 것"],
     correctAnswer: 3,
     explanation: "그래프에서 '가정의 행복(41%)'이 가장 높습니다.",
-    imagePrompt: "A pie chart titled '새해에 바라는 것' with '가정의 행복' as the largest slice at 41%."
+    imagePrompt: "A pie chart titled '새해에 바라는 것' with '가정의 행복' as the largest slice at 41%.",
+    imageUrl: "/images/exam/chart/chart_new_year_wishes.svg"
   },
   {
     id: "s8_r_13",
@@ -3236,7 +3351,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["눈", "손", "발", "머리"],
     correctAnswer: 3,
     explanation: "머리를 짚고 괴로워하는 모습입니다.",
-    imagePrompt: "A man in a doctor's office holding his head with a pained expression."
+    imagePrompt: "A man in a doctor's office holding his head with a pained expression.",
+    imageUrl: "/images/exam/health/health_headache.png"
   },
   {
     id: "s8_l_27",
@@ -3247,7 +3363,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["바쁩니다.", "비쌉니다.", "한가합니다.", "복잡합니다."],
     correctAnswer: 3,
     explanation: "도로에 차가 꽉 막힌 상황은 '복잡하다'고 합니다.",
-    imagePrompt: "A heavy traffic jam on an overpass with many cars stuck."
+    imagePrompt: "A heavy traffic jam on an overpass with many cars stuck.",
+    imageUrl: "/images/exam/transport/transport_traffic_jam.png"
   },
   {
     id: "s8_l_28",
@@ -3441,7 +3558,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["용접작업", "절단작업", "샌딩작업", "프레스작업"],
     correctAnswer: 0,
     explanation: "불꽃을 이용해 철을 붙이는 공정은 '용접'입니다.",
-    imagePrompt: "A welder joining metal parts with bright sparks and wearing a mask."
+    imagePrompt: "A welder joining metal parts with bright sparks and wearing a mask.",
+    imageUrl: "/images/exam/factory/factory_welding.png"
   },
   {
     id: "s9_r_6",
@@ -3452,7 +3570,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["금지", "금연", "휴식", "휴가"],
     correctAnswer: 1,
     explanation: "화재 방지를 위해 담배를 피우지 않는 것은 '금연'입니다.",
-    imagePrompt: "A 'No Smoking' sign (금연) with a crossed-out cigarette."
+    imagePrompt: "A 'No Smoking' sign (금연) with a crossed-out cigarette.",
+    imageUrl: "/images/exam/sign/sign_no_smoking.png"
   },
   {
     id: "s9_r_7",
@@ -3514,7 +3633,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["2층으로 올라갑니다.", "왼쪽으로 똑바로 갑니다.", "지하 2층으로 내려갑니다.", "오른쪽으로 똑바로 갑니다."],
     correctAnswer: 2,
     explanation: "안내판에 '표 사는 곳'이 '지하 2층'이라고 되어 있습니다.",
-    imagePrompt: "A subway sign: 'Tickets' (표 사는 곳) with a down arrow and 'B2'."
+    imagePrompt: "A subway sign: 'Tickets' (표 사는 곳) with a down arrow and 'B2'.",
+    imageUrl: "/images/exam/transport/transport_subway_gap.png"
   },
   {
     id: "s9_r_13",
@@ -3524,7 +3644,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["감압", "감전", "폭발", "추락"],
     correctAnswer: 1,
     explanation: "전기 에너지가 몸에 흐르는 사고는 '감전'입니다.",
-    imagePrompt: "A yellow warning sign with a high voltage spark symbol."
+    imagePrompt: "A yellow warning sign with a high voltage spark symbol.",
+    imageUrl: "/images/exam/sign/sign_high_voltage.png"
   },
   {
     id: "s9_r_14",
@@ -3697,7 +3818,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["흐립니다.", "맑습니다.", "눈이 옵니다.", "비가 옵니다."],
     correctAnswer: 3,
     explanation: "우산을 쓰고 비가 내리는 날씨입니다.",
-    imagePrompt: "A woman walking with an umbrella under a rainy sky."
+    imagePrompt: "A woman walking with an umbrella under a rainy sky.",
+    imageUrl: "/images/exam/weather/weather_summer_rain.png"
   },
   {
     id: "s9_l_30",
@@ -3707,7 +3829,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["네, 복사했어요.", "네, 복사가 잘 돼요.", "네, 고장이 아니예요.", "네, 지금 수리 중이에요."],
     correctAnswer: 3,
     explanation: "복사기 고장 여부를 묻는 질문에 대한 현재 상황 답변입니다.",
-    imagePrompt: "A photocopier with a '수리 중' (Under Repair) sign."
+    imagePrompt: "A photocopier with a '수리 중' (Under Repair) sign.",
+    imageUrl: "/images/exam/factory/factory_machine_repair.png"
   },
   {
     id: "s9_l_31",
@@ -3848,7 +3971,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["출입증", "사원증", "증명서", "신분증"],
     correctAnswer: 3,
     explanation: "개인의 신분을 증명하는 서류나 카드는 '신분증'입니다.",
-    imagePrompt: "A collection of various ID cards including a Korean passport and Alien Registration Card."
+    imagePrompt: "A collection of various ID cards including a Korean passport and Alien Registration Card.",
+    imageUrl: "/images/exam/bank/document_alien_card.png"
   },
   {
     id: "s10_r_4",
@@ -3903,7 +4027,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["출근할", "조퇴할", "퇴근할", "도착할"],
     correctAnswer: 2,
     explanation: "일과를 마치고 집으로 돌아가는 '퇴근' 시에는 안전 점검이 필수입니다.",
-    imagePrompt: "A worker turning off the lights and checking the door before leaving."
+    imagePrompt: "A worker turning off the lights and checking the door before leaving.",
+    imageUrl: "/images/exam/factory/factory_power_plug.png"
   },
   {
     id: "s10_r_9",
@@ -3923,7 +4048,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["버스를 탈 수 있습니다.", "지하철을 탈 수 있습니다.", "음식을 살 수 있습니다.", "환승할 수 있습니다."],
     correctAnswer: 2,
     explanation: "교통카드(T-money)는 교통수단 이용 및 특정 편의점 결제용이며, 일반적인 '음식점(식사)' 결제와는 거리가 있습니다. (기본 기능 기준)",
-    imagePrompt: "A black Korean transportation card with a large 'T-money' logo on it."
+    imagePrompt: "A black Korean transportation card with a large 'T-money' logo on it.",
+    imageUrl: "/images/exam/transport/transport_subway_locker.png"
   },
   {
     id: "s10_r_11",
@@ -3933,7 +4059,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["휴게실", "사무실", "철공소", "목공소"],
     correctAnswer: 1,
     explanation: "복사기는 주로 문서를 다루는 '사무실'에서 사용합니다.",
-    imagePrompt: "A large high-tech office photocopier with paper trays and a top scanner lid."
+    imagePrompt: "A large high-tech office photocopier with paper trays and a top scanner lid.",
+    imageUrl: "/images/exam/factory/factory_machine_repair.png"
   },
   {
     id: "s10_r_12",
@@ -3944,7 +4071,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     correctAnswer: 2,
     explanation: "밥을 짓는 도구는 3번 전기밥솥입니다.",
     optionImagePrompts: ["A traditional tea kettle", "A mechanical kitchen weighing scale", "An electric rice cooker", "A laptop computer"],
-    imagePrompt: "A collage of four items: 1. Kettle, 2. Scale, 3. Rice Cooker, 4. Laptop."
+    imagePrompt: "A collage of four items: 1. Kettle, 2. Scale, 3. Rice Cooker, 4. Laptop.",
+    imageUrl: "/images/exam/food/food_korean_summer.png"
   },
   {
     id: "s10_r_13",
@@ -4065,7 +4193,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["집에서 청소하기", "부동산에서 상담하기", "슈퍼에서 쇼핑하기", "공원에서 산책하기"],
     correctAnswer: 1,
     explanation: "집을 구하기 위해 부동산 중개소 직원과 대화하고 있습니다.",
-    imagePrompt: "A man and a woman talking in front of a real estate office with '부동산' signs."
+    imagePrompt: "A man and a woman talking in front of a real estate office with '부동산' signs.",
+    imageUrl: "/images/exam/food/life_real_estate.png"
   },
   {
     id: "s10_l_24",
@@ -4076,7 +4205,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["안전모 쓰기", "청소하기", "플러그 뽑기", "못 박기"],
     correctAnswer: 2,
     explanation: "전기 기기 수리 시 안전을 위해 '플러그를 뽑는' 동작이 정답입니다.",
-    imagePrompt: "A person's hand pulling a power plug out of a wall socket."
+    imagePrompt: "A person's hand pulling a power plug out of a wall socket.",
+    imageUrl: "/images/exam/factory/factory_power_plug.png"
   },
   {
     id: "s10_l_25",
@@ -4246,7 +4376,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["돈 찾기", "통장 만들기", "해외 송금", "환전하기"],
     correctAnswer: 2,
     explanation: "가족이 있는 고향으로 돈을 보내기(송금) 위함입니다.",
-    imagePrompt: "A digital bank screen showing 'Remittance to Home Country'."
+    imagePrompt: "A digital bank screen showing 'Remittance to Home Country'.",
+    imageUrl: "/images/exam/bank/bank_remittance.png"
   },
 
   // ==========================================
@@ -4358,7 +4489,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["매달 4일에 점검합니다.", "한 달에 네 번 점검합니다.", "4일마다 한 번씩 점검합니다.", "네 번째 일요일에 점검합니다."],
     correctAnswer: 0,
     explanation: "'매월 4일'은 특정 날짜 하루를 의미합니다.",
-    imagePrompt: "A campaign poster with a safety mascot holding a thumb up and text '매월 4일은 안전점검의 날'."
+    imagePrompt: "A campaign poster with a safety mascot holding a thumb up and text '매월 4일은 안전점검의 날'.",
+    imageUrl: "/images/exam/sign/sign_safety_inspection_day.png"
   },
   {
     id: "s11_r_11",
@@ -4368,7 +4500,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["1층", "2층", "3층", "4층"],
     correctAnswer: 2,
     explanation: "안내판에 아동 의류는 3층으로 표시되어 있습니다.",
-    imagePrompt: "Department store directory: 4F Men's, 3F Kids' (아동 의류), 2F Women's, 1F Cosmetics."
+    imagePrompt: "Department store directory: 4F Men's, 3F Kids' (아동 의류), 2F Women's, 1F Cosmetics.",
+    imageUrl: "/images/exam/chart/chart_building_directory.svg"
   },
   {
     id: "s11_r_12",
@@ -4378,7 +4511,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["미국", "아시아", "중동", "기타지역"],
     correctAnswer: 0,
     explanation: "그래프에서 미국의 수치(8.2)가 가장 높습니다.",
-    imagePrompt: "Bar chart: Tourist arrivals by region. USA(8.2), Asia(3.2), Middle East(1.4), Others(1.2)."
+    imagePrompt: "Bar chart: Tourist arrivals by region. USA(8.2), Asia(3.2), Middle East(1.4), Others(1.2).",
+    imageUrl: "/images/exam/chart/chart_tourist_spots.svg"
   },
   {
     id: "s11_r_13",
@@ -4774,7 +4908,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["뛰어다니면 안 됩니다.", "장갑을 끼면 안 됩니다.", "담배를 피우면 안 됩니다.", "이야기를 하면 안 됩니다."],
     correctAnswer: 2,
     explanation: "A 'No Open Flames' (화기엄금) sign implies no smoking.",
-    imagePrompt: "A white sign with red borders saying '화기엄금' (No Open Flames) and '용접 작업중'."
+    imagePrompt: "A white sign with red borders saying '화기엄금' (No Open Flames) and '용접 작업중'.",
+    imageUrl: "/images/exam/factory/factory_welding.png"
   },
   {
     id: "s8_r_10",
@@ -4784,7 +4919,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["과속 운전하면 안 됩니다.", "길을 건너가면 안 됩니다.", "음주운전 하면 안 됩니다.", "공사를 하면 안 됩니다."],
     correctAnswer: 0,
     explanation: "'Reduce Speed' (속도를 줄이시오) means do not speed.",
-    imagePrompt: "A road sign saying '사고많은곳' (High Accident Area) and '속도를 줄이시오' (Reduce Speed)."
+    imagePrompt: "A road sign saying '사고많은곳' (High Accident Area) and '속도를 줄이시오' (Reduce Speed).",
+    imageUrl: "/images/exam/sign/sign_slow_down_accident.png"
   },
   {
     id: "s8_r_11",
@@ -4794,7 +4930,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["3,000원", "35,000원", "37,000원", "40,000원"],
     correctAnswer: 0,
     explanation: "The receipt explicitly says 'Change 3,000 won'.",
-    imagePrompt: "A receipt showing: Pants 35,000, Hat 2,000, Total 37,000, Received 40,000, Change 3,000."
+    imagePrompt: "A receipt showing: Pants 35,000, Hat 2,000, Total 37,000, Received 40,000, Change 3,000.",
+    imageUrl: "/images/exam/bank/document_receipt.png"
   },
   {
     id: "s8_r_12",
@@ -4804,7 +4941,8 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["자기 자신의 능력을 높이는 것", "아프지 않고 건강하게 사는 것", "돈을 많이 벌어 부자가 되는 것", "가족과 편안하고 행복하게 사는 것"],
     correctAnswer: 3,
     explanation: "The chart shows 'Family Happiness (41%)' as the highest wish.",
-    imagePrompt: "A pie chart titled 'New Year's Wishes' with 'Family Happiness' at 41%."
+    imagePrompt: "A pie chart titled 'New Year's Wishes' with 'Family Happiness' at 41%.",
+    imageUrl: "/images/exam/chart/chart_new_year_wishes.svg"
   },
   {
     id: "s8_r_13",

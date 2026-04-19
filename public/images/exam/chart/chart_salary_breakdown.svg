@@ -1,0 +1,33 @@
+<svg viewBox="0 0 380 300" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <rect width="380" height="300" fill="white"/>
+  <text x="190" y="28" text-anchor="middle" font-size="14" font-weight="bold" fill="#1a1a2e">월급 내역 (총급여 190만원)</text>
+  <!-- 파이차트 중심 160,165 반지름 95 -->
+  <!-- 실수령액 155만원 → 약 81.6% → 293.8도 -->
+  <!-- 공제합계 15만원 → 7.9% → 28.4도 -->
+  <!-- 개인저축 20만원 → 10.5% → 37.9도 -->
+
+  <!-- 실수령액 (가장 큰 부분) 0~293.8도 -->
+  <path d="M160,165 L160,70 A95,95 0 1,1 96,230 Z" fill="#2ecc71"/>
+  <!-- 공제합계 293.8~322.2도 -->
+  <path d="M160,165 L96,230 A95,95 0 0,1 76,142 Z" fill="#e74c3c"/>
+  <!-- 개인저축 322.2~360도 -->
+  <path d="M160,165 L76,142 A95,95 0 0,1 160,70 Z" fill="#f39c12"/>
+
+  <!-- 중앙 레이블 -->
+  <text x="175" y="155" font-size="11" font-weight="bold" fill="white">81.6%</text>
+
+  <!-- 범례 -->
+  <rect x="275" y="100" width="14" height="14" fill="#2ecc71"/>
+  <text x="294" y="112" font-size="11" fill="#333">실수령액</text>
+  <text x="294" y="126" font-size="11" fill="#333">155만원</text>
+
+  <rect x="275" y="150" width="14" height="14" fill="#e74c3c"/>
+  <text x="294" y="162" font-size="11" fill="#333">공제합계</text>
+  <text x="294" y="176" font-size="11" fill="#333">15만원</text>
+
+  <rect x="275" y="200" width="14" height="14" fill="#f39c12"/>
+  <text x="294" y="212" font-size="11" fill="#333">개인저축</text>
+  <text x="294" y="226" font-size="11" fill="#333">20만원</text>
+
+  <text x="190" y="275" text-anchor="middle" font-size="10" fill="#888">총급여 190만원 기준</text>
+</svg>

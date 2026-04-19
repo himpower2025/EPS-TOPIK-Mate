@@ -1,0 +1,25 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <rect width="400" height="300" fill="white"/>
+  <text x="200" y="25" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a1a2e">외국인이 좋아하는 한국의 관광지 (%)</text>
+  <!-- 파이 중심 155, 165, 반지름 110 -->
+  <!-- 서울 82.8% → 297.9도 -->
+  <path d="M155,165 L155,55 A110,110 0 1,1 88,255 Z" fill="#e74c3c"/>
+  <!-- 부산 20.1% → 72.4도 -->
+  <path d="M155,165 L88,255 A110,110 0 0,1 218,67 Z" fill="#3498db"/>
+  <!-- 민속촌 13.3% → 47.9도 -->
+  <path d="M155,165 L218,67 A110,110 0 0,1 258,144 Z" fill="#2ecc71"/>
+  <!-- 제주 10.1% → 나머지 -->
+  <path d="M155,165 L258,144 A110,110 0 0,1 155,55 Z" fill="#f39c12"/>
+
+  <!-- 범례 -->
+  <rect x="290" y="90" width="13" height="13" fill="#e74c3c"/>
+  <text x="308" y="101" font-size="11" fill="#333">서울 82.8%</text>
+  <rect x="290" y="115" width="13" height="13" fill="#3498db"/>
+  <text x="308" y="126" font-size="11" fill="#333">부산 20.1%</text>
+  <rect x="290" y="140" width="13" height="13" fill="#2ecc71"/>
+  <text x="308" y="151" font-size="11" fill="#333">민속촌 13.3%</text>
+  <rect x="290" y="165" width="13" height="13" fill="#f39c12"/>
+  <text x="308" y="176" font-size="11" fill="#333">제주 10.1%</text>
+
+  <text x="200" y="285" text-anchor="middle" font-size="10" fill="#888">복수 응답 가능 (단위: %)</text>
+</svg>

@@ -84,7 +84,6 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
   }
 
   const ai = getAI();
-
   const difficultyContext = plan === 'free' ? "Standard Beginner Level" : "High-tier Workplace and Technical Industry Scenarios";
 
   const samples = STATIC_EXAM_DATA
@@ -109,7 +108,7 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
   1. NO REDUNDANCY: Each question must feature a unique workplace scenario (Industrial, Agricultural, etc.).
   2. IMAGE PROMPT PRECISION: Provide extremely descriptive 'imagePrompt' for an illustrator. 
      - Ex: "A side-view 2D vector of a worker in a blue uniform wearing a white safety helmet and using a yellow electric drill on a wooden board."
-  3. AUDIO FIDELITY: For LISTENING, use 'Man:' and 'Woman:' tags in the 'context' field. Include realistic pauses or industrial background descriptions in the prompt.
+  3. AUDIO FIDELITY: For LISTENING, use 'Man:' and 'Woman:' tags in the 'context' field.
   4. LANGUAGE: 
      - Exam content (questionText, options, context): Korean.
      - Metadata (category, explanation, imagePrompt): STRICTLY ENGLISH.
@@ -122,7 +121,6 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
 
   try {
     const response = await ai.models.generateContent({
-      // ✅ 수정: gemini-3.1-pro-preview → 실제 존재하는 모델로 변경
       model: "gemini-2.5-pro-preview-06-05",
       contents: prompt,
       config: {
@@ -152,7 +150,6 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
     if (!text) throw new Error("Empty AI response");
 
     let generated: Question[] = JSON.parse(cleanJson(text));
-
     generated = generated.map(q => ({
       ...q,
       category: q.category || "General",
@@ -168,56 +165,55 @@ export const generateQuestionsBySet = async (mode: ExamMode, roundNumber: number
 };
 
 // ============================================================
-// ✅ 핵심 수정: generateImage 함수 전면 재작성
-// 변경 이유:
-//   1. 'gemini-2.5-flash-image', 'gemini-3-pro-image-preview' → 존재하지 않는 모델명
-//   2. generateContent() + imageConfig → 이미지 생성 API가 아님
-//   3. 올바른 방법: generateImages() + 'imagen-3.0-generate-002' 모델 사용
+// ✅ generateImage 핵심 수정
+//
+// 우선순위:
+//   1순위: imageUrl 있음 → 로컬 파일 즉시 반환 (비용 0원, 속도 즉시)
+//   2순위: imageUrl 없음 → Imagen AI로 생성 (기존 방식)
+//   3순위: AI도 실패 → null 반환
 // ============================================================
-export const generateImage = async (prompt: string): Promise<string | null> => {
-  if (!prompt) return null;
-  const ai = getAI();
+export const generateImage = async (
+  prompt: string,
+  imageUrl?: string   // DB의 imageUrl 필드값을 여기에 전달
+): Promise<string | null> => {
 
+  // 1순위: 로컬 파일 경로가 있으면 바로 반환 — AI 호출 전혀 없음
+  if (imageUrl) {
+    return imageUrl;
+  }
+
+  // imagePrompt도 없으면 포기
+  if (!prompt) return null;
+
+  const ai = getAI();
   const enhancedPrompt = `A clear, high-quality educational illustration for a Korean language exam.
 Style: Simple 2D vector art, clean lines, white background, no decorative text overlays.
 Subject: ${prompt}`;
 
-  // 1차 시도: Imagen 3 (가장 안정적)
+  // 2순위: Imagen 3
   try {
     const response = await ai.models.generateImages({
       model: 'imagen-3.0-generate-002',
       prompt: enhancedPrompt,
-      config: {
-        numberOfImages: 1,
-        aspectRatio: '1:1',
-      }
+      config: { numberOfImages: 1, aspectRatio: '1:1' }
     });
-
     const imageBytes = response.generatedImages?.[0]?.image?.imageBytes;
-    if (imageBytes) {
-      return `data:image/png;base64,${imageBytes}`;
-    }
+    if (imageBytes) return `data:image/png;base64,${imageBytes}`;
   } catch (err) {
-    console.warn('Imagen 3 failed, trying Imagen 3 Fast:', err);
+    console.warn('Imagen 3 failed, trying Fast:', err);
   }
 
-  // 2차 시도: Imagen 3 Fast (속도 우선 폴백)
+  // 3순위: Imagen 3 Fast
   try {
     const response = await ai.models.generateImages({
       model: 'imagen-3.0-fast-generate-001',
       prompt: enhancedPrompt,
-      config: {
-        numberOfImages: 1,
-        aspectRatio: '1:1',
-      }
+      config: { numberOfImages: 1, aspectRatio: '1:1' }
     });
-
     const imageBytes = response.generatedImages?.[0]?.image?.imageBytes;
-    if (imageBytes) {
-      return `data:image/png;base64,${imageBytes}`;
-    }
+    if (imageBytes) return `data:image/png;base64,${imageBytes}`;
   } catch (err) {
-    console.error('All image generation models failed:', err);
+    console.error('All image generation failed:', err);
   }
 
   return null;
@@ -256,9 +252,7 @@ export const generateSpeech = async (text: string, ctx: AudioContext): Promise<A
     if (!candidates || candidates.length === 0 || !candidates[0].content) return null;
 
     const audioData = candidates[0].content.parts?.[0]?.inlineData?.data;
-    if (audioData) {
-      return await decodeAudioData(decodeBase64(audioData), ctx, 24000, 1);
-    }
+    if (audioData) return await decodeAudioData(decodeBase64(audioData), ctx, 24000, 1);
     return null;
   } catch (err) {
     console.error("Speech engine failed:", err);
@@ -270,7 +264,6 @@ export const analyzePerformance = async (session: ExamSession): Promise<Analytic
   const ai = getAI();
   try {
     const response = await ai.models.generateContent({
-      // ✅ 수정: gemini-3-flash-preview → 실제 존재하는 모델로 변경
       model: "gemini-2.5-flash-preview-05-20",
       contents: `Perform an expert analysis on these results. Score: ${session.score}/${session.questions.length}. 
       

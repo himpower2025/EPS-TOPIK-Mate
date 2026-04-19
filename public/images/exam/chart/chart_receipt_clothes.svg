@@ -1,0 +1,34 @@
+<svg viewBox="0 0 280 340" xmlns="http://www.w3.org/2000/svg" font-family="'Courier New', monospace">
+  <rect width="280" height="340" fill="white"/>
+  <!-- 영수증 용지 -->
+  <rect x="30" y="20" width="220" height="300" fill="#fffef0" stroke="#ddd" stroke-width="1" rx="3"/>
+  <!-- 지그재그 상단 -->
+  <polyline points="30,20 40,10 50,20 60,10 70,20 80,10 90,20 100,10 110,20 120,10 130,20 140,10 150,20 160,10 170,20 180,10 190,20 200,10 210,20 220,10 230,20 240,10 250,20" fill="none" stroke="#ddd" stroke-width="1"/>
+  <text x="140" y="50" text-anchor="middle" font-size="15" font-weight="bold" fill="#333">영 수 증</text>
+  <line x1="45" y1="58" x2="235" y2="58" stroke="#333" stroke-width="1" stroke-dasharray="4,2"/>
+  <!-- 품목 -->
+  <text x="50" y="80" font-size="11" fill="#555">품목</text>
+  <text x="210" y="80" text-anchor="end" font-size="11" fill="#555">금액</text>
+  <line x1="45" y1="88" x2="235" y2="88" stroke="#ccc" stroke-width="0.5"/>
+  <text x="50" y="108" font-size="12" fill="#333">바지</text>
+  <text x="210" y="108" text-anchor="end" font-size="12" fill="#333">35,000원</text>
+  <line x1="45" y1="116" x2="235" y2="116" stroke="#eee" stroke-width="0.5"/>
+  <text x="50" y="136" font-size="12" fill="#333">모자</text>
+  <text x="210" y="136" text-anchor="end" font-size="12" fill="#333">2,000원</text>
+  <line x1="45" y1="148" x2="235" y2="148" stroke="#333" stroke-width="1"/>
+  <!-- 합계 -->
+  <text x="50" y="168" font-size="13" font-weight="bold" fill="#333">합 계</text>
+  <text x="210" y="168" text-anchor="end" font-size="13" font-weight="bold" fill="#333">37,000원</text>
+  <line x1="45" y1="178" x2="235" y2="178" stroke="#eee" stroke-width="0.5"/>
+  <!-- 받은금액 -->
+  <text x="50" y="200" font-size="12" fill="#555">받은 금액</text>
+  <text x="210" y="200" text-anchor="end" font-size="12" fill="#555">40,000원</text>
+  <line x1="45" y1="210" x2="235" y2="210" stroke="#eee" stroke-width="0.5"/>
+  <!-- 거스름돈 -->
+  <text x="50" y="235" font-size="13" font-weight="bold" fill="#e74c3c">거스름돈</text>
+  <text x="210" y="235" text-anchor="end" font-size="13" font-weight="bold" fill="#e74c3c">3,000원</text>
+  <line x1="45" y1="245" x2="235" y2="245" stroke="#333" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="140" y="270" text-anchor="middle" font-size="10" fill="#888">감사합니다 ♥</text>
+  <!-- 지그재그 하단 -->
+  <polyline points="30,320 40,330 50,320 60,330 70,320 80,330 90,320 100,330 110,320 120,330 130,320 140,330 150,320 160,330 170,320 180,330 190,320 200,330 210,320 220,330 230,320 240,330 250,320" fill="none" stroke="#ddd" stroke-width="1"/>
+</svg>

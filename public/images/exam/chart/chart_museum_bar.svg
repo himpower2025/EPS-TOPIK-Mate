@@ -1,0 +1,38 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <rect width="400" height="300" fill="white"/>
+  <text x="200" y="28" text-anchor="middle" font-size="14" font-weight="bold" fill="#1a1a2e">상반기 박물관 관람 현황 (명)</text>
+  <!-- Y축 -->
+  <line x1="55" y1="40" x2="55" y2="240" stroke="#333" stroke-width="1.5"/>
+  <line x1="55" y1="240" x2="375" y2="240" stroke="#333" stroke-width="1.5"/>
+  <!-- Y축 눈금 -->
+  <text x="48" y="244" text-anchor="end" font-size="10" fill="#555">0</text>
+  <text x="48" y="194" text-anchor="end" font-size="10" fill="#555">2000</text>
+  <text x="48" y="144" text-anchor="end" font-size="10" fill="#555">4000</text>
+  <text x="48" y="94" text-anchor="end" font-size="10" fill="#555">6000</text>
+  <text x="48" y="44" text-anchor="end" font-size="10" fill="#555">8000</text>
+  <line x1="52" y1="190" x2="375" y2="190" stroke="#eee" stroke-width="1"/>
+  <line x1="52" y1="140" x2="375" y2="140" stroke="#eee" stroke-width="1"/>
+  <line x1="52" y1="90" x2="375" y2="90" stroke="#eee" stroke-width="1"/>
+  <!-- 막대 (3000,2000,5000,4500,7000,6000) → 최대8000, 높이200px -->
+  <!-- 1월 3000 = 75px -->
+  <rect x="65" y="165" width="40" height="75" fill="#4a90d9"/>
+  <text x="85" y="258" text-anchor="middle" font-size="11" fill="#333">1월</text>
+  <!-- 2월 2000 = 50px -->
+  <rect x="115" y="190" width="40" height="50" fill="#4a90d9"/>
+  <text x="135" y="258" text-anchor="middle" font-size="11" fill="#333">2월</text>
+  <!-- 3월 5000 = 125px -->
+  <rect x="165" y="115" width="40" height="125" fill="#4a90d9"/>
+  <text x="185" y="258" text-anchor="middle" font-size="11" fill="#333">3월</text>
+  <!-- 4월 4500 = 112.5px -->
+  <rect x="215" y="127" width="40" height="113" fill="#4a90d9"/>
+  <text x="235" y="258" text-anchor="middle" font-size="11" fill="#333">4월</text>
+  <!-- 5월 7000 = 175px → 정답 -->
+  <rect x="265" y="65" width="40" height="175" fill="#e74c3c"/>
+  <text x="285" y="258" text-anchor="middle" font-size="11" fill="#333">5월</text>
+  <text x="285" y="58" text-anchor="middle" font-size="10" font-weight="bold" fill="#e74c3c">7,000</text>
+  <!-- 6월 6000 = 150px -->
+  <rect x="315" y="90" width="40" height="150" fill="#4a90d9"/>
+  <text x="335" y="258" text-anchor="middle" font-size="11" fill="#333">6월</text>
+  <!-- 단위 -->
+  <text x="200" y="285" text-anchor="middle" font-size="10" fill="#888">(단위: 명)</text>
+</svg>
