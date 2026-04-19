@@ -104,8 +104,15 @@ export const generateQuestionsBySet = async (
   roundNumber: number,
   plan: PlanType
 ): Promise<Question[]> => {
-  if (roundNumber <= 30) {
-    const setPrefix = `s${roundNumber}_`;
+  const isAiSet = (plan === '6m' && roundNumber > 15);
+
+  if (!isAiSet) {
+    let dbSetNumber = roundNumber;
+    if (plan === '1m' && mode === 'FULL') dbSetNumber = roundNumber + 3;
+    if (plan === '3m' && mode === 'FULL') dbSetNumber = roundNumber + 18;
+    if (plan === '6m' && mode === 'FULL') dbSetNumber = roundNumber + 15;
+
+    const setPrefix = `s${dbSetNumber}_`;
     const staticSet = STATIC_EXAM_DATA.filter(
       q => q.id.startsWith(setPrefix) && (mode === 'FULL' || q.type === mode)
     );
@@ -129,18 +136,22 @@ export const generateQuestionsBySet = async (
     };
 
     if (staticSet.length > 0) {
-      return staticSet
+      let filteredSet = staticSet
         .map(q => ({
           ...q,
           category: CATEGORY_MAP[q.category] || q.category,
           questionText: cleanText(q.questionText),
-          // ✅ 듣기 문제의 context는 cleanText 대신 원본 보존
-          // (prepareAudioScript에서 처리)
           context: q.context ?? undefined
         }))
         .sort((a, b) =>
           a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' })
         );
+
+      if (plan === 'free' && mode !== 'FULL') {
+        filteredSet = filteredSet.slice(0, 10);
+      }
+
+      return filteredSet;
     }
   }
 

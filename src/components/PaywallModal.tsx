@@ -25,37 +25,37 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
 
   const plans: Record<'1m' | '3m' | '6m', Plan> = {
     '1m': { 
-      price: 'Rs. 400', 
+      price: 'Rs. 300', 
       period: '1 Month', 
       label: 'Starter Pass',
       features: [
-        'Reading Lab: 20 Sets',
-        'Listening Lab: 20 Sets',
-        'Mock Exam: 5 Rounds'
+        'Reading & Listening Lab: 3 Rounds',
+        'Mock Exam: 3 Rounds',
+        'Total 240 Official Questions'
       ]
     },
     '3m': { 
-      price: 'Rs. 1000', 
+      price: 'Rs. 700', 
       period: '3 Months', 
       label: 'Value Pass',
       isPopular: true,
       features: [
-        'Reading Lab: 70 Sets',
-        'Listening Lab: 70 Sets',
-        'Mock Exam: 20 Rounds',
+        'Reading & Listening Lab: 12 Rounds',
+        'Mock Exam: 12 Rounds',
+        'Total 960 Official Questions',
         'AI Performance Report'
       ]
     },
     '6m': { 
-      price: 'Rs. 1500', 
+      price: 'Rs. 1200', 
       period: '6 Months', 
       label: 'Master Pass',
       isPremium: true,
       features: [
-        'Full Library Access',
-        '50+ Mock Exam Rounds',
-        'Unlimited AI Generation',
-        'Priority AI Illustration'
+        'Full Library Access (25 Rounds)',
+        '10 Rounds of AI Adaptive Exams',
+        'Total 2,000 Questions',
+        'Priority AI Content Generation'
       ]
     }
   };

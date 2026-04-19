@@ -14,11 +14,11 @@ export const SetSelector: React.FC<SetSelectorProps> = ({ mode, plan, onSelect, 
   const isPremium = plan !== 'free';
   
   const getMaxSets = () => {
-    if (!isPremium) return 1;
-    if (plan === '1m') return 30; // 1개월권도 기본 30세트는 다 볼 수 있게 변경
-    if (plan === '3m') return 60; // 30세트 DB + 30세트 AI
-    if (plan === '6m') return 100; // 30세트 DB + 70세트 AI
-    return 30;
+    if (plan === 'free') return 15;
+    if (plan === '1m') return 3;
+    if (plan === '3m') return 12;
+    if (plan === '6m') return 25;
+    return 15;
   };
 
   const maxSets = getMaxSets();
@@ -44,7 +44,7 @@ export const SetSelector: React.FC<SetSelectorProps> = ({ mode, plan, onSelect, 
           <div>
             <h1 className="text-xl font-black text-gray-900 tracking-tight">{info.title}</h1>
             <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em]">
-              {isPremium ? `${plan.toUpperCase()} Plan • Select Round` : "Free Demo • Round 10 Only"}
+              {isPremium ? `${plan.toUpperCase()} Plan • Select Round` : "Free Demo • 15 Rounds"}
             </p>
           </div>
         </div>
@@ -54,8 +54,7 @@ export const SetSelector: React.FC<SetSelectorProps> = ({ mode, plan, onSelect, 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {Array.from({ length: maxSets }, (_, i) => {
             const setNum = i + 1;
-            // 30세트까지는 무조건 Official Database (DB 데이터)
-            const isAiGenerated = setNum > 30;
+            const isAiGenerated = (plan === '6m' && setNum > 15);
 
             return (
               <button
@@ -64,7 +63,7 @@ export const SetSelector: React.FC<SetSelectorProps> = ({ mode, plan, onSelect, 
                 className={`group relative aspect-square rounded-[2.5rem] border-2 bg-white shadow-sm hover:border-indigo-600 hover:shadow-xl active:scale-95 transition-all flex flex-col items-center justify-center p-4 ${isAiGenerated ? 'border-purple-100' : 'border-white'}`}
               >
                 <div className={`text-4xl font-black mb-1 group-hover:scale-110 transition-transform ${isAiGenerated ? 'text-purple-600' : 'text-indigo-950'}`}>
-                  {isPremium ? setNum : 10}
+                  {setNum}
                 </div>
                 <div className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-300">Round</div>
                 

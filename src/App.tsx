@@ -192,10 +192,6 @@ const App: React.FC = () => {
   };
 
   const handleSetSelect = (setNum: number) => {
-    if (user?.plan === 'free' && setNum !== 10) {
-      setShowPaywall(true);
-      return;
-    }
     setSelectedSet(setNum);
     setCurrentState(AppState.EXAM);
   };
