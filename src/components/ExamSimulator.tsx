@@ -182,6 +182,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
   const currentQ = questions[currentIndex];
   const isLast = currentIndex === questions.length - 1;
   const isListening = currentQ.type === QuestionType.LISTENING;
+  const isImageMandatory = ['Signboards', 'Picture Selection', 'Action Identification', 'Location Identification', 'Person Counting', 'Object Identification'].includes(currentQ.category);
 
   const displayQuestionText = cleanText(currentQ.questionText);
   const displayContext = cleanText(currentQ.context || "");
@@ -269,7 +270,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                       />
                     </div>
                   ) : (
-                    (currentQ.imageUrl || currentQ.imagePrompt) && !isListening && (
+                    isImageMandatory && (currentQ.imageUrl || currentQ.imagePrompt) && !isListening && (
                       <div className="flex flex-col items-center gap-4 py-8">
                         <p className="text-gray-400 text-sm font-medium">Image failed to load</p>
                         <button

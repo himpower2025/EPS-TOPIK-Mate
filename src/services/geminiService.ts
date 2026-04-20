@@ -2,7 +2,7 @@ import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Question, QuestionType, AnalyticsFeedback, ExamSession, ExamMode, PlanType } from '../types';
 import { STATIC_EXAM_DATA } from '../data/examData';
 
-const getAI = () => new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 function decodeBase64(base64: string): Uint8Array {
   const binaryString = window.atob(base64);
@@ -85,6 +85,9 @@ export const prepareAudioScript = (rawText: string): { script: string; isDialogu
     // 이미 Man:/Woman: 형식인 경우 (AI 생성 문제)
     { from: /\n?Man\s*:\s*/g, to: '\nMan: ' },
     { from: /\n?Woman\s*:\s*/g, to: '\nWoman: ' },
+    // A:/B: 패턴
+    { from: /\n?A\s*:\s*/g, to: '\nMan: ' },
+    { from: /\n?B\s*:\s*/g, to: '\nWoman: ' },
   ];
 
   let processed = text;
@@ -202,7 +205,7 @@ export const generateQuestionsBySet = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-pro-preview-06-05",
+      model: "gemini-1.5-flash",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -316,7 +319,6 @@ export const generateSpeech = async (
     let config: any;
 
     if (isDialogue) {
-      // 대화형: 남성(Puck) + 여성(Kore) 멀티스피커
       config = {
         responseModalities: [Modality.AUDIO],
         speechConfig: {
@@ -335,7 +337,6 @@ export const generateSpeech = async (
         }
       };
     } else {
-      // 단일 발화: Kore (한국어에 최적화된 목소리)
       config = {
         responseModalities: [Modality.AUDIO],
         speechConfig: {
@@ -344,13 +345,12 @@ export const generateSpeech = async (
       };
     }
 
-    // TTS 지시: 한국어 자연스러운 속도와 억양으로 읽도록
     const ttsInstruction = isDialogue
-      ? `다음은 EPS-TOPIK 한국어 시험 듣기 문제입니다. 두 사람이 자연스럽게 대화하는 것처럼 읽어주세요. 적당한 속도로 또렷하게 발음해주세요.\n\n${script}`
-      : `다음은 EPS-TOPIK 한국어 시험 듣기 문제입니다. 자연스럽고 또렷한 한국어로 읽어주세요.\n\n${script}`;
+      ? `다음은 EPS-TOPIK 한국어 시험 듣기 문제입니다. Man과 Woman 역할을 나누어 두 사람이 자연스럽게 대화하는 것처럼 읽어주세요. 적당한 속도로 또렷하게 발음해주세요.\n\n${script}`
+      : `다음은 EPS-TOPIK 한국어 시험 듣기 문제입니다. 한국어 원어민처럼 자연스럽고 또렷하게 읽어주세요.\n\n${script}`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-preview-tts",
+      model: "gemini-1.5-flash",
       contents: [{ parts: [{ text: ttsInstruction }] }],
       config
     });
@@ -358,7 +358,10 @@ export const generateSpeech = async (
     const candidates = response.candidates;
     if (!candidates || candidates.length === 0 || !candidates[0].content) return null;
 
-    const audioData = candidates[0].content.parts?.[0]?.inlineData?.data;
+    // Search for the part containing audio data
+    const audioPart = candidates[0].content.parts?.find(p => p.inlineData?.data);
+    const audioData = audioPart?.inlineData?.data;
+    
     if (audioData) {
       return await decodeAudioData(decodeBase64(audioData), ctx, 24000, 1);
     }
@@ -375,7 +378,7 @@ export const analyzePerformance = async (
   const ai = getAI();
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-preview-05-20",
+      model: "gemini-1.5-flash",
       contents: `Perform an expert analysis on these results. Score: ${session.score}/${session.questions.length}.
       
       SESSION DATA:
