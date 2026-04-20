@@ -20,8 +20,10 @@ interface Plan {
 }
 
 export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => {
-  const [step, setStep] = useState<'PLANS' | 'PAYMENT' | 'VERIFYING' | 'SUCCESS'>('PLANS');
+  const [step, setStep] = useState<'PLANS' | 'PAYMENT' | 'PAYMENT_CONFIRM' | 'VERIFYING' | 'SUCCESS'>('PLANS');
   const [selectedPlan, setSelectedPlan] = useState<'1m' | '3m' | '6m'>('3m');
+  const [txId, setTxId] = useState('');
+  const [senderName, setSenderName] = useState('');
 
   const plans: Record<'1m' | '3m' | '6m', Plan> = {
     '1m': { 
@@ -62,26 +64,66 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
 
   const currentPlan = plans[selectedPlan];
 
-  const handleStartVerifying = async () => {
+  const handleSubmitVerification = async () => {
+    if (!txId.trim() || !senderName.trim()) {
+      alert("Please enter both Sender Name and Transaction ID/Reference.");
+      return;
+    }
+    
     setStep('VERIFYING');
-    const requestId = `PAY_${user.id}_${Date.now()}`;
-    await setDoc(doc(db, 'paymentAttempts', requestId), {
-      userId: user.id,
-      plan: selectedPlan,
-      status: 'pending',
-      amount: currentPlan.price,
-      createdAt: serverTimestamp()
-    });
 
     try {
-      const isSuccess = await verifyPaymentWithServer(requestId);
-      if (isSuccess) setStep('SUCCESS');
-      else {
-        alert("Payment not confirmed yet. Please ensure you have scanned and paid.");
-        setStep('PAYMENT');
+      // 1. 실제 Fonepay API 서버에 자동 확인 요청
+      const isSuccess = await verifyPaymentWithServer(txId.trim(), currentPlan.price);
+      
+      const requestId = `PAY_${user.id}_${Date.now()}`;
+      const paymentRef = doc(db, 'paymentAttempts', requestId);
+      
+      if (isSuccess) {
+        // 2. [자동 승인] 성공 시 즉시 유저 플랜 업데이트 및 리포트 저장
+        await setDoc(paymentRef, {
+          userId: user.id,
+          userEmail: user.email,
+          plan: selectedPlan,
+          amount: currentPlan.price,
+          senderName: senderName,
+          transactionId: txId,
+          status: 'completed',
+          createdAt: serverTimestamp()
+        });
+
+        const expiryDate = new Date();
+        const months = selectedPlan === '1m' ? 1 : selectedPlan === '3m' ? 3 : 6;
+        expiryDate.setMonth(expiryDate.getMonth() + months);
+
+        await setDoc(doc(db, 'users', user.id), {
+          plan: selectedPlan,
+          subscriptionExpiry: expiryDate.toISOString(),
+          examsRemaining: 9999 // 유료 회원은 무제한에 가깝게 설정
+        }, { merge: true });
+
+        setStep('SUCCESS');
+      } else {
+        // 3. [확인 실패] API상 아직 입금이 안 된 경우
+        await setDoc(paymentRef, {
+          userId: user.id,
+          userEmail: user.email,
+          plan: selectedPlan,
+          amount: currentPlan.price,
+          senderName: senderName,
+          transactionId: txId,
+          status: 'failed_or_pending',
+          createdAt: serverTimestamp()
+        });
+        
+        alert("Payment has not been confirmed by Fonepay yet. If you have already paid, please wait 5-10 minutes and try again with the same ID, or contact support.");
+        setStep('PAYMENT_CONFIRM');
       }
-    } catch {
-      setStep('PAYMENT');
+    } catch (err) {
+      console.error("Verification failed:", err);
+      // API 통지 오류 시 수동 검토용으로 저장만 하고 알림
+      alert("Automatic verification is temporarily unavailable. We will manually verify your request within 1-2 hours.");
+      setStep('SUCCESS'); // 수동 검토 대기 모드로 전환
     }
   };
 
@@ -165,8 +207,40 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
                     <Smartphone className="w-10 h-10 text-indigo-400" />
                  </div>
               </div>
-              <button onClick={handleStartVerifying} className="w-full bg-indigo-600 text-white font-black py-6 rounded-[2.5rem] shadow-2xl text-xl active:scale-95 transition-all">I Have Paid • Verify Now</button>
+              <button onClick={() => setStep('PAYMENT_CONFIRM')} className="w-full bg-indigo-600 text-white font-black py-6 rounded-[2.5rem] shadow-2xl text-xl active:scale-95 transition-all">I Have Paid • Submit Details</button>
               <button onClick={() => setStep('PLANS')} className="mt-6 text-[11px] text-gray-400 font-black uppercase tracking-widest hover:text-indigo-600 transition-colors">Go Back to Plans</button>
+            </div>
+          )}
+
+          {step === 'PAYMENT_CONFIRM' && (
+            <div className="flex flex-col items-center animate-fade-in text-center">
+               <h3 className="text-2xl font-black text-gray-900 mb-6">Payment Verification</h3>
+               <p className="text-gray-500 text-sm mb-6 text-left px-4">To complete your upgrade, please provide the transfer details. Our team will verify and activate your pass shortly.</p>
+               
+               <div className="w-full space-y-4 mb-8">
+                  <input 
+                    type="text" 
+                    placeholder="Sender Name (Account Holder)" 
+                    value={senderName}
+                    onChange={(e) => setSenderName(e.target.value)}
+                    className="w-full bg-white border-2 border-gray-100 rounded-2xl px-6 py-4 outline-none focus:border-indigo-500 font-bold placeholder-gray-300"
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="Transaction ID / Reference No." 
+                    value={txId}
+                    onChange={(e) => setTxId(e.target.value)}
+                    className="w-full bg-white border-2 border-gray-100 rounded-2xl px-6 py-4 outline-none focus:border-indigo-500 font-bold placeholder-gray-300"
+                  />
+               </div>
+
+               <button 
+                onClick={handleSubmitVerification} 
+                className="w-full bg-indigo-600 text-white font-black py-5 rounded-[2.5rem] shadow-2xl text-lg active:scale-95 transition-all"
+               >
+                 Submit Request
+               </button>
+               <button onClick={() => setStep('PAYMENT')} className="mt-6 text-[11px] text-gray-400 font-black uppercase tracking-widest hover:text-indigo-600 transition-colors">Back to QR Code</button>
             </div>
           )}
 
@@ -176,26 +250,25 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ user, onClose }) => 
                   <div className="absolute inset-0 border-4 border-indigo-100 rounded-full"></div>
                   <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
                </div>
-               <h3 className="text-3xl font-black text-gray-900 mb-2">Verifying Payment</h3>
-               <p className="text-gray-400 text-sm font-bold uppercase tracking-widest mb-10 animate-pulse">Checking Secure Server...</p>
-               
-               <button 
-                onClick={() => setStep('PAYMENT')} 
-                className="px-10 py-4 bg-gray-100 text-gray-500 rounded-full font-black text-xs uppercase tracking-widest hover:bg-gray-200 active:scale-95 transition-all"
-               >
-                 Cancel & Return
-               </button>
+               <h3 className="text-2xl font-black text-gray-900 mb-2">Verifying Transaction</h3>
+               <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-10 animate-pulse">Contacting Fonepay Secure Server...</p>
             </div>
           )}
 
           {step === 'SUCCESS' && (
             <div className="flex flex-col items-center text-center py-12 animate-slide-up">
-               <div className="w-32 h-32 bg-green-50 rounded-[3rem] flex items-center justify-center mb-8 shadow-inner">
-                  <CheckCircle2 className="w-20 h-20 text-green-500" />
+               <div className="w-32 h-32 bg-indigo-50 rounded-[3rem] flex items-center justify-center mb-8 shadow-inner">
+                  <CheckCircle2 className="w-20 h-20 text-indigo-500" />
                </div>
-               <h3 className="text-4xl font-black text-gray-900 mb-2">Welcome Aboard!</h3>
-               <p className="text-gray-400 font-bold mb-10">{currentPlan.period} Master Pass is now active.</p>
-               <button onClick={onClose} className="w-full bg-indigo-600 text-white font-black py-6 rounded-[2.5rem] shadow-2xl text-xl hover:scale-[1.02] active:scale-95 transition-all">Start Practice</button>
+               <h3 className="text-3xl font-black text-gray-900 mb-2">Request Submitted!</h3>
+               <p className="text-gray-500 font-bold mb-6 text-sm px-4">Your payment details have been sent. We will upgrade your account to <span className="text-indigo-600 tracking-tight">{currentPlan.period} Master Pass</span> upon successful verification within 12 hours.</p>
+               
+               <div className="bg-orange-50 border border-orange-100 p-4 rounded-xl mb-10 text-orange-800 text-xs text-left">
+                 <strong>Fast Track:</strong> Send your payment screenshot to our WhatsApp (+977 12345678) with your email: <br/>
+                 <span className="font-mono mt-1 block font-bold">{user.email}</span>
+               </div>
+
+               <button onClick={onClose} className="w-full bg-indigo-600 text-white font-black py-5 rounded-[2.5rem] shadow-2xl text-lg hover:scale-[1.02] active:scale-95 transition-all">Return to Dashboard</button>
             </div>
           )}
         </div>

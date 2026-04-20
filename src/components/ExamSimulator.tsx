@@ -114,7 +114,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
   const handlePlayAudio = async () => {
     const q = questions[currentIndex];
     const rawScript = q.context || q.questionText;
-    const { script } = prepareAudioScript(rawScript);
+    const { script, lines } = prepareAudioScript(rawScript);
 
     if (!script || isPlaying || loadingAudio) return;
 
@@ -154,24 +154,47 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
         throw new Error("AI returned no audio buffer");
       }
     } catch (err) {
-      console.warn("AI Audio failed or threw an error, falling back to browser TTS:", err);
+      console.warn("AI Audio failed or threw an error, falling back to browser Sequential TTS:", err);
       
-      // --- FALLBACK: Browser Speech Synthesis ---
-      const utterance = new SpeechSynthesisUtterance(script);
-      utterance.lang = 'ko-KR';
-      utterance.rate = 0.85; // Natural EPS-TOPIK speed
+      setLoadingAudio(false);
+      setIsPlaying(true);
+      window.speechSynthesis.cancel(); // Clear any queued utterances
       
-      utterance.onstart = () => setIsPlaying(true);
-      utterance.onend = () => {
-        setIsPlaying(false);
-        setLoadingAudio(false);
+      const playLine = (line: { text: string; speaker: string }): Promise<void> => {
+        return new Promise((resolve) => {
+          const utterance = new SpeechSynthesisUtterance(line.text);
+          utterance.lang = 'ko-KR';
+          
+          // Simulate distinct voices through pitch and rate adjustment
+          if (line.speaker === 'Man') {
+            utterance.pitch = 0.7;
+            utterance.rate = 0.85;
+          } else if (line.speaker === 'Woman') {
+            utterance.pitch = 1.4;
+            utterance.rate = 0.9;
+          } else {
+            utterance.pitch = 1.0;
+            utterance.rate = 0.85; // Narrator
+          }
+          
+          utterance.onend = () => {
+            // Add a natural 600ms conversational gap between speakers
+            setTimeout(resolve, 600);
+          };
+          utterance.onerror = () => resolve();
+          
+          window.speechSynthesis.speak(utterance);
+        });
       };
-      utterance.onerror = () => {
+
+      const playAllLines = async () => {
+        for (const line of lines) {
+          await playLine(line);
+        }
         setIsPlaying(false);
-        setLoadingAudio(false);
       };
-      
-      window.speechSynthesis.speak(utterance);
+
+      playAllLines();
     }
   };
 

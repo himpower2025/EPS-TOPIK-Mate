@@ -60,8 +60,13 @@ export const cleanText = (text: string): string => {
 //   2. DB의 다양한 대화 태그를 TTS가 인식하는 Man:/Woman: 형식으로 통일
 //   3. 단일 발화인지 대화형인지 판별
 // ============================================================
-export const prepareAudioScript = (rawText: string): { script: string; isDialogue: boolean } => {
-  if (!rawText) return { script: '', isDialogue: false };
+export interface AudioLine {
+  speaker: 'Man' | 'Woman' | 'Narrator';
+  text: string;
+}
+
+export const prepareAudioScript = (rawText: string): { script: string; isDialogue: boolean; lines: AudioLine[] } => {
+  if (!rawText) return { script: '', isDialogue: false, lines: [] };
 
   // 1단계: 대괄호 힌트 제거
   let text = rawText.replace(/\[.*?\]/g, '').trim();
@@ -101,7 +106,31 @@ export const prepareAudioScript = (rawText: string): { script: string; isDialogu
   // 5단계: 대화형 여부 판별
   const isDialogue = processed.includes('Man: ') || processed.includes('Woman: ');
 
-  return { script: processed, isDialogue };
+  // 6단계: 스피커별 라인 분해 (브라우저 TTS 멀티 보이스 재생용)
+  const lines: AudioLine[] = [];
+  const rawLines = processed.split('\n');
+  let currentSpeaker: 'Man' | 'Woman' | 'Narrator' = 'Narrator';
+  
+  for (const line of rawLines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    
+    if (trimmed.startsWith('Man:')) {
+      currentSpeaker = 'Man';
+      lines.push({ speaker: currentSpeaker, text: trimmed.substring(4).trim() });
+    } else if (trimmed.startsWith('Woman:')) {
+      currentSpeaker = 'Woman';
+      lines.push({ speaker: currentSpeaker, text: trimmed.substring(6).trim() });
+    } else {
+      if (lines.length > 0) {
+         lines[lines.length - 1].text += ' ' + trimmed;
+      } else {
+         lines.push({ speaker: currentSpeaker, text: trimmed });
+      }
+    }
+  }
+
+  return { script: processed, isDialogue, lines };
 };
 
 export const generateQuestionsBySet = async (
