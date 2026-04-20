@@ -22,7 +22,7 @@ async function decodeAudioData(
   try {
     // Attempt standard decoding (works for WAV/MP3 headered data)
     const audioDataCopy = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
-    return await ctx.decodeAudioData(audioDataCopy);
+    return await ctx.decodeAudioData(audioDataCopy as ArrayBuffer);
   } catch (e) {
     console.warn("Standard decode failed, falling back to raw PCM", e);
     // Generic PCM fallback
