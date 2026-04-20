@@ -20,10 +20,12 @@ async function decodeAudioData(
   numChannels: number
 ): Promise<AudioBuffer> {
   try {
-    return await ctx.decodeAudioData(
-      data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer
-    );
+    // Attempt standard decoding (works for WAV/MP3 headered data)
+    const audioDataCopy = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+    return await ctx.decodeAudioData(audioDataCopy);
   } catch (e) {
+    console.warn("Standard decode failed, falling back to raw PCM", e);
+    // Generic PCM fallback
     const dataInt16 = new Int16Array(data.buffer, data.byteOffset, Math.floor(data.byteLength / 2));
     const frameCount = dataInt16.length / numChannels;
     const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
@@ -350,13 +352,16 @@ export const generateSpeech = async (
       : `다음은 EPS-TOPIK 한국어 시험 듣기 문제입니다. 한국어 원어민처럼 자연스럽고 또렷하게 읽어주세요.\n\n${script}`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
       contents: [{ parts: [{ text: ttsInstruction }] }],
       config
     });
 
     const candidates = response.candidates;
-    if (!candidates || candidates.length === 0 || !candidates[0].content) return null;
+    if (!candidates || candidates.length === 0 || !candidates[0].content) {
+      console.error("No valid candidates returned from AI for audio.");
+      return null;
+    }
 
     // Search for the part containing audio data
     const audioPart = candidates[0].content.parts?.find(p => p.inlineData?.data);
@@ -365,9 +370,11 @@ export const generateSpeech = async (
     if (audioData) {
       return await decodeAudioData(decodeBase64(audioData), ctx, 24000, 1);
     }
+    
+    console.error("AI responded but no audio parts were found. Modality might be unsupported in this key's region.");
     return null;
-  } catch (err) {
-    console.error("Speech engine failed:", err);
+  } catch (err: any) {
+    console.error("Speech engine failed with error:", err.message, err);
     return null;
   }
 };

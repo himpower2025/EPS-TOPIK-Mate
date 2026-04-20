@@ -51,7 +51,8 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
   const initAudio = async () => {
     try {
       if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+        // Let the browser choose the best sample rate for the hardware
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
       }
       if (audioContextRef.current.state === 'suspended') {
         await audioContextRef.current.resume();
@@ -121,6 +122,11 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
       try { currentAudioSource.current.stop(); } catch {}
     }
 
+    // iOS/Safari Autoplay Unlock for TTS fallback
+    const unlockUtterance = new SpeechSynthesisUtterance('');
+    unlockUtterance.volume = 0;
+    window.speechSynthesis.speak(unlockUtterance);
+
     setLoadingAudio(true);
     try {
       const success = await initAudio();
@@ -145,12 +151,27 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
           setLoadingAudio(false);
         };
       } else {
-        setLoadingAudio(false);
+        throw new Error("AI returned no audio buffer");
       }
     } catch (err) {
-      console.error("Audio playback error:", err);
-      setIsPlaying(false);
-      setLoadingAudio(false);
+      console.warn("AI Audio failed or threw an error, falling back to browser TTS:", err);
+      
+      // --- FALLBACK: Browser Speech Synthesis ---
+      const utterance = new SpeechSynthesisUtterance(script);
+      utterance.lang = 'ko-KR';
+      utterance.rate = 0.85; // Natural EPS-TOPIK speed
+      
+      utterance.onstart = () => setIsPlaying(true);
+      utterance.onend = () => {
+        setIsPlaying(false);
+        setLoadingAudio(false);
+      };
+      utterance.onerror = () => {
+        setIsPlaying(false);
+        setLoadingAudio(false);
+      };
+      
+      window.speechSynthesis.speak(utterance);
     }
   };
 
@@ -182,7 +203,11 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
   const currentQ = questions[currentIndex];
   const isLast = currentIndex === questions.length - 1;
   const isListening = currentQ.type === QuestionType.LISTENING;
-  const isImageMandatory = ['Signboards', 'Picture Selection', 'Action Identification', 'Location Identification', 'Person Counting', 'Object Identification'].includes(currentQ.category);
+  const isImageMandatory = [
+    'Signboards', 'Picture Selection', 'Action Identification', 
+    'Location Identification', 'Person Counting', 'Object Identification',
+    'Graph Analysis', 'Clinic Timetable', '표지판', '그림 고르기', '그래프 분석', '진료 시간표'
+  ].includes(currentQ.category);
 
   const displayQuestionText = cleanText(currentQ.questionText);
   const displayContext = cleanText(currentQ.context || "");
@@ -260,7 +285,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                 </div>
               ) : (
                 <div className="w-full space-y-4 md:space-y-8">
-                  {questionImage ? (
+                  {isImageMandatory && questionImage ? (
                     <div className="w-full flex items-center justify-center">
                       <img
                         src={questionImage}
@@ -322,7 +347,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                       </div>
                     </div>
                   ) : (
-                    !questionImage && displayContext && (
+                    (!isImageMandatory || !questionImage) && displayContext && (
                       <div className="p-6 md:p-10 text-lg md:text-xl lg:text-2xl font-serif leading-relaxed text-gray-800 bg-indigo-50/30 rounded-2xl md:rounded-[2.5rem] w-full border border-indigo-100 italic shadow-inner text-center">
                         "{displayContext}"
                       </div>
