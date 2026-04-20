@@ -35,7 +35,7 @@ export const verifyPaymentWithServer = async (
   transactionId: string, 
   amount: string
 ): Promise<boolean> => {
-  const { merchantId, secretKey, isTestMode } = PAYMENT_CONFIG;
+  const { merchantId, isTestMode } = PAYMENT_CONFIG;
   const baseUrl = isTestMode 
     ? 'https://dev-api.fonepay.com/api/v1/merchant/verification' 
     : 'https://api.fonepay.com/api/v1/merchant/verification';
