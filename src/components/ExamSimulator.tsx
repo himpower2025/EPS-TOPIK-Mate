@@ -114,7 +114,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
   const handlePlayAudio = async () => {
     const q = questions[currentIndex];
     const rawScript = q.context || q.questionText;
-    const { script, lines } = prepareAudioScript(rawScript);
+    const { script, lines, isDialogue } = prepareAudioScript(rawScript);
 
     if (!script || isPlaying || loadingAudio) return;
 
@@ -129,6 +129,11 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
 
     setLoadingAudio(true);
     try {
+      // Force fallback for dialogue questions to ensure sequential playback with pauses
+      if (isDialogue) {
+        throw new Error("Force Sequential TTS for dialogue gap support");
+      }
+
       const success = await initAudio();
       if (!success || !audioContextRef.current) {
         throw new Error("AudioContext initialization failed");
@@ -178,8 +183,8 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
           }
           
           utterance.onend = () => {
-            // Add a natural 600ms conversational gap between speakers
-            setTimeout(resolve, 600);
+            // Add a natural 1000ms conversational gap between speakers
+            setTimeout(resolve, 1000);
           };
           utterance.onerror = () => resolve();
           

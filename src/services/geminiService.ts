@@ -77,36 +77,60 @@ export const prepareAudioScript = (rawText: string): { script: string; isDialogu
   // 3단계: 말줄임표(...) 정리 — TTS가 자연스럽게 읽도록
   text = text.replace(/\.\.\./g, '. ');
 
-  // 4단계: 대화 태그 통일 (DB에 있는 모든 패턴 → Man:/Woman:)
-  // 패턴: 가:/나:, 남:/여:, 남자:/여자:, Man:/Woman: 등
+  // 4단계: 교대 기호 ("/") 를 개행으로 변경
+  text = text.replace(/\s*\/\s*/g, '\n');
+
+  // 5단계: 대화 태그 통일 (DB에 있는 모든 패턴 → Man:/Woman:)
+  let hasTags = /(가|나|남|여|남자|여자|Man|Woman|A|B)\s*:/.test(text);
+
+  // 숨겨진 대화 감지(태그 없이 물음표로 질문과 대답이 나뉘는 경우)
+  if (!hasTags && text.includes('?') && !text.includes('1번')) {
+    const firstQ = text.indexOf('?');
+    // 물음표 뒤에 글자가 있으면 대화로 간주하여 강제 분리
+    if (firstQ !== -1 && firstQ < text.length - 2) {
+      const part1 = text.substring(0, firstQ + 1).trim();
+      const part2 = text.substring(firstQ + 1).trim();
+      text = `Man: ${part1}\nWoman: ${part2}`;
+      hasTags = true;
+    }
+  }
+
   const dialoguePatterns = [
-    // 가:/나: 패턴 — 가=남자, 나=여자로 매핑
     { from: /\n?가\s*:\s*/g, to: '\nMan: ' },
     { from: /\n?나\s*:\s*/g, to: '\nWoman: ' },
-    // 남:/여: 패턴
     { from: /\n?남\s*:\s*/g, to: '\nMan: ' },
     { from: /\n?여\s*:\s*/g, to: '\nWoman: ' },
-    // 남자:/여자: 패턴
     { from: /\n?남자\s*:\s*/g, to: '\nMan: ' },
     { from: /\n?여자\s*:\s*/g, to: '\nWoman: ' },
-    // 이미 Man:/Woman: 형식인 경우 (AI 생성 문제)
     { from: /\n?Man\s*:\s*/g, to: '\nMan: ' },
     { from: /\n?Woman\s*:\s*/g, to: '\nWoman: ' },
-    // A:/B: 패턴
     { from: /\n?A\s*:\s*/g, to: '\nMan: ' },
     { from: /\n?B\s*:\s*/g, to: '\nWoman: ' },
   ];
 
   let processed = text;
-  for (const { from, to } of dialoguePatterns) {
-    processed = processed.replace(from, to);
+  if (hasTags) {
+    for (const { from, to } of dialoguePatterns) {
+      processed = processed.replace(from, to);
+    }
   }
+  
+  // 만약 "/" 로 분리하여 개행은 되었으나 태그가 없었다면 강제 교대
+  const splitRaw = processed.split('\n').filter(l => l.trim().length > 0);
+  if (!hasTags && splitRaw.length > 1) {
+      let forced = '';
+      splitRaw.forEach((line, index) => {
+          forced += (index % 2 === 0 ? `Man: ${line}\n` : `Woman: ${line}\n`);
+      });
+      processed = forced.trim();
+  }
+
   processed = processed.trim();
 
-  // 5단계: 대화형 여부 판별
+  // 6단계: 대화형 여부 판별
   const isDialogue = processed.includes('Man: ') || processed.includes('Woman: ');
 
-  // 6단계: 스피커별 라인 분해 (브라우저 TTS 멀티 보이스 재생용)
+  // 7단계: 스피커별 라인 분해 (브라우저 TTS 멀티 보이스 재생용)
   const lines: AudioLine[] = [];
   const rawLines = processed.split('\n');
   let currentSpeaker: 'Man' | 'Woman' | 'Narrator' = 'Narrator';
