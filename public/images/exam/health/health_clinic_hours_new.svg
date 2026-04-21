@@ -1,0 +1,39 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" font-family="Pretendard, Arial, sans-serif">
+  <!-- Background -->
+  <rect width="400" height="300" fill="#f4f7fb"/>
+  
+  <!-- Main Card -->
+  <rect x="20" y="20" width="360" height="260" rx="12" fill="white" stroke="#e1e8f0" stroke-width="2"/>
+  
+  <!-- Header -->
+  <rect x="20" y="20" width="360" height="50" rx="12" fill="#2d60d3"/>
+  <!-- Hide bottom rounded corners of header to attach to body -->
+  <rect x="20" y="50" width="360" height="20" fill="#2d60d3"/>
+  <text x="200" y="55" text-anchor="middle" font-size="20" font-weight="bold" fill="white">진료 시간 안내</text>
+  
+  <!-- Schedule Items -->
+  <g transform="translate(40, 100)">
+    <!-- Weekdays -->
+    <rect x="0" y="0" width="80" height="24" rx="4" fill="#e8f0fe"/>
+    <text x="40" y="17" text-anchor="middle" font-size="14" font-weight="bold" fill="#2d60d3">평 일</text>
+    <text x="100" y="17" font-size="16" fill="#333">09:00 ~ 18:00</text>
+    
+    <!-- Saturday -->
+    <rect x="0" y="40" width="80" height="24" rx="4" fill="#e8f0fe"/>
+    <text x="40" y="57" text-anchor="middle" font-size="14" font-weight="bold" fill="#2d60d3">토요일</text>
+    <text x="100" y="57" font-size="16" fill="#333">09:00 ~ 13:00</text>
+
+    <!-- Wednesday Night Care -->
+    <rect x="0" y="80" width="80" height="24" rx="4" fill="#fef0f0"/>
+    <text x="40" y="97" text-anchor="middle" font-size="14" font-weight="bold" fill="#d32f2f">수요일</text>
+    <text x="100" y="97" font-size="16" font-weight="bold" fill="#d32f2f">19:00 ~ 21:00 (야간진료)</text>
+
+    <!-- Lunch -->
+    <rect x="0" y="120" width="80" height="24" rx="4" fill="#f5f5f5"/>
+    <text x="40" y="137" text-anchor="middle" font-size="14" font-weight="bold" fill="#666">점심시간</text>
+    <text x="100" y="137" font-size="16" fill="#666">13:00 ~ 14:00</text>
+
+    <!-- Sunday/Holiday -->
+    <text x="0" y="175" font-size="14" font-weight="bold" fill="#d32f2f">※ 일요일 및 공휴일은 휴진입니다.</text>
+  </g>
+</svg>
