@@ -2,22 +2,3224 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>EPS-TOPIK 이미지 오류 검수 페이지</title>
+    <title>EPS-TOPIK 1-30세트 이미지 전수 검수</title>
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; background: #f0f2f5; padding: 20px; }
-        .card { background: white; margin-bottom: 20px; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; gap: 20px; }
-        .img-box { flex: 0 0 300px; }
-        .img-box img { max-width: 100%; border: 1px solid #ddd; border-radius: 4px; }
-        .content-box { flex: 1; }
-        .id-badge { display: inline-block; background: #2d60d3; color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px; margin-bottom: 10px; }
-        h3 { margin: 0 0 10px 0; font-size: 18px; }
-        .options { list-style-type: none; padding: 0; }
-        .options li { margin-bottom: 5px; padding: 5px; background: #f8f9fa; border-radius: 4px; }
-        .correct { color: white; background: #28a745 !important; font-weight: bold; }
-        .note { color: #666; font-size: 14px; margin-top: 10px; }
+        body { font-family: sans-serif; background: #f4f7f6; padding: 20px; }
+        .set-header { background: #2c3e50; color: white; padding: 10px 20px; margin-top: 50px; border-radius: 8px; sticky-top: 0; }
+        .card { background: white; margin: 20px 0; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; gap: 20px; }
+        .img-panel { flex: 0 0 300px; text-align: center; border-right: 1px solid #eee; padding-right: 20px; }
+        .img-panel img { max-width: 100%; border-radius: 5px; }
+        .missing { background: #fff5f5; border: 2px dashed #fc8181; color: #c53030; padding: 40px 10px; border-radius: 5px; }
+        .info-panel { flex: 1; }
+        .id { font-weight: bold; color: #2b6cb0; border: 1px solid #bee3f8; padding: 2px 6px; border-radius: 4px; background: #ebf8ff; }
+        .cat { font-size: 12px; color: #718096; margin-left: 10px; }
+        .opt-list { list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .opt { padding: 8px; background: #f8fafc; border: 1px solid #edf2f7; border-radius: 5px; font-size: 14px; }
+        .correct { background: #f0fff4; border-color: #9ae6b4; color: #276749; font-weight: bold; }
+        .prompt-box { margin-top: 10px; font-size: 12px; color: #4a5568; background: #edf2f7; padding: 10px; border-radius: 5px; font-style: italic; }
     </style>
 </head>
 <body>
-    <h1>🖼 전체 문제 이미지 자가 진단(Audit) 센터</h1>
-    <p>아래 목록은 <strong>이미지가 포함된 전체 문제</strong>를 한곳에 모아놓은 것입니다. 앱에서 일일이 풀면서 찾지 마시고, 아래로 스크롤하며 이미지가 정답이나 문제와 맞지 않는 것을 메모해주시면 됩니다.</p>
-</body></html>
+    <h1>📋 EPS-TOPIK 1-30세트 이미지 검수 마스터 리스트</h1>
+    <p>이미지가 <b>필수</b>인 문항들만 모았습니다. 이미지가 없는 경우 빨간색으로 표시됩니다.</p>
+<div class="set-header"><h2>제 1 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s1_l_23</span><span class="cat">그림 고르기</span>
+            <h3>들은 것과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 7시 35분</li><li class="opt correct">2. 7시 50분</li><li class="opt">3. 9시 50분</li><li class="opt">4. 10시 10분</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s1_l_24</span><span class="cat">그림 고르기</span>
+            <h3>들은 것과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 스키</li><li class="opt">2. 수영</li><li class="opt">3. 탁구</li><li class="opt correct">4. 농구</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s1_l_25</span><span class="cat">상태 묘사</span>
+            <h3>이 사람의 가방은 어떤 것 같습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 귀여운 것 같습니다.</li><li class="opt correct">2. 무거운 것 같습니다.</li><li class="opt">3. 가벼운 것 같습니다.</li><li class="opt">4. 무서운 것 같습니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man struggling to lift a huge, overstuffed duffel bag with both hands, sweating significantly.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/life/life_man_outside.png"><br><small>/images/exam/life/life_man_outside.png</small></div>
+        <div class="info-panel">
+            <span class="id">s1_l_26</span><span class="cat">위치 파악</span>
+            <h3>남자는 어디에 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 집 안에 있어요.</li><li class="opt correct">2. 집 밖에 있어요.</li><li class="opt">3. 집 위에 있어요.</li><li class="opt">4. 집 아래 있어요.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man standing outside in the yard of a house while a woman waves from the window.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/weather/weather_summer_rain.png"><br><small>/images/exam/weather/weather_summer_rain.png</small></div>
+        <div class="info-panel">
+            <span class="id">s1_l_29</span><span class="cat">날씨 파악</span>
+            <h3>날씨가 어떻습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 맑지만 곧 흐려질 것 같아요.</li><li class="opt correct">2. 흐려서 곧 비가 올 것 같아요.</li><li class="opt">3. 비가 오고 바람이 많이 불어요.</li><li class="opt">4. 비가 오지만 곧 그칠 것 같아요.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman looking up at an overcast dark gray sky with heavy rain clouds and wind blowing her hair.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s1_l_36</span><span class="cat">그림 고르기</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 짐 나르는 사람</li><li class="opt correct">2. 운동화 만드는 사람</li><li class="opt">3. 옷 만드는 사람</li><li class="opt">4. 운동하는 사람</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s1_l_37</span><span class="cat">그림 고르기</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 양계장</li><li class="opt">2. 논밭</li><li class="opt">3. 외양간</li><li class="opt">4. 어선</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/chart/chart_museum_bar.svg"><br><small>/images/exam/chart/chart_museum_bar.svg</small></div>
+        <div class="info-panel">
+            <span class="id">s1_r_12</span><span class="cat">그래프 분석</span>
+            <h3>사람들이 박물관을 가장 많이 방문한 달은 언제입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 3월</li><li class="opt">2. 4월</li><li class="opt correct">3. 5월</li><li class="opt">4. 6월</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A vertical bar chart titled '상반기 박물관 관람 현황'. 1월: 3000, 2월: 2000, 3월: 5000, 4월: 4500, 5월: 7000, 6월: 6000. May (5월) bar is tallest.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/sign/sign_no_running.png"><br><small>/images/exam/sign/sign_no_running.png</small></div>
+        <div class="info-panel">
+            <span class="id">s1_r_9</span><span class="cat">표지판</span>
+            <h3>이 표지는 무슨 뜻입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 떠들면 안 됩니다.</li><li class="opt">2. 만지면 안 됩니다.</li><li class="opt">3. 들어오면 안 됩니다.</li><li class="opt correct">4. 뛰어다니면 안 됩니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Yellow triangular warning sign, a black silhouette of a running person inside, overlaid with a bold red circle and diagonal slash. Text below: 위험! 뛰지말것</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 2 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/sign/sign_no_parking.png"><br><small>/images/exam/sign/sign_no_parking.png</small></div>
+        <div class="info-panel">
+            <span class="id">s2_r_10</span><span class="cat">표지판</span>
+            <h3>다음 표지를 맞게 설명한 것을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 공사중이니까 천천히 운전하십시오.</li><li class="opt">2. 공사를 하고 있으니까 들어오지 마십시오.</li><li class="opt">3. 주차를 하려면 현장 소장에게 말하십시오.</li><li class="opt correct">4. 공사를 하고 있으니까 차를 세우지 마십시오.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A portable construction sign board. Text: '공사중 주차금지'. Red prohibition circle with slash. Bottom text: '현장소장'.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/chart/chart_elderly_problems.svg"><br><small>/images/exam/chart/chart_elderly_problems.svg</small></div>
+        <div class="info-panel">
+            <span class="id">s2_r_11</span><span class="cat">그래프 분석</span>
+            <h3>노인들에게 가장 어려운 문제는 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 몸이 아픈 것</li><li class="opt correct">2. 돈이 부족한 것</li><li class="opt">3. 친구가 없는 것</li><li class="opt">4. 할 일이 없는 것</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Bar chart titled '노인들이 겪는 어려운 문제'. Bars: 생활비 부족 (45%), 건강문제 (30%), 할 일이 없음 (15%), 외로움 (5%). The '생활비 부족' bar is the tallest.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s2_r_14</span><span class="cat">수량 단위</span>
+            <h3>빈칸에 들어갈 가장 알맞은 것을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 개</li><li class="opt">2. 손</li><li class="opt">3. 통</li><li class="opt correct">4. 마리</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/sign/sign_maintenance.png"><br><small>/images/exam/sign/sign_maintenance.png</small></div>
+        <div class="info-panel">
+            <span class="id">s2_r_9</span><span class="cat">표지판</span>
+            <h3>이 표지는 무슨 뜻입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 기계를 쓰기 전에 사용 순서를 배웁니다.</li><li class="opt">2. 기계를 사용하지 않을 때는 전원을 끕니다.</li><li class="opt correct">3. 기계가 잘 작동할 수 있게 항상 관리합니다.</li><li class="opt">4. 기계가 고장 났을 때는 관리자에게 말합니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> An industrial safety sign for '정비철저' (Thorough Maintenance).</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 3 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s3_l_23</span><span class="cat">그림 고르기</span>
+            <h3>들은 것과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 쇼핑</li><li class="opt">2. 요리</li><li class="opt correct">3. 설거지</li><li class="opt">4. 찌개 끓이기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s3_l_24</span><span class="cat">그림 고르기</span>
+            <h3>들은 것과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 신문 읽기</li><li class="opt">2. 전화 통화</li><li class="opt">3. 식사하기</li><li class="opt correct">4. 컴퓨터 게임</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/daily/daily_soap_bars.png"><br><small>/images/exam/daily/daily_soap_bars.png</small></div>
+        <div class="info-panel">
+            <span class="id">s3_l_25</span><span class="cat">상태 묘사</span>
+            <h3>이것은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 비누입니다.</li><li class="opt">2. 수건입니다.</li><li class="opt">3. 치약입니다.</li><li class="opt">4. 샴푸입니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Three bars of white soap stacked together.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/job/job_police_officer.png"><br><small>/images/exam/job/job_police_officer.png</small></div>
+        <div class="info-panel">
+            <span class="id">s3_l_26</span><span class="cat">상태 묘사</span>
+            <h3>이 사람의 직업은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 경찰입니다.</li><li class="opt">2. 의사입니다.</li><li class="opt">3. 요리사입니다.</li><li class="opt">4. 택시 기사입니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A policeman in a dark blue uniform standing in front of a white patrol car.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/transport/transport_car_wash.jpg"><br><small>/images/exam/transport/transport_car_wash.jpg</small></div>
+        <div class="info-panel">
+            <span class="id">s3_l_27</span><span class="cat">상태 묘사</span>
+            <h3>이 남자는 지금 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 불을 끄고 있습니다.</li><li class="opt correct">2. 세차를 하고 있습니다.</li><li class="opt">3. 세수를 하고 있습니다.</li><li class="opt">4. 운전을 하고 있습니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man washing a car with soap and water.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/job/job_police_station.png"><br><small>/images/exam/job/job_police_station.png</small></div>
+        <div class="info-panel">
+            <span class="id">s3_l_28</span><span class="cat">상태 묘사</span>
+            <h3>여기는 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 경찰서입니다.</li><li class="opt">2. 소방서입니다.</li><li class="opt">3. 우체국입니다.</li><li class="opt">4. 기차역입니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Exterior of a Korean Police Station building with the emblem and Korean sign '경찰서'.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s3_l_36</span><span class="cat">그림 고르기</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 소방관</li><li class="opt">2. 치과 의사</li><li class="opt">3. 경찰관</li><li class="opt">4. 배달원</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s3_l_37</span><span class="cat">그림 고르기</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 의사</li><li class="opt">2. 은행원</li><li class="opt">3. 요리사</li><li class="opt correct">4. 경찰관</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/sign/sign_overload_warning.png"><br><small>/images/exam/sign/sign_overload_warning.png</small></div>
+        <div class="info-panel">
+            <span class="id">s3_r_10</span><span class="cat">표지판</span>
+            <h3>다음 표지를 맞게 설명한 것을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 너무 빨리 운전하면 안 됩니다.</li><li class="opt">2. 술을 마시고 운전하면 안 됩니다.</li><li class="opt correct">3. 차에 짐을 너무 많이 실으면 안 됩니다.</li><li class="opt">4. 고속도로에 쓰레기를 버리면 안 됩니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Illustration of a cargo truck with goods stacked precariously high and unstable. Text above: 과적금지</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/sign/sign_drinking_water.png"><br><small>/images/exam/sign/sign_drinking_water.png</small></div>
+        <div class="info-panel">
+            <span class="id">s3_r_11</span><span class="cat">표지판</span>
+            <h3>다음 중 ‘물을 마실 수 있는 곳’을 뜻하는 표지판은 어느 것입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 쓰레기통</li><li class="opt correct">2. 식수대</li><li class="opt">3. 종이타월</li><li class="opt">4. 화장실</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A professional blue sign for '식수대' (Drinking Water).</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/chart/chart_tourist_spots.svg"><br><small>/images/exam/chart/chart_tourist_spots.svg</small></div>
+        <div class="info-panel">
+            <span class="id">s3_r_12</span><span class="cat">그래프 분석</span>
+            <h3>외국인이 가장 좋아하는 한국의 관광지는 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 서울</li><li class="opt">2. 부산</li><li class="opt">3. 경주</li><li class="opt">4. 제주도</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A pie chart titled '외국인이 좋아하는 한국의 관광지'. Seoul: 82.8%, Busan: 20.1%, Folk Village: 13.3%, Jeju: 10.1%, Gyeongju: 8.4%.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/sign/sign_one_way.png"><br><small>/images/exam/sign/sign_one_way.png</small></div>
+        <div class="info-panel">
+            <span class="id">s3_r_9</span><span class="cat">표지판</span>
+            <h3>이 표지는 무슨 뜻입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 주차 금지 구역이니까 차를 세우면 안 됩니다.</li><li class="opt">2. 버스 전용 도로니까 자동차가 지나가면 안 됩니다.</li><li class="opt">3. 지게차를 운전하고 있으니까 가까이 가면 안 됩니다.</li><li class="opt correct">4. 한쪽 방향으로만 차가 다니는 길이니까 들어가면 안 됩니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Red circular sign with a thick horizontal white bar in the center. Text below: 일방통행</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 4 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s4_l_23</span><span class="cat">그림 선택</span>
+            <h3>들은 내용에 알맞은 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 팔 벌린 그림</li><li class="opt">2. 허리 굽힌 그림</li><li class="opt correct">3. 머리 뒤 손 그림</li><li class="opt">4. 허리 돌리는 그림</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s4_l_24</span><span class="cat">그림 선택</span>
+            <h3>들은 내용에 알맞은 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 사진관 사진</li><li class="opt">2. 주유소 사진</li><li class="opt">3. 약국 사진</li><li class="opt correct">4. 우체국 사진</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s4_l_26</span><span class="cat">장소 파악</span>
+            <h3>여기는 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 과일을 파는 가게입니다.</li><li class="opt">2. 축구를 하는 운동장입니다.</li><li class="opt correct">3. 닭을 기르는 양계장입니다.</li><li class="opt">4. 머리를 자르는 미용실입니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A large indoor chicken farm (poultry house) with many chickens.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s4_l_27</span><span class="cat">동작 파악</span>
+            <h3>이 사람은 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 식사를 하고 있습니다.</li><li class="opt">2. 낮잠을 자고 있습니다.</li><li class="opt">3. 공부를 하고 있습니다.</li><li class="opt">4. 차를 마시고 있습니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A person sitting at a table with a bowl of rice and side dishes, eating.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s4_l_28</span><span class="cat">사물 파악</span>
+            <h3>이것은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 선풍기입니다.</li><li class="opt">2. 전화기입니다.</li><li class="opt">3. 세탁기입니다.</li><li class="opt">4. 냉장고입니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> An electric desk fan blowing a small flag.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s4_l_29</span><span class="cat">날짜 파악</span>
+            <h3>몇 월 며칠입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 4월 7일입니다.</li><li class="opt">2. 4월 10일입니다.</li><li class="opt correct">3. 4월 17일입니다.</li><li class="opt">4. 4월 21일입니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A calendar page clearly showing April 17th.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s4_l_36</span><span class="cat">그림 관계</span>
+            <h3>다음을 듣고 들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 축구 그림</li><li class="opt correct">2. 가구 제작 그림</li><li class="opt">3. 공부 그림</li><li class="opt">4. TV 시청 그림</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s4_l_37</span><span class="cat">그림 관계</span>
+            <h3>다음을 듣고 들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 시장 사진</li><li class="opt">2. 약국 사진</li><li class="opt">3. 극장 사진</li><li class="opt">4. 우체국 사진</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s4_l_40</span><span class="cat">도구 파악</span>
+            <h3>나무를 자를 때 사용하는 이 도구는 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 가위</li><li class="opt">2. 삽</li><li class="opt">3. 드릴</li><li class="opt correct">4. 전기톱</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/sign/sign_broken_do_not_touch.png"><br><small>/images/exam/sign/sign_broken_do_not_touch.png</small></div>
+        <div class="info-panel">
+            <span class="id">s4_r_12</span><span class="cat">표지판 이해</span>
+            <h3>다음 글과 관계가 있는 표지판은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 점검중 스위치 넣지마시오</li><li class="opt">2. 수리중 운전하지마시오</li><li class="opt correct">3. 고장 손대지 마시오</li><li class="opt">4. 점검중 송전하지 마시오</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A yellow caution sign with the text '고장 손대지 마시오' (Out of order, Do not touch).</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 5 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s5_l_23</span><span class="cat">그림 선택</span>
+            <h3>들은 내용에 알맞은 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 라면 그림</li><li class="opt correct">2. 빵과 계란 그림</li><li class="opt">3. 밥과 국 그림</li><li class="opt">4. 커피 그림</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A breakfast table with sliced bread, a fried egg, and a glass of juice.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s5_l_24</span><span class="cat">그림 선택</span>
+            <h3>들은 내용에 알맞은 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 드라이버</li><li class="opt correct">2. 망치</li><li class="opt">3. 니퍼</li><li class="opt">4. 펜치</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A toolbox with various tools, but a hammer is prominently highlighted in the center.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s5_l_36</span><span class="cat">그림 관계</span>
+            <h3>다음을 듣고 들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 문을 닫는 그림</li><li class="opt correct">2. 문 열어주는 그림</li><li class="opt">3. 짐을 버리는 그림</li><li class="opt">4. 청소하는 그림</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A person holding many boxes while another person kindly opens the door for them.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s5_l_37</span><span class="cat">그림 관계</span>
+            <h3>다음을 듣고 들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 물 마시는 그림</li><li class="opt correct">2. 분리수거 그림</li><li class="opt">3. 길거리에 버리는 그림</li><li class="opt">4. 주스 사는 그림</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Two recycling bins labeled 'General Trash' and 'Empty Bottles' (빈 병류).</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/daily/daily_pot.png"><br><small>/images/exam/daily/daily_pot.png</small></div>
+        <div class="info-panel">
+            <span class="id">s5_r_1</span><span class="cat">그림 보고 맞히기</span>
+            <h3>다음 그림을 보고 맞는 단어나 문장을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 컵입니다.</li><li class="opt">2. 라면입니다.</li><li class="opt correct">3. 냄비입니다.</li><li class="opt">4. 도마입니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Three metallic cooking pots on a gas stove, one with a lid.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/sign/sign_slow_down_accident.png"><br><small>/images/exam/sign/sign_slow_down_accident.png</small></div>
+        <div class="info-panel">
+            <span class="id">s5_r_10</span><span class="cat">표지판 이해</span>
+            <h3>다음 표지판이 있는 곳에서 지켜야 할 사항은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 과속 운전하면 안 됩니다.</li><li class="opt">2. 길을 건너가면 안 됩니다.</li><li class="opt">3. 음주운전 하면 안 됩니다.</li><li class="opt">4. 공사를 하면 안 됩니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A black rectangular road sign saying '사고많은곳' (Accident Prone Area) and '속도를 줄이시오' (Reduce Speed).</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s5_r_2</span><span class="cat">그림 보고 맞히기</span>
+            <h3>다음 그림을 보고 맞는 단어나 문장을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 칼입니다.</li><li class="opt correct">2. 도마입니다.</li><li class="opt">3. 냄비입니다.</li><li class="opt">4. 수저입니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A rectangular wooden cutting board for kitchen use, solo object focus.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/sign/sign_no_smoking.png"><br><small>/images/exam/sign/sign_no_smoking.png</small></div>
+        <div class="info-panel">
+            <span class="id">s5_r_9</span><span class="cat">표지판 이해</span>
+            <h3>다음 표지의 금지 내용을 맞게 설명한 것을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 뛰어다니면 안 됩니다.</li><li class="opt">2. 장갑을 끼면 안 됩니다.</li><li class="opt correct">3. 담배를 피우면 안 됩니다.</li><li class="opt">4. 이야기를 하면 안 됩니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Standard Korean '금연' (No Smoking) sign.</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 6 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/transport/transport_bus_7.jpg"><br><small>/images/exam/transport/transport_bus_7.jpg</small></div>
+        <div class="info-panel">
+            <span class="id">s6_l_23</span><span class="cat">그림 선택</span>
+            <h3>몇 번 버스를 타야 합니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 1번 버스</li><li class="opt">2. 5번 버스</li><li class="opt correct">3. 7번 버스</li><li class="opt">4. 10번 버스</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A blue Korean bus No. 7.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s6_l_24</span><span class="cat">그림 선택</span>
+            <h3>남자의 직업은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 목수</li><li class="opt correct">2. 요리사</li><li class="opt">3. 운전사</li><li class="opt">4. 의사</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A male chef wearing a white uniform and hat, cooking in a professional kitchen.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s6_l_26</span><span class="cat">날짜 파악</span>
+            <h3>몇 월 며칠입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 1월 26일입니다.</li><li class="opt correct">2. 2월 16일입니다.</li><li class="opt">3. 3월 26일입니다.</li><li class="opt">4. 4월 16일입니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A large calendar page showing '2월 16일' clearly.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s6_r_1</span><span class="cat">그림 보고 맞히기</span>
+            <h3>다음 그림을 보고 맞는 단어나 문장을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 할머니들이 주무시고 계십니다.</li><li class="opt">2. 할머니들이 일을 하고 계십니다.</li><li class="opt">3. 할머니들이 책을 읽고 계십니다.</li><li class="opt correct">4. 할머니들이 식사를 하고 계십니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Three elderly Korean people (grandparents) sitting at a dining table, smiling and eating soup and rice with spoons.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s6_r_10</span><span class="cat">표지판 이해</span>
+            <h3>다음 그림의 설명으로 같은 것을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 틈새에 구두 굽이 끼이지 않게 조심하십시오.</li><li class="opt">2. 키가 작은 사람은 높은 구두를 착용하십시오.</li><li class="opt">3. 이곳은 여자들만 들어올 수 있는 장소입니다.</li><li class="opt">4. 이곳에서는 발이 편한 운동화만 착용하십시오.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A yellow triangular warning sign showing a high-heeled shoe stuck in an escalator gap with an exclamation mark.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s6_r_2</span><span class="cat">그림 보고 맞히기</span>
+            <h3>다음 그림을 보고 맞는 단어나 문장을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 냉장고입니다.</li><li class="opt correct">2. 가습기입니다.</li><li class="opt">3. 세탁기입니다.</li><li class="opt">4. 온도계입니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A modern humidifier device with visible cool mist or steam rising from the top.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s6_r_9</span><span class="cat">표지판 이해</span>
+            <h3>이 표지는 무슨 뜻입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 30분 이상 통화하지 마십시오.</li><li class="opt">2. 30kg 이하의 짐만 실으십시오.</li><li class="opt">3. 자동차는 30대만 주차하십시오.</li><li class="opt correct">4. 시속 30km로 천천히 운전하십시오.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A road sign with a red circle and the number '30' inside, and Korean text '절대감속' and '천천히'.</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 7 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s7_l_23</span><span class="cat">그림 선택</span>
+            <h3>들은 내용에 알맞은 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 모자를 쓴 그림</li><li class="opt">2. 코트와 모자 그림</li><li class="opt correct">3. 코트만 입은 그림</li><li class="opt">4. 신발을 사는 그림</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman wearing a long winter coat but no hat, standing next to a hat display.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s7_l_24</span><span class="cat">그림 선택</span>
+            <h3>들은 내용에 알맞은 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 책만 있는 그림</li><li class="opt correct">2. 책, 필통, 지갑(사진) 그림</li><li class="opt">3. 옷만 있는 그림</li><li class="opt">4. 음식만 있는 그림</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> An open backpack showing one book, a pencil case, and a wallet with a visible photo inside.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s7_l_25</span><span class="cat">날씨 파악</span>
+            <h3>날씨가 어떻습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 더워요.</li><li class="opt correct">2. 추워요.</li><li class="opt">3. 비가 와요.</li><li class="opt">4. 눈이 와요.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A person shivering and holding their coat tight as a strong wind bends trees.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s7_l_26</span><span class="cat">위치 파악</span>
+            <h3>고양이가 어디에 있어요?</h3>
+            <ul class="opt-list"><li class="opt">1. 탁자 위에 있어요.</li><li class="opt">2. 탁자 왼쪽에 있어요.</li><li class="opt correct">3. 탁자 아래에 있어요.</li><li class="opt">4. 탁자 오른쪽에 있어요.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A small cat curled up on the floor directly beneath a wooden table.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s7_r_1</span><span class="cat">그림 보고 맞히기</span>
+            <h3>다음 그림을 보고 맞는 단어나 문장을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 세 사람이 회의를 하고 있습니다.</li><li class="opt correct">2. 네 사람이 회의를 하고 있습니다.</li><li class="opt">3. 다섯 사람이 회의를 하고 있습니다.</li><li class="opt">4. 여섯 사람이 회의를 하고 있습니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Four office workers (men and women) sitting around a conference table with notebooks and documents, having a meeting.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/sign/sign_no_entry_authorized.png"><br><small>/images/exam/sign/sign_no_entry_authorized.png</small></div>
+        <div class="info-panel">
+            <span class="id">s7_r_10</span><span class="cat">표지판 이해</span>
+            <h3>다음 표지를 맞게 설명한 것을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 공사 중이니까 이 길로만 다닐 수 있습니다.</li><li class="opt">2. 보호구를 착용하지 않으면 들어갈 수 없습니다.</li><li class="opt">3. 공사를 하고 있으니까 빨리 운전하면 안 됩니다.</li><li class="opt correct">4. 여기에서 일하는 사람만 들어갈 수 있습니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A sign saying '출입금지' (No Entry) and '공사관계자이외' (Authorized Personnel Only).</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s7_r_2</span><span class="cat">그림 보고 맞히기</span>
+            <h3>다음 그림을 보고 맞는 단어나 문장을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 십만 원짜리 수표입니다.</li><li class="opt">2. 백만 원짜리 수표입니다.</li><li class="opt">3. 천만 원짜리 수표입니다.</li><li class="opt">4. 일억 원짜리 수표입니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A Korean bank cashier's check for 100,000 KRW (십만 원), with the number 100,000 clearly visible.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/sign/sign_construction_detour.png"><br><small>/images/exam/sign/sign_construction_detour.png</small></div>
+        <div class="info-panel">
+            <span class="id">s7_r_9</span><span class="cat">표지판 이해</span>
+            <h3>다음 표지를 맞게 설명한 것을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 공사장으로 가려면 우회전하십시오.</li><li class="opt">2. 공사 중에는 주차를 하지 마십시오.</li><li class="opt correct">3. 공사를 하고 있으니 돌아가십시오.</li><li class="opt">4. 공사장에서는 안전모를 착용하십시오.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A yellow construction sign with a person shoveling and the text '우회하세요' (Detour).</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 8 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s8_l_23</span><span class="cat">그림 선택</span>
+            <h3>남자는 오늘 아침에 무엇을 먹었습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 밥과 국</li><li class="opt correct">2. 빵, 계란, 주스</li><li class="opt">3. 고기와 야채</li><li class="opt">4. 커피와 쿠키</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A breakfast table with toast, a fried egg, and a glass of orange juice.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s8_l_24</span><span class="cat">그림 선택</span>
+            <h3>남자가 가져와야 할 도구는 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 니퍼</li><li class="opt">2. 렌치</li><li class="opt correct">3. 망치</li><li class="opt">4. 드라이버</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A heavy metal hammer (Mangchi) highlighted in a tool box.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s8_l_29</span><span class="cat">장소 파악</span>
+            <h3>여기에서 무엇을 합니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 돈을 찾습니다.</li><li class="opt">2. 집을 구합니다.</li><li class="opt correct">3. 영화를 봅니다.</li><li class="opt">4. 편지를 붙입니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> The exterior of a cinema building labeled 'SEOUL CINEMA' with people.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s8_l_36</span><span class="cat">상황 파악</span>
+            <h3>내용에 알맞은 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 문을 잠그는 그림</li><li class="opt correct">2. 문을 열어주는 그림</li><li class="opt">3. 짐을 버리는 그림</li><li class="opt">4. 전화하는 그림</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A person holding large boxes, and another person opening a door for them.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s8_l_37</span><span class="cat">상황 파악</span>
+            <h3>빈 병은 어디에 버려야 합니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 왼쪽 칸</li><li class="opt correct">2. 오른쪽 칸</li><li class="opt">3. 바닥</li><li class="opt">4. 가방 안</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Two recycling bins labeled '일반쓰레기' and '빈 병류'.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s8_r_1</span><span class="cat">그림 보고 맞히기</span>
+            <h3>다음 그림을 보고 맞는 단어나 문장을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 컵입니다.</li><li class="opt">2. 라면입니다.</li><li class="opt correct">3. 냄비입니다.</li><li class="opt">4. 도마입니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Three metal cooking pots (Naembi) placed on a kitchen counter or stove.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/sign/sign_slow_down_accident.png"><br><small>/images/exam/sign/sign_slow_down_accident.png</small></div>
+        <div class="info-panel">
+            <span class="id">s8_r_10</span><span class="cat">표지판 이해</span>
+            <h3>다음 표지판이 있는 곳에서 지켜야 할 사항은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 과속 운전하면 안 됩니다.</li><li class="opt">2. 길을 건너가면 안 됩니다.</li><li class="opt">3. 음주운전 하면 안 됩니다.</li><li class="opt">4. 공사를 하면 안 됩니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A road sign saying '사고많은곳' (High Accident Area) and '속도를 줄이시오' (Reduce Speed).</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s8_r_2</span><span class="cat">그림 보고 맞히기</span>
+            <h3>다음 그림을 보고 맞는 단어나 문장을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 칼입니다.</li><li class="opt correct">2. 도마입니다.</li><li class="opt">3. 냄비입니다.</li><li class="opt">4. 수저입니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A wooden rectangular cutting board (Doma) with a kitchen knife resting on top.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/sign/sign_no_smoking.png"><br><small>/images/exam/sign/sign_no_smoking.png</small></div>
+        <div class="info-panel">
+            <span class="id">s8_r_9</span><span class="cat">표지판 이해</span>
+            <h3>다음 표지의 금지 내용을 맞게 설명한 것을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 뛰어다니면 안 됩니다.</li><li class="opt">2. 장갑을 끼면 안 됩니다.</li><li class="opt correct">3. 담배를 피우면 안 됩니다.</li><li class="opt">4. 이야기를 하면 안 됩니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Standard Korean '금연' (No Smoking) sign.</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 9 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s9_l_23</span><span class="cat">그림 선택</span>
+            <h3>민수 씨는 뭐 하고 있어요?</h3>
+            <ul class="opt-list"><li class="opt">1. 공부하고 있다</li><li class="opt">2. 운동하고 있다</li><li class="opt correct">3. 전화하고 있다</li><li class="opt">4. 잠을 자고 있다</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man holding a phone receiver and talking with a smile.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s9_l_24</span><span class="cat">그림 선택</span>
+            <h3>남자는 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 축구</li><li class="opt">2. 농구</li><li class="opt correct">3. 탁구</li><li class="opt">4. 야구</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A person swinging a paddle to hit a ping-pong ball.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s9_l_26</span><span class="cat">장소 파악</span>
+            <h3>여기에서 무엇을 할 수 있습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 약을 살 수 있습니다.</li><li class="opt">2. 영화를 볼 수 있습니다.</li><li class="opt">3. 머리를 자를 수 있습니다.</li><li class="opt">4. 비행기 표를 살 수 있습니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A shop interior with a sign '나나약국' and medicine boxes on shelves.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/weather/weather_summer_rain.png"><br><small>/images/exam/weather/weather_summer_rain.png</small></div>
+        <div class="info-panel">
+            <span class="id">s9_l_29</span><span class="cat">날씨 파악</span>
+            <h3>날씨가 어떻습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 흐립니다.</li><li class="opt">2. 맑습니다.</li><li class="opt">3. 눈이 옵니다.</li><li class="opt correct">4. 비가 옵니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman walking with an umbrella under a rainy sky.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s9_l_36</span><span class="cat">상황 파악</span>
+            <h3>어머니 생신이 몇 월 며칠입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 1월 1일</li><li class="opt">2. 1월 15일</li><li class="opt correct">3. 1월 30일</li><li class="opt">4. 12월 30일</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A calendar page showing '1월 30일' circled in red.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s9_l_37</span><span class="cat">상황 파악</span>
+            <h3>남자는 주말에 주로 무엇을 합니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 공부하기</li><li class="opt">2. 운동하기</li><li class="opt correct">3. 사진 찍기</li><li class="opt">4. 요리하기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man holding a professional camera and taking a picture of scenery.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s9_r_1</span><span class="cat">그림 보고 맞히기</span>
+            <h3>다음 그림을 보고 맞는 단어나 문장을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 이 층짜리 건물입니다.</li><li class="opt">2. 삼 층짜리 건물입니다.</li><li class="opt">3. 사 층짜리 건물입니다.</li><li class="opt correct">4. 오 층짜리 건물입니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A 5-story building directory board named '서울빌딩' showing floor information.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s9_r_11</span><span class="cat">표지판 이해</span>
+            <h3>다음 사진에 대한 설명으로 맞지 않는 것을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 차에 기름을 넣으려면 왼쪽으로 가야 합니다.</li><li class="opt">2. 차를 세워 놓으려면 지하로 내려가야 합니다.</li><li class="opt">3. 높이가 2.3m 이하인 차만 들어갈 수 있습니다.</li><li class="opt">4. 주차장에 들어갈 때는 오른쪽으로 가야 합니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Parking sign: 'Exit' (Left Arrow), 'Entrance' (Right Arrow), 'Height Limit 2.3M'.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s9_r_2</span><span class="cat">그림 보고 맞히기</span>
+            <h3>다음 그림을 보고 맞는 단어나 문장을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 아파트가 두 동 있습니다.</li><li class="opt">2. 아파트가 두 명 있습니다.</li><li class="opt">3. 아파트가 두 갑 있습니다.</li><li class="opt">4. 아파트가 두 병 있습니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Two identical tall apartment buildings standing side by side.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s9_r_9</span><span class="cat">표지판 이해</span>
+            <h3>다음 표지를 맞게 설명한 것을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 왼쪽으로 25m 가면 계단이 있습니다.</li><li class="opt correct">2. 왼쪽으로 25m 가면 화장실이 있습니다.</li><li class="opt">3. 오른쪽으로 25m 가면 계단이 있습니다.</li><li class="opt">4. 오른쪽으로 25m 가면 화장실이 있습니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A directional sign with a left arrow (⬅), '25m', and a toilet icon.</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 10 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/life/life_real_estate_new.png"><br><small>/images/exam/life/life_real_estate_new.png</small></div>
+        <div class="info-panel">
+            <span class="id">s10_l_23</span><span class="cat">그림 선택</span>
+            <h3>여자는 지금 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 집에서 청소하기</li><li class="opt correct">2. 부동산에서 상담하기</li><li class="opt">3. 슈퍼에서 쇼핑하기</li><li class="opt">4. 공원에서 산책하기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A real estate consultation office sign '찾아가는 부동산 상담실'.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/factory/factory_power_off.png"><br><small>/images/exam/factory/factory_power_off.png</small></div>
+        <div class="info-panel">
+            <span class="id">s10_l_24</span><span class="cat">그림 선택</span>
+            <h3>남자는 수리 전 무엇을 먼저 합니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 안전모 쓰기</li><li class="opt">2. 청소하기</li><li class="opt correct">3. 플러그 뽑기</li><li class="opt">4. 못 박기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A safety sign for '전원 차단' (Power Off).</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s10_l_25</span><span class="cat">수량 파악</span>
+            <h3>그릇이 몇 개 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 5개</li><li class="opt correct">2. 6개</li><li class="opt">3. 8개</li><li class="opt">4. 9개</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A tray with 6 white ceramic bowls placed on it.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s10_l_26</span><span class="cat">장소 파악</span>
+            <h3>여기는 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 지하철역</li><li class="opt">2. 병원</li><li class="opt">3. 공항</li><li class="opt">4. 은행</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A subway station platform with Korean text '지하철역' on the wall and people waiting.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s10_l_28</span><span class="cat">날짜 파악</span>
+            <h3>몇 월 며칠입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 6월 9일</li><li class="opt">2. 7월 8일</li><li class="opt correct">3. 8월 9일</li><li class="opt">4. 9월 8일</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> An August calendar page with a red circle around the 9th day.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s10_l_29</span><span class="cat">수량 파악</span>
+            <h3>교실에 학생이 몇 명 있습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 한 명</li><li class="opt">2. 아무도 없음</li><li class="opt">3. 여러 명</li><li class="opt">4. 두 명</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A single student sitting at a desk in a classroom, studying alone.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s10_l_36</span><span class="cat">상황 파악</span>
+            <h3>여자는 왜 바로 주문하지 않습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 돈이 없어서</li><li class="opt">2. 배가 안 고파서</li><li class="opt correct">3. 일행을 기다려서</li><li class="opt">4. 식당이 맛없어서</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman at a restaurant table checking her watch and looking at the door.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s10_l_37</span><span class="cat">상황 파악</span>
+            <h3>어떤 운동을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 달리기</li><li class="opt correct">2. 허리 돌리기</li><li class="opt">3. 팔 굽히기</li><li class="opt">4. 앉았다 일어나기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A fitness diagram of a person with hands on waist rotating their hips.</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 11 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s11_l_23</span><span class="cat">날씨 파악</span>
+            <h3>날씨가 어떻습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 맑음</li><li class="opt correct">2. 눈이 옴</li><li class="opt">3. 비가 옴</li><li class="opt">4. 바람 불음</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A winter scene with snowflakes falling and people in heavy coats.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s11_l_24</span><span class="cat">날짜 파악</span>
+            <h3>오늘은 며칠입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 9일</li><li class="opt correct">2. 16일</li><li class="opt">3. 23일</li><li class="opt">4. 30일</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> September calendar: 2nd(1st Sat), 9th(2nd Sat), 16th(3rd Sat) circled.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s11_l_27</span><span class="cat">활동 파악</span>
+            <h3>이 남자는 지금 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 이 닦기</li><li class="opt correct">2. 손 씻기</li><li class="opt">3. 세수하기</li><li class="opt">4. 머리 빗기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man washing his hands with soap foam over a sink.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s11_l_28</span><span class="cat">장소 파악</span>
+            <h3>여기는 어떤 곳입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 흡연 구역</li><li class="opt">2. 안내소</li><li class="opt correct">3. 환전소</li><li class="opt">4. 매표소</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A currency exchange counter with symbols for Dollar, Yen, and Euro.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s11_l_29</span><span class="cat">위치 파악</span>
+            <h3>의자가 어디에 있어요?</h3>
+            <ul class="opt-list"><li class="opt">1. 책상 위</li><li class="opt correct">2. 책상 밑</li><li class="opt">3. 책상 왼쪽</li><li class="opt">4. 책상 오른쪽</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A wooden desk with a chair pushed underneath it.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s11_l_36</span><span class="cat">상황 파악</span>
+            <h3>남자는 지금 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 커피 마시기</li><li class="opt">2. 운동하기</li><li class="opt">3. 책 읽기</li><li class="opt">4. 잠자기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man sitting on a park bench holding a take-out coffee cup.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s11_l_37</span><span class="cat">상황 파악</span>
+            <h3>이 사람은 현재 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 운전하기</li><li class="opt correct">2. 도로공사</li><li class="opt">3. 나무 심기</li><li class="opt">4. 건물 짓기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A worker with a shovel repairing a road surface near orange traffic cones.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><img src="images/exam/sign/sign_safety_inspection_day.png"><br><small>/images/exam/sign/sign_safety_inspection_day.png</small></div>
+        <div class="info-panel">
+            <span class="id">s11_r_10</span><span class="cat">표지판 이해</span>
+            <h3>다음 표지에 대한 설명으로 옳은 것은?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 매달 4일에 점검합니다.</li><li class="opt">2. 한 달에 네 번 점검합니다.</li><li class="opt">3. 4일마다 한 번씩 점검합니다.</li><li class="opt">4. 네 번째 일요일에 점검합니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A campaign poster with a safety mascot holding a thumb up and text '매월 4일은 안전점검의 날'.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s11_r_9</span><span class="cat">표지판 이해</span>
+            <h3>다음 표지를 맞게 설명한 것을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 우회전하십시오.</li><li class="opt">2. 주차를 하지 마십시오.</li><li class="opt correct">3. 공사를 하고 있으니 돌아가십시오.</li><li class="opt">4. 안전모를 착용하십시오.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A yellow road sign with a construction worker silhouette, text '공사중', and a U-turn arrow saying '우회하세요'.</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 12 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s12_l_23</span><span class="cat">상황 파악</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 축구</li><li class="opt">2. 농구</li><li class="opt correct">3. 태권도</li><li class="opt">4. 수영</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A girl in a white Taekwondo uniform doing a high kick.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s12_l_24</span><span class="cat">상황 파악</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 자전거</li><li class="opt correct">2. 버스</li><li class="opt">3. 지하철</li><li class="opt">4. 도보</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man getting on a crowded city bus.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s12_l_25</span><span class="cat">날씨 파악</span>
+            <h3>날씨가 어떻습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 눈</li><li class="opt">2. 비</li><li class="opt correct">3. 맑음</li><li class="opt">4. 흐림</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Bright sunny day with a clear blue sky and a large sun.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s12_l_26</span><span class="cat">사물 개수</span>
+            <h3>모두 몇 명입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 2명</li><li class="opt">2. 3명</li><li class="opt">3. 4명</li><li class="opt correct">4. 5명</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A group of 5 friends sitting together at a table.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s12_l_29</span><span class="cat">장소 파악</span>
+            <h3>여기는 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 은행</li><li class="opt">2. 식당</li><li class="opt">3. 우체국</li><li class="opt correct">4. 지하철역</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Inside of a subway station with an arriving train.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s12_l_36</span><span class="cat">상황 파악</span>
+            <h3>내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 4:45</li><li class="opt">2. 3:45</li><li class="opt">3. 5:45</li><li class="opt">4. 4:15</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Analog wall clock showing 4:45.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s12_l_37</span><span class="cat">상황 파악</span>
+            <h3>내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 흡연 구역</li><li class="opt correct">2. 금연 구역</li><li class="opt">3. 식사 구역</li><li class="opt">4. 휴식 구역</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A 'No Smoking' sign (cigarette with a red slash) in an office setting.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s12_r_1</span><span class="cat">표지판</span>
+            <h3>이 표지는 무슨 뜻입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 차량은 통행할 수 없습니다.</li><li class="opt">2. 절대 물기가 닿으면 안 됩니다.</li><li class="opt">3. 걸어서 다닐 수 없습니다.</li><li class="opt">4. 물건을 옮기지 마십시오.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Red circle sign with a vehicle silhouette and a diagonal slash.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s12_r_13</span><span class="cat">시각 정보</span>
+            <h3>다음 그림을 보고 맞는 단어나 문장을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 청소기</li><li class="opt">2. 세탁기</li><li class="opt">3. 냉장고</li><li class="opt">4. 선풍기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A modern blue canister vacuum cleaner with its hose and brush head.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s12_r_14</span><span class="cat">시각 정보</span>
+            <h3>다음 그림을 보고 맞는 단어나 문장을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 목 돌리기 운동</li><li class="opt">2. 다리 올리기 운동</li><li class="opt">3. 허리 구부리기 운동</li><li class="opt">4. 두 팔 높이 들기 운동</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A person standing and leaning back slightly to stretch their neck and back.</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 13 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s13_l_23</span><span class="cat">상황 파악</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 요리와 음악</li><li class="opt">2. 청소와 음악</li><li class="opt">3. 운동과 TV</li><li class="opt">4. 독서와 라디오</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman cooking at a stove while a radio next to her emits music notes.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s13_l_24</span><span class="cat">상황 파악</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 창문 닫기</li><li class="opt">2. 청소하기</li><li class="opt correct">3. 창문 열고 작업</li><li class="opt">4. 기계 수리</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A factory worker operating a machine next to a wide-open window.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s13_l_25</span><span class="cat">위치 파악</span>
+            <h3>책상이 어디에 있어요?</h3>
+            <ul class="opt-list"><li class="opt">1. 침대 밑</li><li class="opt">2. 침대 위</li><li class="opt correct">3. 침대 옆</li><li class="opt">4. 침대 속</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A cozy bedroom with a desk placed right beside the bed.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s13_l_28</span><span class="cat">활동 파악</span>
+            <h3>이 여자는 지금 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 머리 감기</li><li class="opt correct">2. 청소</li><li class="opt">3. 음악 듣기</li><li class="opt">4. 음식 만들기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman pushing a vacuum cleaner on a carpet in a living room.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s13_l_29</span><span class="cat">사물 파악</span>
+            <h3>이것은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 밥과 국</li><li class="opt">2. 물과 과일</li><li class="opt correct">3. 빵과 우유</li><li class="opt">4. 가방과 우산</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A wooden tray with slices of bread and a carton of milk.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s13_l_36</span><span class="cat">상황 파악</span>
+            <h3>내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 정류장 기다림</li><li class="opt correct">2. 도로 정체</li><li class="opt">3. 사고 발생</li><li class="opt">4. 버스 탑승</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A long line of cars stuck in heavy traffic during rush hour.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s13_l_37</span><span class="cat">상황 파악</span>
+            <h3>내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 신발 공장</li><li class="opt correct">2. 자동차 부품 가공</li><li class="opt">3. 농장 작업</li><li class="opt">4. 식당 주방</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A worker in coveralls using a CNC machine to shape a metal car part.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s13_r_12</span><span class="cat">표지판</span>
+            <h3>안내소('안내하는 곳')를 뜻하는 표지판은 어느 것입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 1번</li><li class="opt">2. 2번</li><li class="opt correct">3. 3번</li><li class="opt">4. 4번</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Four icons: 1. Currency Symbols ($/₩), 2. Telephone (C-shape), 3. Question Mark (?), 4. Parking (P).</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s13_r_9</span><span class="cat">표 해석</span>
+            <h3>다음 표에 대한 설명으로 맞는 것은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 시덴 씨는 일반석 표를 샀습니다.</li><li class="opt">2. 시덴 씨는 표를 세 장 예매했습니다.</li><li class="opt correct">3. 시덴 씨는 부산에서 서울까지 갑니다.</li><li class="opt">4. 시덴 씨는 7월 30일에 서울에서 출발합니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Flight reservation table for 'Siden'. From: Busan, To: Seoul(Gimpo), Date: 2022.07.30, Passengers: 2 Adults 2 Children, Seat: Business.</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 14 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s14_l_23</span><span class="cat">활동 파악</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 노래방</li><li class="opt">2. 공원 산책</li><li class="opt">3. 영화관</li><li class="opt">4. 식당</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman singing into a microphone with colorful lights in a Karaoke room.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s14_l_24</span><span class="cat">활동 파악</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 과일 쇼핑</li><li class="opt">2. 야채 쇼핑</li><li class="opt">3. 옷 쇼핑</li><li class="opt">4. 신발 쇼핑</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman holding a shopping basket and choosing apples at a market stall.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s14_l_25</span><span class="cat">사물 파악</span>
+            <h3>이것은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 책상/의자</li><li class="opt">2. 비누/수건</li><li class="opt correct">3. 치약/칫솔</li><li class="opt">4. 연필/지우개</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A tube of toothpaste and a toothbrush placed together.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s14_l_26</span><span class="cat">장소 파악</span>
+            <h3>여기는 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 공항</li><li class="opt">2. 병원</li><li class="opt">3. 은행</li><li class="opt">4. 학교</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Subway ticket gate and route map in a station.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s14_l_27</span><span class="cat">직업 파악</span>
+            <h3>이 여자의 직업은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 간호사</li><li class="opt">2. 미용사</li><li class="opt">3. 요리사</li><li class="opt correct">4. 운전기사</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A female bus driver focused on the road while steering.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s14_l_28</span><span class="cat">날짜 파악</span>
+            <h3>오늘은 몇 월 며칠입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 3월 17일</li><li class="opt">2. 4월 18일</li><li class="opt correct">3. 9월 17일</li><li class="opt">4. 10월 18일</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A calendar page showing September (9월) with '17' circled.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s14_l_29</span><span class="cat">사물 개수</span>
+            <h3>모두 몇 명입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 5명</li><li class="opt correct">2. 6명</li><li class="opt">3. 7명</li><li class="opt">4. 8명</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A illustration of exactly 6 people standing in a group.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s14_l_36</span><span class="cat">상황 파악</span>
+            <h3>내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 수영</li><li class="opt">2. 등산</li><li class="opt correct">3. 스키</li><li class="opt">4. 낚시</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A skier in full gear gliding down a snowy mountain slope.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s14_l_37</span><span class="cat">상황 파악</span>
+            <h3>내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 옷 선물</li><li class="opt correct">2. 시계 선물</li><li class="opt">3. 꽃 선물</li><li class="opt">4. 신발 선물</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A person opening a gift box to find a large round wall clock inside.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s14_l_40</span><span class="cat">날짜 파악</span>
+            <h3>남자는 무슨 요일에 한국말을 배웁니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 화/목</li><li class="opt correct">2. 월/수/금</li><li class="opt">3. 토/일</li><li class="opt">4. 매일</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A weekly schedule with 'Korean Class' marked on Monday, Wednesday, and Friday.</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 15 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s15_l_23</span><span class="cat">직업 파악</span>
+            <h3>실례지만 무슨 일을 하세요?</h3>
+            <ul class="opt-list"><li class="opt">1. 빨래</li><li class="opt">2. 설거지</li><li class="opt">3. 재봉질</li><li class="opt correct">4. 요리사</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s15_l_24</span><span class="cat">활동 파악</span>
+            <h3>저는 음식 만드는 것을 좋아합니다. 지금도 음식을 만들고 있습니다. 오늘은 맛있는 생선 요리를 하려고 합니다.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 생선 요리</li><li class="opt">2. 그림 그리기</li><li class="opt">3. 식사하기</li><li class="opt">4. 노래 부르기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s15_l_26</span><span class="cat">사물 개수</span>
+            <h3>홍차가 몇 잔 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 한 잔</li><li class="opt correct">2. 두 잔</li><li class="opt">3. 세 잔</li><li class="opt">4. 네 잔</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s15_l_28</span><span class="cat">날짜 파악</span>
+            <h3>생일이 언제입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 1980년 1월 26일</li><li class="opt">2. 1981년 2월 16일</li><li class="opt">3. 1982년 1월 16일</li><li class="opt">4. 1983년 2월 26일</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A hand holding a piece of paper with '1980년 1월 26일' written on it.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s15_l_29</span><span class="cat">위치 파악</span>
+            <h3>모자가 어디에 있어요?</h3>
+            <ul class="opt-list"><li class="opt">1. 책상 밑</li><li class="opt">2. 옷장 안</li><li class="opt correct">3. 침대 위</li><li class="opt">4. 전화기 뒤</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A bedroom view with a black baseball cap resting on top of a white bed duvet.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s15_l_36</span><span class="cat">상황 파악</span>
+            <h3>쇠를 자를 때 불꽃이 일어나기 때문에 보안면을 쓰고 안전장갑도 낍니다.</h3>
+            <ul class="opt-list"><li class="opt">1. 용접 작업</li><li class="opt">2. 그라인더 작업</li><li class="opt correct">3. 보안면 절단 작업</li><li class="opt">4. 운반 작업</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s15_l_37</span><span class="cat">상황 파악</span>
+            <h3>지금 사무실에서 일을 하고 있어요?</h3>
+            <ul class="opt-list"><li class="opt">1. 업무 중</li><li class="opt correct">2. 커피 휴식 중</li><li class="opt">3. 취침 중</li><li class="opt">4. 식사 중</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s15_r_9</span><span class="cat">표 해석</span>
+            <h3>다음 표에 대한 설명으로 맞는 것은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 시덴 씨는 일반석 표를 샀습니다.</li><li class="opt">2. 시덴 씨는 표를 세 장 예매했습니다.</li><li class="opt correct">3. 시덴 씨는 부산에서 서울까지 갑니다.</li><li class="opt">4. 시덴 씨는 7월 30일에 서울에서 출발합니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A digital flight booking screen: Passenger Siden, Busan to Seoul(Gimpo), July 30, Business Class.</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 16 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s16_l_23</span><span class="cat">활동 파악</span>
+            <h3>이 사람은 지금 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 등산</li><li class="opt">2. 독서</li><li class="opt correct">3. 그림 그리기</li><li class="opt">4. 사진 촬영</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s16_l_24</span><span class="cat">활동 파악</span>
+            <h3>취미가 뭐예요?</h3>
+            <ul class="opt-list"><li class="opt">1. 공부</li><li class="opt correct">2. 피아노와 노래</li><li class="opt">3. 요리</li><li class="opt">4. 노래만</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s16_l_25</span><span class="cat">날짜 파악</span>
+            <h3>몇 월 며칠입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 2월 13일</li><li class="opt">2. 5월 14일</li><li class="opt">3. 6월 13일</li><li class="opt correct">4. 9월 14일</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A white paper with '9월 14일' written in large black numbers.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s16_l_26</span><span class="cat">장소 파악</span>
+            <h3>여기는 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 공항</li><li class="opt correct">2. 지하철역</li><li class="opt">3. 택시 승강장</li><li class="opt">4. 버스 정류장</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A view of a subway station interior with electronic ticket gates and a route map.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s16_l_27</span><span class="cat">직업 파악</span>
+            <h3>이 남자의 직업은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 간호사</li><li class="opt">2. 미용사</li><li class="opt">3. 요리사</li><li class="opt correct">4. 운전기사</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A male bus driver sitting in the driver's seat and looking at the road.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s16_l_28</span><span class="cat">날씨 파악</span>
+            <h3>날씨가 어떻습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 추움</li><li class="opt">2. 더움</li><li class="opt">3. 따뜻함</li><li class="opt">4. 선선함</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man in a thick coat and scarf shivering in the wind with snowflakes.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s16_l_29</span><span class="cat">사물 개수</span>
+            <h3>커피가 몇 잔 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 1잔</li><li class="opt">2. 3잔</li><li class="opt correct">3. 5잔</li><li class="opt">4. 7잔</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A round tray with exactly 5 white ceramic coffee cups.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s16_l_36</span><span class="cat">상황 파악</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 시장</li><li class="opt">2. 공항</li><li class="opt">3. 영화관</li><li class="opt correct">4. 역 매표소</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s16_l_37</span><span class="cat">상황 파악</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 치과</li><li class="opt">2. 사무실</li><li class="opt">3. 교실</li><li class="opt">4. 은행</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s16_r_10</span><span class="cat">표지판 해석</span>
+            <h3>다음을 바르게 설명한 것을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 여기는 홍대역입니다.</li><li class="opt correct">2. 다음 역은 이대역입니다.</li><li class="opt">3. 신촌은 340m 가야 함</li><li class="opt">4. 전 역은 이대역입니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Subway platform wall sign: Left arrow Hongdae, Center 'Sinchon', Right arrow 'Ewha Univ'.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s16_r_9</span><span class="cat">표지판 해석</span>
+            <h3>다음 안내판을 보고 오른쪽으로 가야 하는 사람은 누구입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 돈을 바꾸려고 하는 사람</li><li class="opt">2. 전화를 걸려고 하는 사람</li><li class="opt correct">3. 밖으로 나가려고 하는 사람</li><li class="opt">4. 커피를 마시려고 하는 사람</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Interior sign: Left arrows for Restroom/Phone/Food, Diagonal right up arrow for 'Exit'.</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 17 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s17_l_23</span><span class="cat">상황 파악</span>
+            <h3>가족은 모두 몇 명입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 3명</li><li class="opt">2. 4명</li><li class="opt correct">3. 5명</li><li class="opt">4. 6명</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A family photo showing a grandmother, parents, and two daughters.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s17_l_24</span><span class="cat">활동 파악</span>
+            <h3>주말에 무엇을 했습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 영화 관람</li><li class="opt">2. 독서</li><li class="opt">3. 배드민턴</li><li class="opt">4. 등산</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A young couple sitting in a movie theater with popcorn.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s17_l_25</span><span class="cat">위치 파악</span>
+            <h3>컴퓨터가 어디에 있어요?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 책상 위</li><li class="opt">2. 책상 밑</li><li class="opt">3. 책상 옆</li><li class="opt">4. 책상 앞</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A neat desk with a monitor, keyboard, and mouse on top.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s17_l_27</span><span class="cat">장소 파악</span>
+            <h3>여기에서 무엇을 할 수 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 집 구매</li><li class="opt correct">2. 돈 환전</li><li class="opt">3. 책 대여</li><li class="opt">4. 편지 발송</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> The entrance of a bank with 'Money Exchange' symbols.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s17_l_28</span><span class="cat">날짜 파악</span>
+            <h3>오늘은 몇 월 며칠입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 9월 5일</li><li class="opt">2. 10월 6일</li><li class="opt correct">3. 11월 5일</li><li class="opt">4. 12월 6일</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A piece of paper with '11월 5일' written on it in large characters.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s17_l_29</span><span class="cat">날씨 파악</span>
+            <h3>날씨가 어떻습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 맑음</li><li class="opt">2. 눈이 옴</li><li class="opt correct">3. 비가 옴</li><li class="opt">4. 바람이 붊</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman walking with a yellow umbrella under a rainy sky.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s17_l_36</span><span class="cat">상황 파악</span>
+            <h3>무슨 일을 하세요?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 건설 현장</li><li class="opt">2. 자동차 공장</li><li class="opt">3. 이사 현장</li><li class="opt">4. 제설 작업</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A construction site with scaffolding and cranes.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s17_l_37</span><span class="cat">상황 파악</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 짐 드는 사람</li><li class="opt correct">2. 우체국 소포 접수</li><li class="opt">3. 창고</li><li class="opt">4. 교실</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A post office clerk weighing a cardboard box on a digital scale.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s17_r_10</span><span class="cat">시각 정보</span>
+            <h3>다음 그림과 관계가 있는 말을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 안전모를 착용해야 합니다.</li><li class="opt correct">2. 눈과 얼굴을 보호하는 보안면을 써야 합니다.</li><li class="opt">3. 작업을 끝낸 후에는 목욕을 해야 합니다.</li><li class="opt">4. 사용한 공구는 정리 정돈을 해야 합니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A welder wearing a full face shield (보안면) with bright sparks flying.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s17_r_9</span><span class="cat">표지판</span>
+            <h3>이 표지는 무슨 뜻입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 이곳의 물을 마시면 위험합니다.</li><li class="opt">2. 이곳의 물을 마셔도 괜찮습니다.</li><li class="opt correct">3. 이곳에서 수영을 하면 위험합니다.</li><li class="opt">4. 이곳에서 수영을 해도 괜찮습니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A yellow triangular caution sign showing a stick figure struggling in waves (Drowning Warning).</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 18 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s18_l_23</span><span class="cat">상황 파악</span>
+            <h3>가족 구성원을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 자녀 3명 가족</li><li class="opt">2. 할머니 포함 5명</li><li class="opt correct">3. 조부모 포함 6명</li><li class="opt">4. 부부와 아이 3명</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A large family sitting together including elders and two young men.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s18_l_24</span><span class="cat">상황 파악</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 번화가</li><li class="opt">2. 우체국</li><li class="opt">3. 은행</li><li class="opt correct">4. 지하철역</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A traveler buying two tickets at a subway station ticket machine.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s18_l_25</span><span class="cat">장소 파악</span>
+            <h3>여기는 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 공장</li><li class="opt">2. 시장</li><li class="opt">3. 은행</li><li class="opt">4. 식당</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> An industrial factory building with a sawtooth roof and smoke rising from a chimney.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s18_l_26</span><span class="cat">날짜 파악</span>
+            <h3>몇 월 며칠입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 10월 16일</li><li class="opt">2. 10월 25일</li><li class="opt">3. 11월 16일</li><li class="opt correct">4. 11월 25일</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A hand holding a piece of paper with '11월 25일' written on it.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s18_l_27</span><span class="cat">장소 파악</span>
+            <h3>여기는 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 돈 찾는 곳</li><li class="opt correct">2. 책 파는 곳</li><li class="opt">3. 영화 보는 곳</li><li class="opt">4. 편지 부치는 곳</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A massive bookstore with floor-to-ceiling bookshelves.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s18_l_28</span><span class="cat">직업 파악</span>
+            <h3>이 여자의 직업은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 약사</li><li class="opt">2. 교사</li><li class="opt correct">3. 간호사</li><li class="opt">4. 요리사</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A female nurse in uniform holding a medical chart and a stethoscope.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s18_l_29</span><span class="cat">날짜 파악</span>
+            <h3>3월 셋째 화요일은 며칠입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 7일</li><li class="opt">2. 14일</li><li class="opt correct">3. 21일</li><li class="opt">4. 28일</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A March calendar page: 1st is Wednesday. Tuesday dates are 7, 14, 21, 28.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s18_l_36</span><span class="cat">상황 파악</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 밭일</li><li class="opt">2. 건축</li><li class="opt">3. 도배</li><li class="opt correct">4. 외양간</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A farmer feeding hay to cows in a wooden barn (외양간).</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s18_l_37</span><span class="cat">상황 파악</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 학습</li><li class="opt correct">2. 공장 작업</li><li class="opt">3. 축구</li><li class="opt">4. 식사</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Workers sealing cardboard boxes on a factory assembly line.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s18_r_10</span><span class="cat">표지판</span>
+            <h3>이 표지판은 무슨 뜻입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 무게가 3.5톤 이하만 가능</li><li class="opt">2. 폭이 3.5미터 이하만 가능</li><li class="opt">3. 길이가 3.5미터 이하만 가능</li><li class="opt correct">4. 높이가 3.5미터 이하만 가능</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A circular sign with '3.5m' and up/down arrows (Height Limit).</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s18_r_11</span><span class="cat">표지판</span>
+            <h3>이 표지가 있는 곳에서 할 수 없는 것은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 식사를 할 수 있습니다.</li><li class="opt">2. 차를 수리할 수 있습니다.</li><li class="opt correct">3. 영화를 볼 수 있습니다.</li><li class="opt">4. 차에 기름을 넣을 수 있습니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A highway service area sign with icons for a fork/knife, gas pump, and wrench.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s18_r_9</span><span class="cat">표지판</span>
+            <h3>이 표지판이 있는 곳에서 지켜야 할 사항은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 주차를 하면 안 됩니다.</li><li class="opt">2. 택시를 잡으면 안 됩니다.</li><li class="opt">3. 차가 지나다니면 안 됩니다.</li><li class="opt">4. 지계차를 운전하면 안 됩니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A sign showing a tow truck lifting a car (Towing Zone, 견인지역).</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 19 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s19_l_23</span><span class="cat">상황 파악</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 편지 쓰기</li><li class="opt">2. 피아노</li><li class="opt">3. 독서</li><li class="opt">4. 전화</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman sitting at a desk under a lamp, writing a letter on stationery.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s19_l_24</span><span class="cat">활동 파악</span>
+            <h3>이 사람은 지금 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 줄넘기</li><li class="opt">2. 런닝머신</li><li class="opt correct">3. 테니스</li><li class="opt">4. 수영</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Two people playing tennis on an outdoor court.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s19_l_26</span><span class="cat">위치 파악</span>
+            <h3>책꽂이가 어디에 있어요?</h3>
+            <ul class="opt-list"><li class="opt">1. 안</li><li class="opt">2. 밑</li><li class="opt correct">3. 왼쪽</li><li class="opt">4. 오른쪽</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A bedroom layout: a tall wardrobe (옷장) with a bookshelf (책꽂이) to its left.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s19_l_27</span><span class="cat">날씨 파악</span>
+            <h3>날씨가 어때요?</h3>
+            <ul class="opt-list"><li class="opt">1. 더워요</li><li class="opt">2. 따뜻해요</li><li class="opt">3. 비와요</li><li class="opt correct">4. 바람 불어요</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man holding onto his hat in a very windy park, trees swaying.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s19_l_28</span><span class="cat">사물 개수</span>
+            <h3>모두 몇 명입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 6명</li><li class="opt">2. 7명</li><li class="opt correct">3. 8명</li><li class="opt">4. 9명</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A group photo of 8 professional office workers standing in two rows.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s19_l_29</span><span class="cat">날짜 파악</span>
+            <h3>몇 월 며칠입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 9월 5일</li><li class="opt">2. 10월 6일</li><li class="opt">3. 11월 5일</li><li class="opt correct">4. 12월 6일</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A piece of paper with '12월 6일' written in large blue ink.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s19_l_36</span><span class="cat">상황 파악</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 분리수거</li><li class="opt correct">2. 예약석 안내</li><li class="opt">3. 운전 중 통화</li><li class="opt">4. 카트 금지</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A restaurant table with a neat 'Reserved' (예약석) sign on it.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s19_r_10</span><span class="cat">표지판</span>
+            <h3>이 표지판은 무슨 뜻입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 비가 오니까 서행</li><li class="opt">2. 바닥이 미끄러움</li><li class="opt">3. 기계가 뜨거움</li><li class="opt correct">4. 전기가 흐름</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A yellow triangular sign with a lightning bolt symbol and text '감전주의' (Electric Shock Warning).</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s19_r_11</span><span class="cat">표지판</span>
+            <h3>이 표지가 의미하는 것은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 진입 금지</li><li class="opt correct">2. 천천히 운전</li><li class="opt">3. 뛰기 금지</li><li class="opt">4. 30분 대기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A circular red border sign with '30' inside and '공사중 서행' (Slow down, construction) text below.</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 20 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s20_l_23</span><span class="cat">활동 파악</span>
+            <h3>이 사람은 지금 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 쇼핑</li><li class="opt">2. 복사</li><li class="opt correct">3. 손빨래</li><li class="opt">4. 청소</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman squatting next to a washing machine, scrubbing a shirt in a basin.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s20_l_24</span><span class="cat">활동 파악</span>
+            <h3>이 사람은 지금 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 수영</li><li class="opt correct">2. 음악 감상</li><li class="opt">3. 피아노</li><li class="opt">4. 요리</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman lying on a cozy rug with headphones, looking relaxed.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s20_l_25</span><span class="cat">날짜 파악</span>
+            <h3>몇 월 며칠입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 1월 19일</li><li class="opt correct">2. 5월 29일</li><li class="opt">3. 6월 19일</li><li class="opt">4. 9월 29일</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A calendar page showing May (5월) with '29' highlighted.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s20_l_26</span><span class="cat">사물 개수</span>
+            <h3>모두 몇 명입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 1명</li><li class="opt">2. 3명</li><li class="opt correct">3. 5명</li><li class="opt">4. 7명</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Five friends posing in a park: 3 sitting on a bench, 2 standing behind.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s20_l_27</span><span class="cat">날씨 파악</span>
+            <h3>날씨가 어떻습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 비와 추움</li><li class="opt">2. 햇빛 덥움</li><li class="opt">3. 흐림 비안옴</li><li class="opt">4. 바람 시원</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> People with umbrellas walking in a cold rain, shivering.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s20_l_29</span><span class="cat">장소 파악</span>
+            <h3>여기는 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 도서관</li><li class="opt">2. 대사관</li><li class="opt">3. 우체국</li><li class="opt correct">4. 소방서</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A building with large garage doors and red fire trucks parked outside.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s20_l_36</span><span class="cat">상황 파악</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 12:10</li><li class="opt correct">2. 12:20</li><li class="opt">3. 11:20</li><li class="opt">4. 12:00</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 21 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s21_l_23</span><span class="cat">활동 파악</span>
+            <h3>무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 빨래</li><li class="opt correct">2. 청소</li><li class="opt">3. 요리</li><li class="opt">4. 공부</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A person using a vacuum cleaner on a rug.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s21_l_24</span><span class="cat">직업 파악</span>
+            <h3>이 사람의 직업은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 경찰</li><li class="opt">2. 의사</li><li class="opt correct">3. 요리사</li><li class="opt">4. 교사</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A smiling chef wearing a white toque and holding a ladle.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s21_l_25</span><span class="cat">시간 파악</span>
+            <h3>몇 시입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 2:30</li><li class="opt correct">2. 3:30</li><li class="opt">3. 4:30</li><li class="opt">4. 5:30</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> An analog clock showing 3:30.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s21_l_26</span><span class="cat">장소 파악</span>
+            <h3>여기는 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 공원</li><li class="opt correct">2. 편의점</li><li class="opt">3. 약국</li><li class="opt">4. 은행</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A bright convenience store interior with shelves of snacks.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s21_l_27</span><span class="cat">활동 파악</span>
+            <h3>무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 운전</li><li class="opt correct">2. 전화</li><li class="opt">3. 식사</li><li class="opt">4. 독서</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman talking on her smartphone while walking.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s21_l_28</span><span class="cat">사물 파악</span>
+            <h3>이것은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 치약</li><li class="opt">2. 칫솔</li><li class="opt correct">3. 비누</li><li class="opt">4. 수건</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A bar of soap on a soap dish with bubbles.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s21_l_29</span><span class="cat">날짜 파악</span>
+            <h3>생일이 언제입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 5/10</li><li class="opt correct">2. 5/20</li><li class="opt">3. 6/10</li><li class="opt">4. 6/20</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A calendar marked on May 20th with a heart.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s21_l_36</span><span class="cat">상황 파악</span>
+            <h3>남자는 지금 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 기차 대기</li><li class="opt correct">2. 버스 대기</li><li class="opt">3. 택시 운전</li><li class="opt">4. 자전거 수리</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man looking at his watch at a bus stop.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s21_r_1</span><span class="cat">표지판</span>
+            <h3>이 표지는 무슨 뜻입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 불을 피우지 마십시오</li><li class="opt correct">2. 담배를 피우지 마십시오</li><li class="opt">3. 음식을 먹지 마십시오</li><li class="opt">4. 뛰어 다니지 마십시오</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Prohibition sign with a cigarette and a red diagonal slash.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s21_r_10</span><span class="cat">도구 파악</span>
+            <h3>나무를 자를 때 사용하는 공구는 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 톱</li><li class="opt">2. 망치</li><li class="opt">3. 자</li><li class="opt">4. 붓</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A sharp hand saw for woodworking.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s21_r_11</span><span class="cat">도구 파악</span>
+            <h3>무거운 물건을 들어 올리는 기계는 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 지게차</li><li class="opt">2. 선풍기</li><li class="opt">3. 냉장고</li><li class="opt">4. 세탁기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A yellow forklift carrying a wooden pallet.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s21_r_2</span><span class="cat">활동 파악</span>
+            <h3>이 사람은 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 용접을 하고 있습니다</li><li class="opt">2. 못을 박고 있습니다</li><li class="opt">3. 페인트를 칠하고 있습니다</li><li class="opt">4. 전선을 자르고 있습니다</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A worker in a safety mask performing arc welding, sparks flying.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s21_r_3</span><span class="cat">표 해석</span>
+            <h3>이 약은 언제 먹어야 합니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 밥 먹기 전</li><li class="opt correct">2. 밥 먹은 후</li><li class="opt">3. 자기 전</li><li class="opt">4. 아무 때나</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A Korean medicine envelope with instructions: '식후 30분 (After meal)' checked.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s21_r_9</span><span class="cat">도구 파악</span>
+            <h3>다음 중 '펜치'는 어느 것입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 망치</li><li class="opt correct">2. 펜치</li><li class="opt">3. 드라이버</li><li class="opt">4. 송곳</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A pair of industrial pliers (combination pliers).</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 22 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s22_l_23</span><span class="cat">활동 파악</span>
+            <h3>무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 잠</li><li class="opt correct">2. 운동</li><li class="opt">3. 청소</li><li class="opt">4. 공부</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A person jogging in a park.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s22_l_24</span><span class="cat">직업 파악</span>
+            <h3>이 남자의 직업은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 어부</li><li class="opt correct">2. 농부</li><li class="opt">3. 운전사</li><li class="opt">4. 경찰</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A farmer in a field wearing a straw hat and holding a tool.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s22_l_25</span><span class="cat">시간 파악</span>
+            <h3>지금은 몇 시입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 7:15</li><li class="opt">2. 8:15</li><li class="opt">3. 9:15</li><li class="opt">4. 10:15</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> An analog clock showing 7:15.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s22_l_26</span><span class="cat">장소 파악</span>
+            <h3>여기는 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 기차역</li><li class="opt correct">2. 공항</li><li class="opt">3. 항구</li><li class="opt">4. 터미널</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> An airport terminal with planes visible outside the window.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s22_l_27</span><span class="cat">활동 파악</span>
+            <h3>이 사람은 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 그림 그리기</li><li class="opt correct">2. 사진 찍기</li><li class="opt">3. 음악 듣기</li><li class="opt">4. 춤 추기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A person holding a professional DSLR camera.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s22_l_28</span><span class="cat">사물 파악</span>
+            <h3>이것은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 가방</li><li class="opt correct">2. 지갑</li><li class="opt">3. 모자</li><li class="opt">4. 안경</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A leather wallet with some Korean Won bills sticking out.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s22_l_29</span><span class="cat">날짜 파악</span>
+            <h3>시험이 언제입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 12/05</li><li class="opt correct">2. 12/15</li><li class="opt">3. 11/05</li><li class="opt">4. 11/15</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A calendar page for December with the 15th circled.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s22_l_36</span><span class="cat">상황 파악</span>
+            <h3>남자는 지금 어디에 가고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 병원</li><li class="opt correct">2. 약국</li><li class="opt">3. 은행</li><li class="opt">4. 공원</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man walking toward a pharmacy.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s22_r_1</span><span class="cat">표지판</span>
+            <h3>이 표지는 무슨 뜻입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 주차 금지</li><li class="opt">2. 통행 금지</li><li class="opt">3. 추월 금지</li><li class="opt">4. 서행 하십시오</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Prohibition sign with 'P' inside a red circle with a slash.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s22_r_10</span><span class="cat">사물 파악</span>
+            <h3>이것은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 선풍기</li><li class="opt">2. 에어컨</li><li class="opt">3. 난로</li><li class="opt">4. 가습기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A classic electric pedestal fan.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s22_r_11</span><span class="cat">직업 파악</span>
+            <h3>농장에서 일하며 동물을 돌보는 사람은 누구입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 축산업자</li><li class="opt">2. 어부</li><li class="opt">3. 운전기사</li><li class="opt">4. 미용사</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A person feeding cows in a barn.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s22_r_2</span><span class="cat">활동 파악</span>
+            <h3>이 사람은 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 과일을 따고 있습니다</li><li class="opt">2. 씨를 뿌리고 있습니다</li><li class="opt">3. 물을 주고 있습니다</li><li class="opt">4. 배추를 심고 있습니다</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A worker picking apples from a tree branch.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s22_r_3</span><span class="cat">표 해석</span>
+            <h3>출발 시간은 몇 시입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 오후 2시</li><li class="opt">2. 오후 4시</li><li class="opt">3. 오전 10시</li><li class="opt">4. 오전 2시</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A Korean train ticket showing departure time 14:00.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s22_r_9</span><span class="cat">사물 파악</span>
+            <h3>다음 중 '저울'은 어느 것입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 저울</li><li class="opt">2. 가위</li><li class="opt">3. 거울</li><li class="opt">4. 분무기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A digital kitchen scale.</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 23 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s23_l_23</span><span class="cat">활동 파악</span>
+            <h3>이 사람은 지금 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 등산</li><li class="opt">2. 재봉</li><li class="opt">3. 요리</li><li class="opt">4. 사진</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man hiking up a green mountain trail.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s23_l_24</span><span class="cat">활동 파악</span>
+            <h3>이 사람은 지금 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 우산 판매대</li><li class="opt">2. 옷 가게</li><li class="opt">3. 신발 판매대</li><li class="opt">4. 시장 판매대</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> An umbrella stand inside a convenience store.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s23_l_25</span><span class="cat">날짜 파악</span>
+            <h3>몇 월 며칠입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 9월 21일</li><li class="opt">2. 9월 22일</li><li class="opt correct">3. 10월 23일</li><li class="opt">4. 10월 24일</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A paper with '10월 23일' written in large letters.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s23_l_26</span><span class="cat">장소 파악</span>
+            <h3>여기는 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 극장</li><li class="opt">2. 도서관</li><li class="opt">3. 우체국</li><li class="opt correct">4. 미용실</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A beauty salon with mirrors, chairs, and styling tools.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s23_l_27</span><span class="cat">직업 파악</span>
+            <h3>이 여자의 직업은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 의사</li><li class="opt">2. 경찰</li><li class="opt">3. 요리사</li><li class="opt correct">4. 미용사</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A smiling female hair stylist holding professional scissors.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s23_l_28</span><span class="cat">사물 파악</span>
+            <h3>이것은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 과일</li><li class="opt">2. 과자</li><li class="opt">3. 사탕</li><li class="opt correct">4. 음료수</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Assorted soda cans like Cider and Cola on a shelf.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s23_l_29</span><span class="cat">활동 파악</span>
+            <h3>사람들이 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 집 수리</li><li class="opt">2. 가방 제작</li><li class="opt">3. 세차</li><li class="opt">4. 기계 수리</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Workers repairing the wall of an old house.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s23_l_36</span><span class="cat">상황 파악</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 배 포장</li><li class="opt">2. 밭일</li><li class="opt">3. 주방 일</li><li class="opt">4. 어선 작업</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A worker carefully wrapping a pear in protective foam at an orchard.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s23_l_37</span><span class="cat">시간 파악</span>
+            <h3>지금은 몇 시입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 12:20</li><li class="opt">2. 11:20</li><li class="opt">3. 10:10</li><li class="opt">4. 12:05</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> An analog clock showing 12:20.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s23_r_10</span><span class="cat">도구 파악</span>
+            <h3>다음 그림을 맞게 설명한 것을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 망치</li><li class="opt">2. 손수레</li><li class="opt correct">3. 페인트 붓</li><li class="opt">4. 사다리</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Three different sized flat paint brushes with wooden handles.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s23_r_11</span><span class="cat">도구 파악</span>
+            <h3>다음 사진을 바르게 설명한 것을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 칼</li><li class="opt">2. 그릇</li><li class="opt correct">3. 손수레</li><li class="opt">4. 저울</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A blue metal L-shaped platform truck (hand truck) with four wheels.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s23_r_9</span><span class="cat">도구 파악</span>
+            <h3>다음 공구로 할 수 있는 것을 맞게 설명한 것을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 나무 베는 톱</li><li class="opt">2. 전선 자르는 니퍼</li><li class="opt">3. 못 박는 장도리</li><li class="opt correct">4. 나사 죄는 스패너</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A shiny steel adjustable wrench (spanner) placed on a workbench.</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 24 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s24_l_23</span><span class="cat">상황 파악</span>
+            <h3>이 가방이 너무 무거운데 좀 도와주시겠어요?</h3>
+            <ul class="opt-list"><li class="opt">1. 차 마시기</li><li class="opt correct">2. 짐 들어주기</li><li class="opt">3. 사무실 대화</li><li class="opt">4. 전화</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman helping a man carry a heavy suitcase.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s24_l_24</span><span class="cat">직업 파악</span>
+            <h3>이 여자의 직업은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 청소</li><li class="opt correct">2. 요리사</li><li class="opt">3. 침대 정리</li><li class="opt">4. 조리</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A chef in a white hat tasting a dish from a pan.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s24_l_25</span><span class="cat">날짜 파악</span>
+            <h3>몇 월 며칠입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 3/13</li><li class="opt">2. 3/14</li><li class="opt">3. 4/13</li><li class="opt">4. 4/14</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A paper showing '3월 13일'.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s24_l_26</span><span class="cat">장소 파악</span>
+            <h3>여기는 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 시장</li><li class="opt">2. 극장</li><li class="opt correct">3. 도서관</li><li class="opt">4. 운동장</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A quiet university library with rows of students studying.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s24_l_28</span><span class="cat">사물 파악</span>
+            <h3>이것은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 안경</li><li class="opt">2. 시계</li><li class="opt">3. 가구</li><li class="opt">4. 거울</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A pair of black-framed eye glasses.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s24_l_29</span><span class="cat">활동 파악</span>
+            <h3>이 사람은 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 전화</li><li class="opt">2. 라디오</li><li class="opt correct">3. TV 시청</li><li class="opt">4. 컴퓨터</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man relaxing on a couch watching a TV show.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s24_l_36</span><span class="cat">직업 파악</span>
+            <h3>이 사람의 직업은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 용접</li><li class="opt">2. 기차 정비</li><li class="opt correct">3. 교통 정리</li><li class="opt">4. 요리</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A police officer in uniform directing traffic at an intersection.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s24_l_37</span><span class="cat">상황 파악</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 창문 청소</li><li class="opt">2. 택배 수령</li><li class="opt">3. 택시 정류장</li><li class="opt correct">4. 버스 정류장</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Two people talking at a bus stop under a sign showing '7'.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s24_l_40</span><span class="cat">장소 파악</span>
+            <h3>두 사람이 대화하고 있는 곳은 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 2층 남성복</li><li class="opt">2. 3층 남성복</li><li class="opt correct">3. 2층 여성복</li><li class="opt">4. 3층 여성복</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A department store section filled with women's dresses.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s24_r_1</span><span class="cat">표지판</span>
+            <h3>이 표지는 무슨 뜻입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 차량 통행 불가</li><li class="opt">2. 물기 주의</li><li class="opt correct">3. 보행 금지</li><li class="opt">4. 물건 이동 금지</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A white circular sign with a red border and a person silhouette with a red slash.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s24_r_13</span><span class="cat">사물 파악</span>
+            <h3>다음 그림에 맞는 단어를 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 청소기</li><li class="opt">2. 세탁기</li><li class="opt">3. 냉장고</li><li class="opt">4. 선풍기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A modern home vacuum cleaner with an extension hose.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s24_r_14</span><span class="cat">활동 파악</span>
+            <h3>다음 그림에 맞는 문장을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 목 돌리기</li><li class="opt">2. 다리 올리기</li><li class="opt correct">3. 허리 굽히기</li><li class="opt">4. 두 팔 높이 들기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man stretching his waist sideways with hands on hips.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s24_r_2</span><span class="cat">활동 파악</span>
+            <h3>이 사람은 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 책 읽기</li><li class="opt correct">2. 창밖 보며 커피</li><li class="opt">3. 창문 닦기</li><li class="opt">4. 컴퓨터 작업</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man sitting by a window, smiling and holding a steaming coffee cup.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s24_r_3</span><span class="cat">표 해석</span>
+            <h3>이영수 씨가 타는 비행기는 어디까지 갑니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 이영수</li><li class="opt">2. 김포</li><li class="opt correct">3. 제주</li><li class="opt">4. 서울</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A boarding pass showing Passenger: LEE YOUNGSOO, From: GIMPO, To: JEJU.</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 25 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s25_l_23</span><span class="cat">직업 파악</span>
+            <h3>직업이 뭐예요?</h3>
+            <ul class="opt-list"><li class="opt">1. 창고 정리</li><li class="opt">2. 농사일</li><li class="opt correct">3. 자동차 공장</li><li class="opt">4. 축사 관리</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Automobile assembly line with robotic arms and workers.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s25_l_24</span><span class="cat">활동 파악</span>
+            <h3>이 사람은 지금 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. TV 보며 식사</li><li class="opt">2. 라디오 공부</li><li class="opt">3. 신문 읽기</li><li class="opt">4. 요리 전화</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A person eating dinner in front of a TV screen.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s25_l_25</span><span class="cat">날짜 파악</span>
+            <h3>몇 월 며칠입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 7/14</li><li class="opt">2. 7/15</li><li class="opt">3. 8/14</li><li class="opt">4. 8/15</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A calendar page showing July 14th.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s25_l_26</span><span class="cat">위치 파악</span>
+            <h3>남자의 사무실은 어느 것입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 경찰서 건너편</li><li class="opt">2. 편의점 옆</li><li class="opt">3. 24시 편의점</li><li class="opt">4. 우체국 옆</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A simple city map showing a 4-way intersection with a police station and a convenience store.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s25_l_27</span><span class="cat">직업 파악</span>
+            <h3>이 여자의 직업은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 의사</li><li class="opt">2. 교사</li><li class="opt">3. 경찰</li><li class="opt correct">4. 미용사</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A smiling female hair stylist holding professional scissors.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s25_l_28</span><span class="cat">사물 파악</span>
+            <h3>이것은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 옷</li><li class="opt">2. 돈</li><li class="opt correct">3. 구두</li><li class="opt">4. 모자</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A pair of shiny black leather dress shoes.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s25_l_29</span><span class="cat">활동 파악</span>
+            <h3>이 여자는 지금 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 택시 잡기</li><li class="opt">2. 자전거 타기</li><li class="opt">3. 택시 운전</li><li class="opt">4. 횡단보도 건너기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman waving at an approaching yellow taxi.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s25_l_36</span><span class="cat">장소 파악</span>
+            <h3>여기는 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 시장</li><li class="opt">2. 등산</li><li class="opt">3. 영화관</li><li class="opt correct">4. 도서관</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A quiet library with study desks.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s25_l_37</span><span class="cat">사물 파악</span>
+            <h3>이것은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 난로</li><li class="opt">2. 노트북</li><li class="opt">3. 수박</li><li class="opt">4. 선풍기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> An electric space heater glowing orange.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s25_l_39</span><span class="cat">활동 파악</span>
+            <h3>두 사람은 지금 무엇을 할 것입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 콘서트 가기</li><li class="opt">2. 쇼핑하기</li><li class="opt correct">3. TV 보기</li><li class="opt">4. 영화관 가기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A cozy living room with a TV on.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s25_l_40</span><span class="cat">활동 파악</span>
+            <h3>남자는 설날에 무엇을 하겠습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 일하기</li><li class="opt">2. 집에서 쉬기</li><li class="opt">3. 떡국 만들기</li><li class="opt correct">4. 여자의 집 가기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A bowl of Tteokguk (Korean rice cake soup) prepared for a guest.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s25_r_1</span><span class="cat">표지판</span>
+            <h3>이 표지는 무슨 뜻입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 출입문에 기대지 마십시오</li><li class="opt">2. 점검 중 문 열지 마십시오</li><li class="opt">3. 계단에서 뛰지 마십시오</li><li class="opt correct">4. 문 닫힐 때 타지 마십시오</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Prohibition sign: a person trying to step into closing subway doors with a red slash.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s25_r_12</span><span class="cat">도구 파악</span>
+            <h3>모내기 할 때 모를 옮겨심는 기계는 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 트렉터</li><li class="opt">2. 탈곡기</li><li class="opt">3. 콤바인</li><li class="opt correct">4. 이앙기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A rice transplanter machine working in a muddy rice field.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s25_r_13</span><span class="cat">사물 파악</span>
+            <h3>다음 그림에 맞는 단어를 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 전기드릴</li><li class="opt">2. 압력드릴</li><li class="opt">3. 절단기</li><li class="opt">4. 선풍기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A cordless power drill with a bit attached.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s25_r_14</span><span class="cat">활동 파악</span>
+            <h3>다음 그림에 맞는 문장을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 물건을 팔고 있음</li><li class="opt">2. 교통정리를 하고 있음</li><li class="opt">3. 횡단보도를 건너고 있음</li><li class="opt correct">4. 거리 청소를 하고 있음</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A street cleaner sweeping the sidewalk with a long broom.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s25_r_2</span><span class="cat">활동 파악</span>
+            <h3>이 사람은 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 불을 켜고 있음</li><li class="opt">2. 물을 붓고 있음</li><li class="opt correct">3. 그림을 걸고 있음</li><li class="opt">4. 창문을 닫고 있음</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman standing on a stool, hanging a framed picture on a living room wall.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s25_r_3</span><span class="cat">표 해석</span>
+            <h3>어린이의 여객요금은 얼마입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 2,500원</li><li class="opt correct">2. 1,200원</li><li class="opt">3. 500원</li><li class="opt">4. 무료</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Fare table: Adult 2,500 KRW, Child (소인) 1,200 KRW, Disabled 500 KRW discount.</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 26 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s26_l_23</span><span class="cat">사물 파악</span>
+            <h3>이것은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 환풍기</li><li class="opt">2. 손수레</li><li class="opt correct">3. 사다리</li><li class="opt">4. 바구니</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A standard aluminum A-frame ladder.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s26_l_24</span><span class="cat">활동 파악</span>
+            <h3>이 사람은 지금 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 환기 중</li><li class="opt">2. 공부 중</li><li class="opt">3. 박스 이동</li><li class="opt">4. 짐 들기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man wide opening a window to let fresh air into a smoky room.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s26_l_25</span><span class="cat">사물 파악</span>
+            <h3>이것은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 경운기</li><li class="opt">2. 손수레</li><li class="opt">3. 콤바인</li><li class="opt correct">4. 트랙터</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A modern red tractor parked in a field.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s26_l_26</span><span class="cat">활동 파악</span>
+            <h3>이 사람은 무엇을 합니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 거름 주기</li><li class="opt">2. 농약 치기</li><li class="opt correct">3. 모종 심기</li><li class="opt">4. 벌레 잡기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A farmer squatting and planting small green seedlings in a field row.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s26_l_27</span><span class="cat">날짜 파악</span>
+            <h3>내일은 며칠입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 14일</li><li class="opt correct">2. 15일</li><li class="opt">3. 28일</li><li class="opt">4. 29일</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A calendar page for May: the 14th is marked as Sunday, arrow pointing to the 15th.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s26_l_28</span><span class="cat">장소 파악</span>
+            <h3>여기는 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 도서관</li><li class="opt">2. 대사관</li><li class="opt">3. 우체국</li><li class="opt correct">4. 소방서</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A fire station building with red fire trucks parked in the garage bays.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s26_l_29</span><span class="cat">활동 파악</span>
+            <h3>여자는 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 문 열어줌</li><li class="opt">2. 문 닫아줌</li><li class="opt">3. 커피 타기</li><li class="opt">4. 커피 갖다 줌</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman opening a glass office door for a man carrying a briefcase.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s26_l_36</span><span class="cat">수량 파악</span>
+            <h3>몇 명입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 8명</li><li class="opt">2. 11명</li><li class="opt correct">3. 5명</li><li class="opt">4. 4명</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A simple drawing of 5 people's faces in a row.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s26_l_37</span><span class="cat">장소 파악</span>
+            <h3>어디 가세요?</h3>
+            <ul class="opt-list"><li class="opt">1. 우체국</li><li class="opt correct">2. 은행</li><li class="opt">3. 동사무소</li><li class="opt">4. 약국</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A bank building with a '하나은행' or general bank logo.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s26_l_38</span><span class="cat">활동 파악</span>
+            <h3>남자는 어떻게 하겠습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 휴게실 휴식</li><li class="opt">2. 약국 방문</li><li class="opt">3. 의사 진찰</li><li class="opt">4. 머리 깎기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man sitting on a sofa in a company rest area.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s26_l_39</span><span class="cat">장소 파악</span>
+            <h3>여기는 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 안과</li><li class="opt">2. 소아과</li><li class="opt correct">3. 정형외과</li><li class="opt">4. 이비인후과</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A clinic with a sign '정형외과' and a patient with a bandaged ankle.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s26_l_40</span><span class="cat">활동 파악</span>
+            <h3>남자는 무엇을 해야 합니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 수술</li><li class="opt">2. 걷기</li><li class="opt">3. 약 먹기</li><li class="opt correct">4. 찜질</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A person applying an ice pack to their foot at home.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s26_r_1</span><span class="cat">사물 파악</span>
+            <h3>이것은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 송곳입니다</li><li class="opt correct">2. 열쇠입니다</li><li class="opt">3. 렌치입니다</li><li class="opt">4. 드라이버입니다</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A single metallic door key on a plain background.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s26_r_12</span><span class="cat">도구 파악</span>
+            <h3>벼, 보리의 이삭에서 낟알을 떨어내는 농기계는 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 트렉터</li><li class="opt">2. 콤바인</li><li class="opt correct">3. 탈곡기</li><li class="opt">4. 이앙기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> An old-style mechanical rice thresher (탈곡기) on a farm.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s26_r_13</span><span class="cat">사물 파악</span>
+            <h3>다음 그림에 맞는 단어를 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 사원증</li><li class="opt">2. 학생증</li><li class="opt">3. 운전면허증</li><li class="opt">4. 건강보험증</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> An identification badge with 'KBS' logo, a male photo, and name 'Jung Dong-gun'.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s26_r_14</span><span class="cat">활동 파악</span>
+            <h3>다음 그림에 맞는 문장을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 사진사가 촬영 중</li><li class="opt">2. 의사가 치료 중</li><li class="opt">3. 교사가 교수 중</li><li class="opt correct">4. 의사가 진찰 중</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A pediatrician using a stethoscope on a young child while the mother watches.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s26_r_2</span><span class="cat">활동 파악</span>
+            <h3>이 사람은 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 머리를 묶고 운동을 합니다</li><li class="opt">2. 머리를 풀고 샴푸를 합니다</li><li class="opt">3. 신발을 신고 집 밖으로 나갑니다</li><li class="opt correct">4. 신발을 벗고 집 안으로 들어갑니다</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman at a Korean-style house entrance (Genkan) taking off her sneakers to step up into the living room.</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 27 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s27_l_23</span><span class="cat">시각 정보</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 교통정리</li><li class="opt">2. 사무실 근무</li><li class="opt">3. 요리사</li><li class="opt">4. 공장 작업</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A police officer directing traffic in a street with hand signals.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s27_l_24</span><span class="cat">시간 파악</span>
+            <h3>지금은 몇 시입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 11:00</li><li class="opt">2. 10:00</li><li class="opt">3. 12:00</li><li class="opt">4. 1:00</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Clock showing 11:00.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s27_l_26</span><span class="cat">사물 파악</span>
+            <h3>이것은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 신문</li><li class="opt">2. 책상</li><li class="opt">3. 연필</li><li class="opt">4. 가방</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A bundle of Korean newspapers on a stand.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s27_l_27</span><span class="cat">직업 파악</span>
+            <h3>이 여자의 직업은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 의사</li><li class="opt correct">2. 교사</li><li class="opt">3. 경찰</li><li class="opt">4. 미용사</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A female teacher in front of a chalkboard.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s27_l_28</span><span class="cat">장소 파악</span>
+            <h3>여기는 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 공장</li><li class="opt">2. 학교</li><li class="opt">3. 은행</li><li class="opt correct">4. 슈퍼마켓</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Inside of a supermarket with shelves and a shopping cart.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s27_l_29</span><span class="cat">활동 파악</span>
+            <h3>사람들은 여기에서 무엇을 합니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 돈을 찾습니다.</li><li class="opt correct">2. 음료수를 삽니다.</li><li class="opt">3. 사진을 찍습니다.</li><li class="opt">4. 전화 요금을 냅니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A person buying a can of soda from a vending machine.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s27_l_36</span><span class="cat">시각 정보</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 4월 27일 메모</li><li class="opt">2. 번호 다른 메모</li><li class="opt correct">3. 4월 29일 메모</li><li class="opt">4. 다른 날짜 메모</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A sticky note with '4월 29일, 이영수 과장님, 720-0020' written on it.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s27_l_37</span><span class="cat">활동 파악</span>
+            <h3>남자는 지금 무엇을 합니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 축구</li><li class="opt correct">2. 가구 공장</li><li class="opt">3. 독서</li><li class="opt">4. TV 시청</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man assembling a wooden chair in a furniture factory.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s27_l_38</span><span class="cat">장소 파악</span>
+            <h3>여기는 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 부동산 중개소</li><li class="opt">2. 동사무소</li><li class="opt">3. 경찰서</li><li class="opt">4. 출입국사무소</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Inside a Korean Real Estate Agency (부동산) with property listings on the window.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s27_l_39</span><span class="cat">장소 파악</span>
+            <h3>두 사람은 지금 어디에 있습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 버스 안</li><li class="opt">2. 택시 안</li><li class="opt">3. 남대문 시장</li><li class="opt">4. 버스 정류장</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Interior of a city bus with passengers.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s27_r_1</span><span class="cat">표지판</span>
+            <h3>이 표지는 무슨 뜻입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 탑승하지 마십시오.</li><li class="opt correct">2. 보행하지 마십시오.</li><li class="opt">3. 승강기를 타지 마십시오.</li><li class="opt">4. 물기 있는 손으로 만지지 마십시오.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Red circular prohibitory sign with a person walking inside and a red diagonal slash.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s27_r_13</span><span class="cat">시각 정보</span>
+            <h3>다음 그림을 보고 맞는 문장을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 심폐소생술</li><li class="opt">2. 인공호흡법</li><li class="opt">3. 잠 깨우기</li><li class="opt">4. 일으켜 세우기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A person performing chest compressions (CPR) on a victim.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s27_r_14</span><span class="cat">시각 정보</span>
+            <h3>다음 그림을 보고 맞는 문장을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 여기에 표를 파는 곳이 있습니다.</li><li class="opt">2. 여기에 주차를 하는 곳이 있습니다.</li><li class="opt correct">3. 50m 앞에 표를 파는 곳이 있습니다.</li><li class="opt">4. 50m 금방에 차를 세울 수 있습니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A sign saying '월정매표소' with an up arrow and '50m' text.</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 28 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s28_l_23</span><span class="cat">시간 파악</span>
+            <h3>지금은 몇 시입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 3:30</li><li class="opt">2. 4:30</li><li class="opt">3. 5:30</li><li class="opt">4. 6:30</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Clock showing 3:30.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s28_l_25</span><span class="cat">장소 파악</span>
+            <h3>서울 호텔이 어디에 있어요?</h3>
+            <ul class="opt-list"><li class="opt">1. 직진</li><li class="opt">2. 좌회전</li><li class="opt">3. 뒤로가기</li><li class="opt correct">4. 우회전</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Map showing a car turning right at a four-way intersection.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s28_l_26</span><span class="cat">활동 파악</span>
+            <h3>지금 무엇을 합니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 굽기</li><li class="opt">2. 튀기기</li><li class="opt">3. 삶기</li><li class="opt">4. 볶기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A fish being grilled on a mesh over charcoal.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s28_l_27</span><span class="cat">날짜 파악</span>
+            <h3>몇 월 며칠입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 4월 24일</li><li class="opt">2. 7월 24일</li><li class="opt">3. 10월 24일</li><li class="opt correct">4. 11월 24일</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A paper with '11월 24일' written in large letters.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s28_l_29</span><span class="cat">사물 파악</span>
+            <h3>이것은 무엇입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 양파</li><li class="opt">2. 당근</li><li class="opt">3. 감자</li><li class="opt correct">4. 생선</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Two elongated items that look like sweet potatoes but are referred to as fish.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s28_l_36</span><span class="cat">활동 파악</span>
+            <h3>무슨 일을 하세요?</h3>
+            <ul class="opt-list"><li class="opt">1. 달리기</li><li class="opt">2. 주방</li><li class="opt correct">3. 재봉 작업</li><li class="opt">4. 헬스</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A worker at a sewing machine making sneakers.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s28_l_37</span><span class="cat">장소 파악</span>
+            <h3>어디에서 일합니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 양계장</li><li class="opt">2. 논일</li><li class="opt">3. 돼지우리</li><li class="opt">4. 어선</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A large chicken coop with many white hens.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s28_l_38</span><span class="cat">활동 파악</span>
+            <h3>여자는 어떤 일을 합니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 그릇 씻기</li><li class="opt">2. 음식 만들기</li><li class="opt">3. 책 정리</li><li class="opt">4. 학생 가르치기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman washing dishes in a commercial kitchen.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s28_l_39</span><span class="cat">활동 파악</span>
+            <h3>남자는 토요일마다 무엇을 합니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 노래방</li><li class="opt">2. 운동</li><li class="opt correct">3. 음악 연습</li><li class="opt">4. 인도네시아어 교육</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A band with a guitar and drums practicing in a studio.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s28_l_40</span><span class="cat">활동 파악</span>
+            <h3>방방 씨는 어디를 다쳤습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 눈</li><li class="opt">2. 손</li><li class="opt">3. 목</li><li class="opt">4. 귀</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A person with a bandage over their eye after welding.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s28_r_1</span><span class="cat">표지판</span>
+            <h3>이 표지는 무슨 뜻입니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 자전거는 다닐 수 없습니다.</li><li class="opt">2. 자전거만 다닐 수 있는 길입니다.</li><li class="opt">3. 자전거를 세워둘 수 없습니다.</li><li class="opt">4. 자전거를 세워둘 수 있습니다.</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Red circular sign with a bicycle and a diagonal slash.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s28_r_13</span><span class="cat">시각 정보</span>
+            <h3>다음 그림을 보고 맞는 단어를 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 지계차</li><li class="opt">2. 트랙터</li><li class="opt">3. 콤바인</li><li class="opt">4. 화물트럭</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Industrial forklift (지게차) lifting a wooden pallet.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s28_r_2</span><span class="cat">사물 파악</span>
+            <h3>무엇이 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 밥 한 통과 계란</li><li class="opt correct">2. 밥 한 공기와 계란</li><li class="opt">3. 밥 한 병과 계란</li><li class="opt">4. 밥 한 마리와 계란</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A bowl of rice (공기) and a fried egg on a small plate.</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 29 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s29_l_23</span><span class="cat">시간 파악</span>
+            <h3>지금은 몇 시입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 8:30</li><li class="opt">2. 10:30</li><li class="opt">3. 11:30</li><li class="opt correct">4. 9:30</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> An analog clock showing 9:30.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s29_l_25</span><span class="cat">활동 파악</span>
+            <h3>이 사람은 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 작업복 입음</li><li class="opt">2. 작업 시작</li><li class="opt correct">3. 작업을 함</li><li class="opt">4. 작업장 진입</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A factory worker standing in overalls, looking busy.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s29_l_26</span><span class="cat">활동 파악</span>
+            <h3>이 사람은 지금 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 때리고 있음</li><li class="opt correct">2. 화를 내고 있음</li><li class="opt">3. 사과를 함</li><li class="opt">4. 싸움을 함</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> An angry man pointing his finger and shouting at someone.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s29_l_27</span><span class="cat">활동 파악</span>
+            <h3>오늘 뭐 해요?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 등산</li><li class="opt">2. 수영</li><li class="opt">3. 회식</li><li class="opt">4. 환송</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man and a woman in hiking gear climbing a mountain path.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s29_l_28</span><span class="cat">사물 파악</span>
+            <h3>어서 쓰세요. 무엇을 써야 합니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 안전모</li><li class="opt">2. 보안면</li><li class="opt">3. 보안경</li><li class="opt">4. 안전화</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A collection of safety gear: hard hat, face shield, goggles, boots.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s29_l_36</span><span class="cat">활동 파악</span>
+            <h3>들은 내용과 관계있는 그림을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt correct">1. 영화관 데이트</li><li class="opt">2. 공부</li><li class="opt">3. 배드민턴</li><li class="opt">4. 등산</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A couple eating popcorn while watching a movie in a dark theater.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s29_l_39</span><span class="cat">활동 파악</span>
+            <h3>여자는 이번 주 토요일에 무엇을 하겠습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 이사하겠음</li><li class="opt">2. 요리 배우기</li><li class="opt correct">3. 남자를 도와줌</li><li class="opt">4. 남자의 집 방문</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman carrying a cardboard box toward a man.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s29_l_40</span><span class="cat">활동 파악</span>
+            <h3>남자는 어떻게 하겠습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 밥 먹기</li><li class="opt correct">2. 식당에 가기</li><li class="opt">3. 전화 걸기</li><li class="opt">4. 사무실 가기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man walking back toward a restaurant entrance.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s29_r_1</span><span class="cat">표지판</span>
+            <h3>이 표지는 무슨 뜻입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 빨리 운전하면 안 됩니다</li><li class="opt">2. 사람이 탑승하면 안 됩니다</li><li class="opt correct">3. 차가 지나다니면 안 됩니다</li><li class="opt">4. 기계의 전원을 켜면 안 됩니다</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A roadside yellow signboard saying '교통차단' with a red circle prohibition sign (no entry for cars).</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s29_r_13</span><span class="cat">사물 파악</span>
+            <h3>다음 그림에 맞는 단어를 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 신문</li><li class="opt">2. 수첩</li><li class="opt correct">3. 달력</li><li class="opt">4. 공책</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A typical desktop flip calendar with Korean holidays marked in red.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s29_r_14</span><span class="cat">활동 파악</span>
+            <h3>그림에 대한 설명으로 맞는 것을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 삼 주 공부</li><li class="opt">2. 삼 달 공부</li><li class="opt">3. 삼 년 공부</li><li class="opt correct">4. 삼 개월 공부</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A timeline graphic: Feb 1st to April 30th, with a student studying diligently.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s29_r_16</span><span class="cat">활동 파악</span>
+            <h3>사진에 대한 설명으로 맞는 것을 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 택시 세움</li><li class="opt">2. 무단횡단 중</li><li class="opt">3. 차 타려 달림</li><li class="opt correct">4. 신호 준수하여 건넘</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man walking across a crosswalk on a green light, cars stopped correctly at the line.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s29_r_2</span><span class="cat">표지판 찾기</span>
+            <h3>엘리베이터를 타려고 합니다. 다음 중 어떤 표지판을 찾아야 합니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 엘리베이터 내부 사람</li><li class="opt">2. 에스컬레이터 이용</li><li class="opt">3. 수도꼭지 물</li><li class="opt">4. 비상구 탈출</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> No prompt available</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s29_r_3</span><span class="cat">장소 파악</span>
+            <h3>여기서 무엇을 합니까? (여기는 어디입니까?)</h3>
+            <ul class="opt-list"><li class="opt">1. 버스 승강장</li><li class="opt correct">2. 공항 검색대</li><li class="opt">3. 화물 찾는 곳</li><li class="opt">4. 선착장</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Airport security checkpoint: passengers standing in line placing bags on an X-ray conveyor belt.</div>
+        </div>
+    </div>
+    <div class="set-header"><h2>제 30 세트</h2></div>
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s30_l_23</span><span class="cat">시간 파악</span>
+            <h3>지금은 몇 시입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 11:25</li><li class="opt">2. 10:15</li><li class="opt correct">3. 10:25</li><li class="opt">4. 11:15</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> An analog clock showing 10:25.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s30_l_25</span><span class="cat">날씨 파악</span>
+            <h3>날씨가 어떻습니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 눈이 많이 옴</li><li class="opt">2. 비가 많이 옴</li><li class="opt">3. 맑고 바람 없음</li><li class="opt correct">4. 바람이 붊</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A girl standing in a strong wind, hair blowing forward.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s30_l_26</span><span class="cat">날짜 파악</span>
+            <h3>몇 월 며칠입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 7/12</li><li class="opt">2. 7/21</li><li class="opt correct">3. 8/12</li><li class="opt">4. 8/21</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A sticky note with '8월 12일' written on it.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s30_l_27</span><span class="cat">위치 파악</span>
+            <h3>집에서 제일 먼 곳은 어디입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 은행</li><li class="opt">2. 우체국</li><li class="opt">3. 경찰서</li><li class="opt correct">4. 소방서</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A map showing a house in the center, bank nearby, fire station at the far edge.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s30_l_36</span><span class="cat">직업 파악</span>
+            <h3>아버지는 무슨 일을 하십니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 소방관</li><li class="opt">2. 의사</li><li class="opt">3. 경찰관</li><li class="opt">4. 작업원</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A firefighter in a helmet and protective suit holding a hose.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s30_l_37</span><span class="cat">장소 파악</span>
+            <h3>반방 씨는 어디에서 일하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 건설 현장</li><li class="opt">2. 정비 현장</li><li class="opt">3. 가구 제작</li><li class="opt">4. 제설 작업</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A construction site with a steel frame of a building.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s30_l_38</span><span class="cat">활동 파악</span>
+            <h3>여자는 지금 무엇을 하려고 합니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 차 구매</li><li class="opt correct">2. 차 세우기</li><li class="opt">3. 택시비 지불</li><li class="opt">4. 주차비 지불</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A woman pointing at a car space in front of a cinema.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s30_l_39</span><span class="cat">활동 파악</span>
+            <h3>남자는 지금 무엇을 하고 있습니까?</h3>
+            <ul class="opt-list"><li class="opt correct">1. 음악 듣기</li><li class="opt">2. 운동 하기</li><li class="opt">3. 노래 부르기</li><li class="opt">4. 책 읽기</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A man wearing headphones, looking relaxed.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s30_r_13</span><span class="cat">정보 해석</span>
+            <h3>다음 그림에 맞는 단어를 고르십시오.</h3>
+            <ul class="opt-list"><li class="opt">1. 비행기표</li><li class="opt">2. 여객선표</li><li class="opt correct">3. 기차표</li><li class="opt">4. 버스표</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A KORAIL train ticket (승차권) showing Seoul to Busan route.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s30_r_14</span><span class="cat">그림 해석</span>
+            <h3>다음 그림에 대한 설명으로 맞는 것은?</h3>
+            <ul class="opt-list"><li class="opt">1. 거실이 2층</li><li class="opt">2. 방이 한 개</li><li class="opt correct">3. 화장실이 두 개</li><li class="opt">4. 부엌 옆 화장실</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Floor plan of an apartment with 2 bedrooms, a living room, kitchen, and 2 bathrooms.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s30_r_4</span><span class="cat">표지판</span>
+            <h3>이 표지는 무슨 뜻입니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 시속 50m 속도</li><li class="opt correct">2. 50m 앞 좌회전</li><li class="opt">3. 좌회전 금지</li><li class="opt">4. 주차 금지</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> A blue circular road sign with a white left-turn arrow and '50m' written below.</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="img-panel"><div class="missing">❌ 이미지 없음</div></div>
+        <div class="info-panel">
+            <span class="id">s30_r_5</span><span class="cat">표지판 찾기</span>
+            <h3>불이 나서 대피해야 합니다. 어떤 표지를 찾아야 합니까?</h3>
+            <ul class="opt-list"><li class="opt">1. 진입금지</li><li class="opt">2. 응급처치</li><li class="opt correct">3. 비상구</li><li class="opt">4. 폭발물 주의</li></ul>
+            <div class="prompt-box"><b>이미지 가이드:</b> Standard green emergency exit sign (Exit) with a silhouette of a running person.</div>
+        </div>
+    </div>
+    </body></html>

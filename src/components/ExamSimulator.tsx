@@ -389,6 +389,8 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
           <div className="grid grid-cols-1 gap-3 md:gap-4 h-full content-start">
             {currentQ.options.map((option, idx) => {
               const isSelected = answers[currentQ.id] === idx;
+              const optionImage = currentQ.optionImages?.[idx];
+              
               return (
                 <button
                   key={idx}
@@ -398,7 +400,18 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                   <div className={`w-8 h-8 md:w-14 md:h-14 rounded-lg md:rounded-2xl flex items-center justify-center text-sm md:text-xl font-black shrink-0 ${isSelected ? 'bg-white text-indigo-600 shadow-lg' : 'bg-gray-50 text-gray-400'}`}>
                     {idx + 1}
                   </div>
-                  <span className="text-sm md:text-lg lg:text-xl font-bold flex-1 leading-tight">{option}</span>
+                  
+                  {optionImage ? (
+                    <div className="flex-1 flex flex-col gap-2">
+                      <div className="bg-white p-2 rounded-xl overflow-hidden shadow-inner border border-gray-100">
+                        <img src={optionImage} alt={`Option ${idx + 1}`} className="max-h-24 md:max-h-32 object-contain" />
+                      </div>
+                      <span className={`text-sm md:text-lg font-bold ${isSelected ? 'text-white' : 'text-gray-900'}`}>{option}</span>
+                    </div>
+                  ) : (
+                    <span className="text-sm md:text-lg lg:text-xl font-bold flex-1 leading-tight">{option}</span>
+                  )}
+                  
                   {isSelected && <CheckCircle className="w-5 h-5 md:w-8 md:h-8 text-indigo-200" />}
                 </button>
               );
