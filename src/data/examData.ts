@@ -1,6 +1,3 @@
-import { ExamQuestion, QuestionType } from '../types/exam';
-
-export const examData: ExamQuestion[] = [
 import { Question, QuestionType } from '../types';
 
 /**
@@ -278,7 +275,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s1_l_24_2.jpg",
       "/images/exam/listening/s1_l_24_3.png",
       "/images/exam/listening/s1_l_24_4.jpg"
-    ]
+    ],
     optionImagePrompts: [
       "A person skiing down a snowy slope.",
       "A person swimming in a pool.",
@@ -300,7 +297,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s1_l_25_2.jpg",
       "/images/exam/listening/s1_l_25_3.jpg",
       "/images/exam/listening/s1_l_25_4.png"
-    ]
+    ],
     imagePrompt: "A man struggling to lift a huge, overstuffed duffel bag with both hands, sweating significantly."
   },
 {
@@ -421,7 +418,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s1_l_36_2.png",
       "/images/exam/listening/s1_l_36_3.jpg",
       "/images/exam/listening/s1_l_36_4.png"
-    ]
+    ],
     optionImagePrompts: [
       "A person moving heavy cargo boxes in a warehouse.",
       "A factory worker assembling shoes/sneakers on a production line.",
@@ -443,7 +440,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s1_l_37_2.png",
       "/images/exam/listening/s1_l_37_3.png",
       "/images/exam/listening/s1_l_37_4.png"
-    ]
+    ],
     optionImagePrompts: [
       "Interior of a large modern poultry farm with many chickens.",
       "A vast agricultural field with rice or vegetables.",
@@ -955,7 +952,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s3_l_23_2.jpg",
       "/images/exam/listening/s3_l_23_3.png",
       "/images/exam/listening/s3_l_23_4.png"
-    ]
+    ],
     optionImagePrompts: [
       "A person buying groceries at a supermarket.",
       "A person cutting vegetables on a board in a kitchen.",
@@ -977,7 +974,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s3_l_24_2.png",
       "/images/exam/listening/s3_l_24_3.png",
       "/images/exam/listening/s3_l_24_4.png"
-    ]
+    ],
     optionImagePrompts: [
       "A man sitting on a sofa reading a newspaper.",
       "A man talking on a mobile phone.",
@@ -1133,7 +1130,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s3_l_37_2.png",
       "/images/exam/listening/s3_l_37_3.png",
       "/images/exam/listening/s3_l_37_4.png"
-    ]
+    ],
     optionImagePrompts: [
       "A doctor examining a patient's heartbeat with a stethoscope.",
       "A bank clerk counting money behind a glass window.",
@@ -1407,7 +1404,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s4_l_23_2.png",
       "/images/exam/listening/s4_l_23_3.png",
       "/images/exam/listening/s4_l_23_4.png"
-    ]
+    ],
     optionImagePrompts: [
       "A person standing with arms stretched horizontally.",
       "A person bending forward at the waist.",
@@ -1429,7 +1426,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s4_l_24_2.png",
       "/images/exam/listening/s4_l_24_3.png",
       "/images/exam/listening/s4_l_24_4.png"
-    ]
+    ],
     optionImagePrompts: [
       "A photography studio with camera icons.",
       "A gas station with pumps and cars.",
@@ -1477,7 +1474,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s4_l_27_2.png",
       "/images/exam/listening/s4_l_27_3.png",
       "/images/exam/listening/s4_l_27_4.png"
-    ]
+    ],
     imagePrompt: "A person sitting at a table with a bowl of rice and side dishes, eating."
   },
 {
@@ -1494,7 +1491,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s4_l_28_2.png",
       "/images/exam/listening/s4_l_28_3.png",
       "/images/exam/listening/s4_l_28_4.jpg"
-    ]
+    ],
     imagePrompt: "An electric desk fan blowing a small flag."
   },
 {
@@ -1511,7 +1508,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s4_l_29_2.png",
       "/images/exam/listening/s4_l_29_3.png",
       "/images/exam/listening/s4_l_29_4.png"
-    ]
+    ],
     imagePrompt: "A calendar page clearly showing April 17th."
   },
 {
@@ -1610,7 +1607,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s4_l_37_2.png",
       "/images/exam/listening/s4_l_37_3.png",
       "/images/exam/listening/s4_l_37_4.png"
-    ]
+    ],
     optionImagePrompts: [
       "A bustling traditional Korean market with food and shops.",
       "Interior of a pharmacy with medicine shelves.",
@@ -1652,7 +1649,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s4_l_40_2.png",
       "/images/exam/listening/s4_l_40_3.png",
       "/images/exam/listening/s4_l_40_4.png"
-    ]
+    ],
     optionImagePrompts: [
       "A pair of scissors.",
       "A garden shovel (spade).",
@@ -1679,7 +1676,7 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["칼입니다.", "도마입니다.", "냄비입니다.", "수저입니다."],
     correctAnswer: 1,
     explanation: "식재료를 썰 때 받쳐 사용하는 도구는 '도마'입니다.",
-    imageUrl: "/images/exam/daily/s5_r_2.jpg"
+    imageUrl: "/images/exam/daily/s5_r_2.jpg",
     imagePrompt: "A rectangular wooden cutting board for kitchen use, solo object focus."
   },
 {
@@ -1898,7 +1895,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s5_l_23_2.jpg",
       "/images/exam/listening/s5_l_23_3.png",
       "/images/exam/listening/s5_l_23_4.png"
-    ]
+    ],
     imagePrompt: "A breakfast table with sliced bread, a fried egg, and a glass of juice."
   },
 {
@@ -1915,7 +1912,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s5_l_24_2.png",
       "/images/exam/listening/s5_l_24_3.png",
       "/images/exam/listening/s5_l_24_4.png"
-    ]
+    ],
     imagePrompt: "A toolbox with various tools, but a hammer is prominently highlighted in the center."
   },
 {
@@ -2042,7 +2039,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s5_l_36_2.png",
       "/images/exam/listening/s5_l_36_3.png",
       "/images/exam/listening/s5_l_36_4.png"
-    ]
+    ],
     imagePrompt: "A person holding many boxes while another person kindly opens the door for them."
   },
 {
@@ -2059,7 +2056,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s5_l_37_2.png",
       "/images/exam/listening/s5_l_37_3.png",
       "/images/exam/listening/s5_l_37_4.png"
-    ]
+    ],
     imagePrompt: "Two recycling bins labeled 'General Trash' and 'Empty Bottles' (빈 병류)."
   },
 {
@@ -2341,7 +2338,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s6_l_24_2.png",
       "/images/exam/listening/s6_l_24_3.png",
       "/images/exam/listening/s6_l_24_4.png"
-    ]
+    ],
     imagePrompt: "A male chef wearing a white uniform and hat, cooking in a professional kitchen."
   },
 {
@@ -2368,7 +2365,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s6_l_26_2.png",
       "/images/exam/listening/s6_l_26_3.png",
       "/images/exam/listening/s6_l_26_4.png"
-    ]
+    ],
     imagePrompt: "A large calendar page showing '2월 16일' clearly."
   },
 {
@@ -2747,7 +2744,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s7_l_24_2.jpg",
       "/images/exam/listening/s7_l_24_3.png",
       "/images/exam/listening/s7_l_24_4.png"
-    ]
+    ],
     imagePrompt: "A woman wearing a long winter coat but no hat, standing next to a hat display."
   },
 {
@@ -3154,7 +3151,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s8_l_23_2.png",
       "/images/exam/listening/s8_l_23_3.png",
       "/images/exam/listening/s8_l_23_4.png"
-    ]
+    ],
     imagePrompt: "A breakfast table with toast, a fried egg, and a glass of orange juice."
   },
 {
@@ -3171,7 +3168,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s8_l_24_2.png",
       "/images/exam/listening/s8_l_24_3.png",
       "/images/exam/listening/s8_l_24_4.png"
-    ]
+    ],
     imagePrompt: "A heavy metal hammer (Mangchi) highlighted in a tool box."
   },
 {
@@ -3563,7 +3560,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s9_l_23_2.jpg",
       "/images/exam/listening/s9_l_23_3.jpg",
       "/images/exam/listening/s9_l_23_4.png"
-    ]
+    ],
     imagePrompt: "A man holding a phone receiver and talking with a smile."
   },
 {
@@ -3580,7 +3577,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s9_l_24_2.png",
       "/images/exam/listening/s9_l_24_3.png",
       "/images/exam/listening/s9_l_24_4.png"
-    ]
+    ],
     imagePrompt: "A person swinging a paddle to hit a ping-pong ball."
   },
 {
@@ -3602,7 +3599,7 @@ export const STATIC_EXAM_DATA: Question[] = [
     options: ["약을 살 수 있습니다.", "영화를 볼 수 있습니다.", "머리를 자를 수 있습니다.", "비행기 표를 살 수 있습니다."],
     correctAnswer: 0,
     explanation: "약국 간판이 보이는 곳이므로 약을 살 수 있습니다.",
-    imageUrl: "/images/exam/life/s9_l_26.jpg"
+    imageUrl: "/images/exam/life/s9_l_26.jpg",
     imagePrompt: "A shop interior with a sign '나나약국' and medicine boxes on shelves."
   },
 {
@@ -3705,7 +3702,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s9_l_36_2.png",
       "/images/exam/listening/s9_l_36_3.png",
       "/images/exam/listening/s9_l_36_4.png"
-    ]
+    ],
     imagePrompt: "A calendar page showing '1월 30일' circled in red."
   },
 {
@@ -3722,7 +3719,7 @@ export const STATIC_EXAM_DATA: Question[] = [
       "/images/exam/listening/s9_l_37_2.jpg",
       "/images/exam/listening/s9_l_37_3.png",
       "/images/exam/listening/s9_l_37_4.png"
-    ]
+    ],
     imagePrompt: "A man holding a professional camera and taking a picture of scenery."
   },
 {
