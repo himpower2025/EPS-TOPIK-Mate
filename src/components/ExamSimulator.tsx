@@ -376,7 +376,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                       </div>
                     </div>
                   ) : (
-                    (!isImageMandatory || !questionImage) && displayContext && (
+                    !questionImage && displayContext && (
                       <div className="p-6 md:p-10 text-lg md:text-xl lg:text-2xl font-serif leading-relaxed text-gray-800 bg-indigo-50/30 rounded-2xl md:rounded-[2.5rem] w-full border border-indigo-100 italic shadow-inner text-center">
                         "{displayContext}"
                       </div>
@@ -403,11 +403,10 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                   </div>
                   
                   {optionImage ? (
-                    <div className="flex-1 flex flex-col gap-2">
+                    <div className="flex-1 flex justify-center">
                       <div className="bg-white p-2 rounded-xl overflow-hidden shadow-inner border border-gray-100">
                         <img src={optionImage} alt={`Option ${idx + 1}`} className="max-h-24 md:max-h-32 object-contain" />
                       </div>
-                      <span className={`text-sm md:text-lg font-bold ${isSelected ? 'text-white' : 'text-gray-900'}`}>{option}</span>
                     </div>
                   ) : (
                     <span className="text-sm md:text-lg lg:text-xl font-bold flex-1 leading-tight">{option}</span>
