@@ -232,11 +232,8 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
   const currentQ = questions[currentIndex];
   const isLast = currentIndex === questions.length - 1;
   const isListening = currentQ.type === QuestionType.LISTENING;
-  const isImageMandatory = [
-    'Signboards', 'Picture Selection', 'Action Identification', 
-    'Location Identification', 'Person Counting', 'Object Identification',
-    'Graph Analysis', 'Clinic Timetable', '표지판', '그림 고르기', '그래프 분석', '진료 시간표'
-  ].includes(currentQ.category);
+  // 카테고리 상관없이 imageUrl 또는 imagePrompt가 있으면 이미지 문제로 처리
+  const hasImage = !!(currentQ.imageUrl || currentQ.imagePrompt);
 
   const displayQuestionText = cleanText(currentQ.questionText);
   const displayContext = cleanText(currentQ.context || "");
@@ -314,17 +311,19 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                 </div>
               ) : (
                 <div className="w-full space-y-4 md:space-y-8">
-                  {isImageMandatory && questionImage ? (
+                  {/* 이미지가 있는 문제: 카테고리 상관없이 이미지 표시 */}
+                  {hasImage && questionImage ? (
                     <div className="w-full flex items-center justify-center">
                       <img
                         src={questionImage}
                         className="max-h-[200px] md:max-h-[350px] w-auto object-contain rounded-2xl md:rounded-[2rem] shadow-2xl animate-fade-in"
                         alt="Exam Visual"
                         referrerPolicy="no-referrer"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                       />
                     </div>
                   ) : (
-                    isImageMandatory && (currentQ.imageUrl || currentQ.imagePrompt) && !isListening && (
+                    hasImage && !isListening && !isGeneratingVisuals && (
                       <div className="flex flex-col items-center gap-4 py-8">
                         <p className="text-gray-400 text-sm font-medium">Image failed to load</p>
                         <button
@@ -550,6 +549,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
               <button
                 onClick={() => {
                   setShowCompleteConfirm(false);
+                  setIsGeneratingVisuals(false); // 이미지 로딩 중단
                   handleSubmit({ ...answers });
                 }}
                 className="w-full py-4 bg-green-600 text-white font-black rounded-2xl uppercase tracking-widest active:scale-95 transition-all"
