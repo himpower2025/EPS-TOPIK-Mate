@@ -130,7 +130,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
 
     setLoadingAudio(true);
     try {
-      // Force fallback for dialogue questions to ensure sequential playback with pauses
+      // 대화체는 브라우저 TTS 폴백으로 2인칬 재생
       if (isDialogue) {
         throw new Error("Force Sequential TTS for dialogue gap support");
       }
@@ -160,42 +160,63 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
         throw new Error("AI returned no audio buffer");
       }
     } catch (err) {
-      console.warn("AI Audio failed or threw an error, falling back to browser Sequential TTS:", err);
-      
+      console.warn("AI Audio failed, falling back to browser Sequential TTS:", err);
+
       setLoadingAudio(false);
       setIsPlaying(true);
-      window.speechSynthesis.cancel(); // Clear any queued utterances
-      
+      window.speechSynthesis.cancel();
+
+      // 한국어 목소리 선택: 실제 차이나는 두 목소리를 선택시도
+      const getKoreanVoice = (preferMale: boolean): SpeechSynthesisVoice | null => {
+        const voices = window.speechSynthesis.getVoices();
+        const koVoices = voices.filter(v => v.lang.startsWith('ko'));
+        if (koVoices.length === 0) return null;
+        if (koVoices.length === 1) return koVoices[0];
+        // 두 개 이상이면 첫 번째를 남성, 두 번째를 여성으로 사용
+        return preferMale ? koVoices[0] : koVoices[koVoices.length - 1];
+      };
+
+      const pause = (ms: number): Promise<void> =>
+        new Promise(resolve => setTimeout(resolve, ms));
+
       const playLine = (line: { text: string; speaker: string }): Promise<void> => {
         return new Promise((resolve) => {
           const utterance = new SpeechSynthesisUtterance(line.text);
           utterance.lang = 'ko-KR';
-          
-          // Simulate distinct voices through pitch and rate adjustment
+          utterance.volume = 1.0;
+
           if (line.speaker === 'Man') {
-            utterance.pitch = 0.7;
-            utterance.rate = 0.85;
+            const maleVoice = getKoreanVoice(true);
+            if (maleVoice) utterance.voice = maleVoice;
+            utterance.pitch = 0.75;   // 낙은 남성음
+            utterance.rate = 0.82;    // 시험에 적합한 느린 속도
           } else if (line.speaker === 'Woman') {
-            utterance.pitch = 1.4;
-            utterance.rate = 0.9;
+            const femaleVoice = getKoreanVoice(false);
+            if (femaleVoice) utterance.voice = femaleVoice;
+            utterance.pitch = 1.35;   // 높은 여성음
+            utterance.rate = 0.85;
           } else {
             utterance.pitch = 1.0;
-            utterance.rate = 0.85; // Narrator
+            utterance.rate = 0.80;    // 나레이터 속도 더 느리게
           }
-          
-          utterance.onend = () => {
-            // Add a natural 1000ms conversational gap between speakers
-            setTimeout(resolve, 1000);
+
+          utterance.onend = async () => {
+            // 화자 사이 자연스러운 충분한 쉼: 대화체 1200ms, 나레이터 800ms
+            const gapMs = (line.speaker === 'Narrator') ? 800 : 1200;
+            await pause(gapMs);
+            resolve();
           };
           utterance.onerror = () => resolve();
-          
+
           window.speechSynthesis.speak(utterance);
         });
       };
 
       const playAllLines = async () => {
-        for (const line of lines) {
-          await playLine(line);
+        // 첫 문장 전 300ms 준비 시간
+        await pause(300);
+        for (let i = 0; i < lines.length; i++) {
+          await playLine(lines[i]);
         }
         setIsPlaying(false);
       };
