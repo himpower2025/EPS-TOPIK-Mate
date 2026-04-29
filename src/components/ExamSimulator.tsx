@@ -22,6 +22,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
   const [loadingAudio, setLoadingAudio] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [showCompleteConfirm, setShowCompleteConfirm] = useState(false);
 
   const [questionImage, setQuestionImage] = useState<string | null>(null);
   const [isGeneratingVisuals, setIsGeneratingVisuals] = useState(false);
@@ -421,28 +422,37 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-2xl border-t border-gray-100 p-4 md:p-6 pb-safe z-40">
-        <div className="max-w-screen-xl mx-auto flex gap-3 md:gap-4">
-          <button
-            onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
-            disabled={currentIndex === 0}
-            className="px-5 md:px-8 py-4 md:py-5 rounded-xl md:rounded-3xl bg-gray-100 text-gray-500 disabled:opacity-30 font-black active:scale-95 transition-all"
-          >
-            <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
-          </button>
-          <button
-            onClick={() => {
-              if (isLast) {
-                // Flush the latest state snapshot directly to avoid async timing issue
-                const finalAnswers = { ...answers };
-                handleSubmit(finalAnswers);
-              } else {
-                setCurrentIndex(p => p + 1);
-              }
-            }}
-            className={`flex-1 ${isLast ? 'bg-green-600 shadow-green-100' : 'bg-indigo-600 shadow-indigo-100'} text-white font-black rounded-xl md:rounded-3xl shadow-2xl active:scale-95 text-base md:text-xl uppercase tracking-widest transition-all py-4 md:py-5`}
-          >
-            {isLast ? 'Complete Exam' : 'Next Question'}
-          </button>
+        <div className="max-w-screen-xl mx-auto flex flex-col gap-2 md:gap-3">
+          <div className="flex gap-3 md:gap-4">
+            <button
+              onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
+              disabled={currentIndex === 0}
+              className="px-5 md:px-8 py-4 md:py-5 rounded-xl md:rounded-3xl bg-gray-100 text-gray-500 disabled:opacity-30 font-black active:scale-95 transition-all"
+            >
+              <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
+            </button>
+            <button
+              onClick={() => {
+                if (isLast) {
+                  const finalAnswers = { ...answers };
+                  handleSubmit(finalAnswers);
+                } else {
+                  setCurrentIndex(p => p + 1);
+                }
+              }}
+              className="flex-1 bg-indigo-600 shadow-indigo-100 text-white font-black rounded-xl md:rounded-3xl shadow-2xl active:scale-95 text-base md:text-xl uppercase tracking-widest transition-all py-4 md:py-5"
+            >
+              {isLast ? 'Complete Exam' : 'Next Question'}
+            </button>
+          </div>
+          {!isLast && (
+            <button
+              onClick={() => setShowCompleteConfirm(true)}
+              className="w-full py-3 rounded-xl md:rounded-3xl bg-green-50 text-green-700 border border-green-200 font-black text-sm uppercase tracking-widest active:scale-95 transition-all hover:bg-green-100"
+            >
+              ✓ Complete Exam Now
+            </button>
+          )}
         </div>
       </div>
 
@@ -507,6 +517,51 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                 className="w-full py-4 bg-gray-100 text-gray-500 font-black rounded-2xl uppercase tracking-widest active:scale-95 transition-all"
               >
                 Keep Going
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Complete Exam Confirmation Modal */}
+      {showCompleteConfirm && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-[2.5rem] shadow-2xl p-8 w-full max-w-sm text-center">
+            <div className="w-16 h-16 bg-green-50 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="w-8 h-8 text-green-500" />
+            </div>
+            <h3 className="text-2xl font-black text-gray-900 mb-2">시험 제출</h3>
+            <p className="text-gray-500 text-sm font-medium mb-2 leading-relaxed">
+              현재 <span className="font-black text-indigo-600">{currentIndex + 1}</span> / {questions.length} 번 문제까지 진행했습니다.
+            </p>
+            {(() => {
+              const unanswered = questions.filter(q => answers[q.id] === undefined).length;
+              return unanswered > 0 ? (
+                <p className="text-orange-500 text-sm font-black mb-6">
+                  ⚠ 아직 {unanswered}문제가 미응답입니다.
+                </p>
+              ) : (
+                <p className="text-green-600 text-sm font-black mb-6">
+                  ✓ 모든 문제에 답했습니다!
+                </p>
+              );
+            })()}
+            <p className="text-gray-400 text-xs mb-8">미응답 문제는 오답으로 처리되며, 지금 바로 결과를 확인할 수 있습니다.</p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => {
+                  setShowCompleteConfirm(false);
+                  handleSubmit({ ...answers });
+                }}
+                className="w-full py-4 bg-green-600 text-white font-black rounded-2xl uppercase tracking-widest active:scale-95 transition-all"
+              >
+                결과 보기
+              </button>
+              <button
+                onClick={() => setShowCompleteConfirm(false)}
+                className="w-full py-4 bg-gray-100 text-gray-500 font-black rounded-2xl uppercase tracking-widest active:scale-95 transition-all"
+              >
+                계속 풀기
               </button>
             </div>
           </div>

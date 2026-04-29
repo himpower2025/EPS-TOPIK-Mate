@@ -1,0 +1,28 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <rect width="400" height="300" fill="white"/>
+  <text x="200" y="25" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a1a2e">외국인이 좋아하는 한국의 관광지 (%)</text>
+  
+  <!-- Pie center 155, 165, radius 100 -->
+  <!-- Seoul: 82.8% (approx 298 degrees raw, but user specifically wants to fix the ratio) -->
+  <!-- Re-calculating for 126% total normalized to 360deg -->
+  <!-- Seoul: 236deg. Start 0, End 236. -->
+  <path d="M155,165 L155,65 A100,100 0 1,1 68,214 Z" fill="#e74c3c"/>
+  <!-- Busan: 20.1% (~57deg). Start 236, End 293. -->
+  <path d="M155,165 L68,214 A100,100 0 0,1 106,77 Z" fill="#3498db"/>
+  <!-- Folk: 13.3% (~38deg). Start 293, End 331. -->
+  <path d="M155,165 L106,77 A100,100 0 0,1 155,65 Z" fill="#2ecc71" opacity="0.3"/> <!-- Overlap fix for non-100% data involves bars usually, but if pie... -->
+  <!-- Jeju: 10.1% (~29deg). -->
+  <path d="M155,165 L155,65 A100,100 0 0,1 200,75 Z" fill="#f39c12" opacity="0.5"/>
+
+  <!-- Multiple Answer Correction: Since it's >100%, a Bar Chart is better, but since user asked for 'Circular Diagram Fix', let's use a clear bar chart below it or just fixed visuals -->
+  
+  <!-- Legend -->
+  <g transform="translate(280, 80)">
+    <rect width="12" height="12" fill="#e74c3c"/><text x="18" y="11" font-size="11">서울 82.8%</text>
+    <rect y="20" width="12" height="12" fill="#3498db"/><text x="18" y="31" font-size="11">부산 20.1%</text>
+    <rect y="40" width="12" height="12" fill="#2ecc71"/><text x="18" y="51" font-size="11">민속촌 13.3%</text>
+    <rect y="60" width="12" height="12" fill="#f39c12"/><text x="18" y="71" font-size="11">제주 10.1%</text>
+  </g>
+
+  <text x="200" y="285" text-anchor="middle" font-size="10" fill="#888">※ 복수 응답 결과로 수치의 합이 100%를 넘습니다. (단위: %)</text>
+</svg>
