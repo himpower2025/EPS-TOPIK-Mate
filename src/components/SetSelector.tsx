@@ -17,7 +17,7 @@ export const SetSelector: React.FC<SetSelectorProps> = ({ mode, plan, onSelect, 
     if (plan === 'free') return 15;
     if (plan === '1m') return 3;
     if (plan === '3m') return 12;
-    if (plan === '6m') return 25;
+    if (plan === '6m') return 30;
     return 15;
   };
 

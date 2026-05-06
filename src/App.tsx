@@ -49,7 +49,8 @@ const App: React.FC = () => {
       const snap = await getDoc(userRef);
       let userData: User;
       
-      const isAdmin = firebaseUser.email === 'abraham0715@gmail.com';
+      const adminEmails = ['abraham0715@gmail.com', 'huoung@gmail.com'];
+      const isAdmin = firebaseUser.email && adminEmails.includes(firebaseUser.email);
       const expiryDate = isAdmin ? new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString() : null;
 
       if (snap.exists()) {
