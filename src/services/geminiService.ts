@@ -77,6 +77,10 @@ export const prepareAudioScript = (rawText: string): { script: string; isDialogu
   // 3단계: 말줄임표(...) 정리 — TTS가 자연스럽게 읽도록
   text = text.replace(/\.\.\./g, '. ');
 
+  // 3.5단계: 정답 유추를 방지하기 위한 "1번", "2번" 등 숫자 마커 제거
+  text = text.replace(/\d+\s?번/g, ''); // "1번", "2번" 제거
+  text = text.replace(/^\d+[\.\)]\s*/gm, ''); // "1.", "1)" 등 라인 시작 숫자 제거
+
   // 4단계: 교대 기호 ("/") 를 개행으로 변경
   text = text.replace(/\s*\/\s*/g, '\n');
 

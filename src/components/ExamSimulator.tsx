@@ -118,16 +118,17 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     return () => clearInterval(timer);
   }, [loading, timeLeft]);
 
-  const handlePlayAudio = async () => {
-    const q = questions[currentIndex];
-    const rawScript = q.context || q.questionText;
-    const { script, lines, isDialogue } = prepareAudioScript(rawScript);
-
-    if (!script || isPlaying || loadingAudio) return;
-
+    if (!script) return;
+    
+    // 강제 초기화: 이전 오디오나 TTS가 돌고 있다면 모두 중지
+    window.speechSynthesis.cancel();
     if (currentAudioSource.current) {
       try { currentAudioSource.current.stop(); } catch {}
+      currentAudioSource.current = null;
     }
+    
+    // 이미 로딩 중이거나 재생 중이면 잠시 중단 후 재시도 가능하게 함
+    if (loadingAudio) return; 
 
     // iOS/Safari Autoplay Unlock for TTS fallback
     const unlockUtterance = new SpeechSynthesisUtterance('');
@@ -321,13 +322,13 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
             <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] shadow-sm border border-gray-100">
               <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-4 md:mb-6 border ${isListening ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-green-50 text-green-700 border-green-100'}`}>
                 {isListening ? <Headphones className="w-3 h-3" /> : <ImageIcon className="w-3 h-3" />}
-                {currentQ.type} Section
+                {isListening ? "Listening" : currentQ.category} Section
               </div>
               <h2 className="text-xl md:text-2xl lg:text-3xl font-black text-gray-900 leading-tight mb-2 md:mb-4">
-                {displayQuestionText}
+                {isListening ? "질문을 잘 듣고 알맞은 답을 고르십시오." : displayQuestionText}
               </h2>
               <p className="text-[10px] md:text-xs text-gray-400 font-bold uppercase tracking-widest opacity-60">
-                {currentQ.category}
+                {isListening ? "Listening Comprehension" : currentQ.category}
               </p>
             </div>
 
@@ -341,12 +342,12 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                 </div>
               ) : (
                 <div className="w-full space-y-4 md:space-y-8">
-                  {/* 이미지가 있는 문제: 카테고리 상관없이 이미지 표시 */}
-                  {hasImage && questionImage ? (
+                  {/* 이미지가 있는 문제: 읽기 문제인 경우에만 표시 (듣기는 이미지 제거) */}
+                  {!isListening && hasImage && questionImage ? (
                     <div className="w-full flex items-center justify-center">
                       <img
                         src={questionImage}
-                        className="max-h-[200px] md:max-h-[350px] w-auto object-contain rounded-2xl md:rounded-[2rem] shadow-2xl animate-fade-in"
+                        className="max-h-[200px] md:max-h-[350px] w-auto object-contain rounded-2xl md:rounded-[2.5rem] shadow-2xl animate-fade-in"
                         alt="Exam Visual"
                         referrerPolicy="no-referrer"
                         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
