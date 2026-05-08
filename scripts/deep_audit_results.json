@@ -1,0 +1,121 @@
+{
+  "missingScript": [],
+  "shortDialogue": [
+    {
+      "id": "s17_l_36",
+      "category": "상황 파악",
+      "activeScript": "건물 짓는 공사장",
+      "options": [
+        "건설 현장",
+        "자동차 공장",
+        "이사 현장",
+        "제설 작업"
+      ]
+    },
+    {
+      "id": "s17_l_38",
+      "category": "내용 파악",
+      "activeScript": "하얀색 긴 치마",
+      "options": [
+        "하얀색 긴 치마",
+        "파란색 긴 치마",
+        "하얀색 짧은 치마",
+        "파란색 짧은 치마"
+      ]
+    },
+    {
+      "id": "s19_l_40",
+      "category": "내용 파악",
+      "activeScript": "제주도 숙박",
+      "options": [
+        "민박 했음",
+        "친구 집",
+        "호텔 숙박",
+        "여관 예약"
+      ]
+    }
+  ],
+  "notAQuestion": [
+    {
+      "id": "s21_l_34",
+      "category": "이어지는 말",
+      "activeScript": "만나서 반갑습니다."
+    },
+    {
+      "id": "s24_l_31",
+      "category": "대화 응답",
+      "activeScript": "괜찮음입니다."
+    },
+    {
+      "id": "s24_l_32",
+      "category": "대화 응답",
+      "activeScript": "소방서 전화입니다."
+    },
+    {
+      "id": "s24_l_33",
+      "category": "대화 응답",
+      "activeScript": "김 선생님입니다."
+    },
+    {
+      "id": "s25_l_31",
+      "category": "대화 응답",
+      "activeScript": "분류함입니다."
+    },
+    {
+      "id": "s25_l_32",
+      "category": "대화 응답",
+      "activeScript": "확인해 보겠음입니다."
+    },
+    {
+      "id": "s25_l_33",
+      "category": "대화 응답",
+      "activeScript": "제품만 실으면 됨입니다."
+    },
+    {
+      "id": "s26_l_31",
+      "category": "대화 응답",
+      "activeScript": "45분쯤입니다."
+    },
+    {
+      "id": "s26_l_33",
+      "category": "대화 응답",
+      "activeScript": "점심시간입니다."
+    },
+    {
+      "id": "s27_l_33",
+      "category": "대화 응답",
+      "activeScript": "아니요입니다."
+    },
+    {
+      "id": "s29_l_31",
+      "category": "대화 응답",
+      "activeScript": "너무 커서 못 입음입니다."
+    },
+    {
+      "id": "s29_l_32",
+      "category": "대화 응답",
+      "activeScript": "한 통에 2만 원입니다."
+    },
+    {
+      "id": "s29_l_33",
+      "category": "대화 응답",
+      "activeScript": "3인분 주세요입니다."
+    },
+    {
+      "id": "s30_l_31",
+      "category": "대화 응답",
+      "activeScript": "8년쯤 살았음입니다."
+    },
+    {
+      "id": "s30_l_32",
+      "category": "대화 응답",
+      "activeScript": "건강함입니다."
+    },
+    {
+      "id": "s30_l_33",
+      "category": "대화 응답",
+      "activeScript": "바지는 만 원입니다."
+    }
+  ],
+  "answerLeaked": []
+}
