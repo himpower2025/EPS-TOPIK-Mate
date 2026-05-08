@@ -99,14 +99,15 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     setIsPlaying(false);
     setLoadingAudio(false);
 
-    const timer = setTimeout(() => {
-      if (q.type === QuestionType.LISTENING && audioContextReady && !isPlaying && !loadingAudio) {
-        handlePlayAudio();
-      }
-    }, 500);
+    // 자동 재생 로직 삭제 (학습자가 Play 버튼을 누를 때만 실행되도록 변경)
+    // const timer = setTimeout(() => {
+    //   if (q.type === QuestionType.LISTENING && audioContextReady && !isPlaying && !loadingAudio) {
+    //     handlePlayAudio();
+    //   }
+    // }, 500);
 
     return () => {
-      clearTimeout(timer);
+      // clearTimeout(timer);
       window.speechSynthesis.cancel();
     };
   }, [currentIndex, questions, audioContextReady, loading]);
@@ -184,44 +185,41 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
       const pause = (ms: number): Promise<void> =>
         new Promise(resolve => setTimeout(resolve, ms));
 
-      const playLine = (line: { text: string; speaker: string }): Promise<void> => {
-        return new Promise((resolve) => {
+      const playAllLines = async () => {
+        // 첫 문장 전 준비 시간
+        await pause(300);
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
           const utterance = new SpeechSynthesisUtterance(line.text);
           utterance.lang = 'ko-KR';
           utterance.volume = 1.0;
 
+          // 화자별 목소리 및 톤 설정 (성별이 같더라도 순서에 따라 피치를 다르게 함)
+          const isEven = i % 2 === 0;
           if (line.speaker === 'Man') {
             const maleVoice = getKoreanVoice(true);
             if (maleVoice) utterance.voice = maleVoice;
-            utterance.pitch = 0.9;    // 너무 낮지 않은 자연스러운 남성톤
-            utterance.rate = 0.9;     // 조금 더 생동감 있는 속도
+            utterance.pitch = isEven ? 0.9 : 0.8;    // 남성1: 0.9, 남성2: 0.8
+            utterance.rate = 0.9;
           } else if (line.speaker === 'Woman') {
             const femaleVoice = getKoreanVoice(false);
             if (femaleVoice) utterance.voice = femaleVoice;
-            utterance.pitch = 1.1;    // 너무 높지 않은 부드러운 여성톤
+            utterance.pitch = isEven ? 1.1 : 1.25;   // 여성1: 1.1, 여성2: 1.25
             utterance.rate = 0.95;
           } else {
             utterance.pitch = 1.0;
-            utterance.rate = 0.9;     // 나레이터 속도 표준화
+            utterance.rate = 0.9;
           }
 
-          utterance.onend = async () => {
-            // 화자 사이 자연스러운 충분한 쉼: 대화체 1200ms, 나레이터 800ms
-            const gapMs = (line.speaker === 'Narrator') ? 800 : 1200;
-            await pause(gapMs);
-            resolve();
-          };
-          utterance.onerror = () => resolve();
-
-          window.speechSynthesis.speak(utterance);
-        });
-      };
-
-      const playAllLines = async () => {
-        // 첫 문장 전 300ms 준비 시간
-        await pause(300);
-        for (let i = 0; i < lines.length; i++) {
-          await playLine(lines[i]);
+          await new Promise<void>((resolve) => {
+            utterance.onend = async () => {
+              const gapMs = (line.speaker === 'Narrator') ? 800 : 1200;
+              await pause(gapMs);
+              resolve();
+            };
+            utterance.onerror = () => resolve();
+            window.speechSynthesis.speak(utterance);
+          });
         }
         setIsPlaying(false);
       };
