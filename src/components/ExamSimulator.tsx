@@ -94,6 +94,8 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
       try { currentAudioSource.current.stop(); } catch {}
       currentAudioSource.current = null;
     }
+    // 문제 이동 시 TTS 즉시 중단
+    window.speechSynthesis.cancel();
     setIsPlaying(false);
     setLoadingAudio(false);
 
@@ -103,7 +105,10 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
       }
     }, 500);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      window.speechSynthesis.cancel();
+    };
   }, [currentIndex, questions, audioContextReady, loading]);
 
   useEffect(() => {
@@ -188,16 +193,16 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
           if (line.speaker === 'Man') {
             const maleVoice = getKoreanVoice(true);
             if (maleVoice) utterance.voice = maleVoice;
-            utterance.pitch = 0.75;   // 낙은 남성음
-            utterance.rate = 0.82;    // 시험에 적합한 느린 속도
+            utterance.pitch = 0.9;    // 너무 낮지 않은 자연스러운 남성톤
+            utterance.rate = 0.9;     // 조금 더 생동감 있는 속도
           } else if (line.speaker === 'Woman') {
             const femaleVoice = getKoreanVoice(false);
             if (femaleVoice) utterance.voice = femaleVoice;
-            utterance.pitch = 1.35;   // 높은 여성음
-            utterance.rate = 0.85;
+            utterance.pitch = 1.1;    // 너무 높지 않은 부드러운 여성톤
+            utterance.rate = 0.95;
           } else {
             utterance.pitch = 1.0;
-            utterance.rate = 0.80;    // 나레이터 속도 더 느리게
+            utterance.rate = 0.9;     // 나레이터 속도 표준화
           }
 
           utterance.onend = async () => {
@@ -266,7 +271,13 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
         <h2 className="text-3xl font-black mb-4">Listening Test Ready</h2>
         <p className="mb-12 text-indigo-200/70 font-medium">Please turn on your sound for a realistic exam experience.</p>
         <button
-          onClick={initAudio}
+          onClick={async () => {
+            const success = await initAudio();
+            if (success) {
+              // 초기화 직후 첫 문제 즉시 재생 트리거
+              setTimeout(() => handlePlayAudio(), 300);
+            }
+          }}
           className="bg-white text-indigo-900 px-12 py-5 rounded-[2.5rem] font-black text-xl shadow-2xl active:scale-95"
         >
           Begin Audio
