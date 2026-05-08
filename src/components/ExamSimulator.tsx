@@ -117,6 +117,10 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
     const timer = setInterval(() => setTimeLeft(p => p - 1), 1000);
     return () => clearInterval(timer);
   }, [loading, timeLeft]);
+  const handlePlayAudio = async () => {
+    const q = questions[currentIndex];
+    const rawScript = q.context || q.questionText;
+    const { script, lines, isDialogue } = prepareAudioScript(rawScript);
 
     if (!script) return;
     
