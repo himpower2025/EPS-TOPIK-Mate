@@ -692,6 +692,26 @@ export const STATIC_EXAM_DATA: Question[] = [
   },
 {
     id: "s2_r_20",
+{ id: "s2_l_21", type: QuestionType.LISTENING, category: "단어 듣기", questionText: "들은 것을 고르십시오.", context: "불편합니다.", options: ["불편합니다", "불안합니다", "불쌍합니다", "불이 났어요"], correctAnswer: 0, explanation: "여성이 "불편합니다"라고 말하므로 정답은 ①번입니다." },
+{ id: "s2_l_22", type: QuestionType.LISTENING, category: "단어 듣기", questionText: "들은 것을 고르십시오.", context: "안경.", options: ["안녕", "안경", "안개", "안심"], correctAnswer: 1, explanation: "여성이 "안경"이라고 말하므로 정답은 ②번입니다." },
+{ id: "s2_l_23", type: QuestionType.LISTENING, category: "그림 선택", questionText: "들은 내용과 관계있는 그림을 고르십시오.", context: "여: 실례합니다. 동대문시장에 가려고 하는데 몇 번 버스를 타야 해요? 남: 여기서 17번 버스를 타세요.", options: ["그림 1", "그림 2", "그림 3", "그림 4"], correctAnswer: 2, explanation: "버스 번호를 안내하는 상황으로 정답은 ③번입니다.", optionImages: ["/images/exam/listening/s2_l_23_1.png", "/images/exam/listening/s2_l_23_2.png", "/images/exam/listening/s2_l_23_3.png", "/images/exam/listening/s2_l_23_4.png"] },
+{ id: "s2_l_24", type: QuestionType.LISTENING, category: "그림 선택", questionText: "들은 내용과 관계있는 그림을 고르십시오.", context: "여: 실례지만 무슨 일을 하세요? 남: 요리사예요. 주방에서 음식 만드는 일을 해요.", options: ["그림 1", "그림 2", "그림 3", "그림 4"], correctAnswer: 3, explanation: "요리사가 주방에서 일하는 상황으로 정답은 ④번입니다.", optionImages: ["/images/exam/listening/s2_l_24_1.png", "/images/exam/listening/s2_l_24_2.png", "/images/exam/listening/s2_l_24_3.png", "/images/exam/listening/s2_l_24_4.png"] },
+{ id: "s2_l_25", type: QuestionType.LISTENING, category: "그림 보고 답하기", questionText: "다음을 듣고 그림의 알맞은 답을 고르십시오.", context: "교통이 어떻습니까?", options: ["바쁩니다", "비쌉니다", "한가합니다", "복잡합니다"], correctAnswer: 3, explanation: "교통이 복잡한 그림에 맞는 대답은 "복잡합니다"입니다.", imageUrl: "/images/exam/listening/s2_l_25.png" },
+{ id: "s2_l_26", type: QuestionType.LISTENING, category: "그림 보고 답하기", questionText: "다음을 듣고 그림의 알맞은 답을 고르십시오.", context: "몇 월 며칠입니까?", options: ["1월 26일입니다", "1월 16일입니다", "2월 26일입니다", "2월 16일입니다"], correctAnswer: 1, explanation: "달력 그림을 보고 날짜를 맞추는 문제입니다.", imageUrl: "/images/exam/listening/s2_l_26.png" },
+{ id: "s2_l_27", type: QuestionType.LISTENING, category: "그림 보고 답하기", questionText: "다음을 듣고 그림의 알맞은 답을 고르십시오.", context: "날씨가 어때요?", options: ["너무 더워요", "아주 추워요", "비가 많이 와요", "바람이 많이 불어요"], correctAnswer: 0, explanation: "그림의 날씨 상황에 맞는 대답은 "너무 더워요"입니다.", imageUrl: "/images/exam/listening/s2_l_27.png" },
+{ id: "s2_l_28", type: QuestionType.LISTENING, category: "그림 보고 답하기", questionText: "다음을 듣고 그림의 알맞은 답을 고르십시오.", context: "이것들의 맛은 어떻습니까?", options: ["답니다", "쉽니다", "짭니다", "씁니다"], correctAnswer: 1, explanation: "그림의 음식 맛을 묻는 문제입니다.", imageUrl: "/images/exam/listening/s2_l_28.png" },
+{ id: "s2_l_29", type: QuestionType.LISTENING, category: "그림 보고 답하기", questionText: "다음을 듣고 그림의 알맞은 답을 고르십시오.", context: "이 남자는 어디가 아픕니까?", options: ["손", "다리", "이", "귀"], correctAnswer: 2, explanation: "그림 속 남자가 아픈 부위를 맞추는 문제입니다.", imageUrl: "/images/exam/listening/s2_l_29.png" },
+{ id: "s2_l_30", type: QuestionType.LISTENING, category: "대화 응답", questionText: "다음을 듣고 물음에 알맞은 대답을 고르십시오.", context: "제 취미는 독서예요. 영수 씨 취미는 뭐예요?", options: ["저는 대학생이에요", "저는 은행에서 일해요", "저는 책방에 갈 거예요", "저는 영화 보는 것을 좋아해요"], correctAnswer: 3, explanation: "취미를 묻는 질문에 영화 보는 것을 좋아한다고 답하는 ④번이 정답입니다." },
+{ id: "s2_l_31", type: QuestionType.LISTENING, category: "대화 응답", questionText: "다음을 듣고 물음에 알맞은 대답을 고르십시오.", context: "실례지만 김 과장님 계세요?", options: ["부산에서 왔어요", "길 건너서 타세요", "지금 자리에 안 계신데요", "김 과장님을 만나러 왔어요"], correctAnswer: 2, explanation: "자리에 있는지 묻는 질문에 "지금 자리에 안 계신데요"가 알맞은 대답입니다." },
+{ id: "s2_l_32", type: QuestionType.LISTENING, category: "대화 응답", questionText: "다음을 듣고 물음에 알맞은 대답을 고르십시오.", context: "어디에서 버스를 타요?", options: ["사무실에 가요", "시장에서 사요", "버스가 빨라요", "시청 앞에서 타요"], correctAnswer: 3, explanation: "버스 타는 장소를 묻는 질문에 "시청 앞에서 타요"가 알맞은 대답입니다." },
+{ id: "s2_l_33", type: QuestionType.LISTENING, category: "대화 응답", questionText: "다음을 듣고 물음에 알맞은 대답을 고르십시오.", context: "여기서 집이 가까워요?", options: ["네 가깝지 않아요", "네 지금 집에 있어요", "네 여기서 살 거예요", "네 걸어서 5분 걸려요"], correctAnswer: 3, explanation: "집까지 거리를 묻는 질문에 "걸어서 5분 걸려요"가 알맞은 대답입니다." },
+{ id: "s2_l_34", type: QuestionType.LISTENING, category: "이어지는 말", questionText: "다음을 듣고 이어지는 말을 고르십시오.", context: "자동차에 기름을 넣는 곳을 뭐라고 하지요?", options: ["주유소라고 해요", "주차장이라고 해요", "정류장이라고 해요", "지하철이라고 해요"], correctAnswer: 0, explanation: "기름을 넣는 곳은 "주유소"입니다." },
+{ id: "s2_l_35", type: QuestionType.LISTENING, category: "이어지는 말", questionText: "다음을 듣고 이어지는 말을 고르십시오.", context: "회사에 어떻게 가세요?", options: ["버스를 타고 가요", "9시까지 출근해요", "친구가 가르쳐 주었어요", "사장님을 만나러 왔어요"], correctAnswer: 0, explanation: "교통수단을 묻는 말에 "버스를 타고 가요"가 이어지는 말입니다." },
+{ id: "s2_l_36", type: QuestionType.LISTENING, category: "그림 선택", questionText: "다음을 듣고 내용과 관계있는 그림을 고르십시오.", context: "남: 제 취미는 탁구입니다. 1년 전에 처음으로 탁구 치는 것을 배웠는데 요즘은 꽤 잘 합니다.", options: ["그림 1", "그림 2", "그림 3", "그림 4"], correctAnswer: 0, explanation: "탁구를 치는 그림이 내용과 관계있습니다.", optionImages: ["/images/exam/listening/s2_l_36_1.png", "/images/exam/listening/s2_l_36_2.png", "/images/exam/listening/s2_l_36_3.png", "/images/exam/listening/s2_l_36_4.png"] },
+{ id: "s2_l_37", type: QuestionType.LISTENING, category: "그림 선택", questionText: "다음을 듣고 내용과 관계있는 그림을 고르십시오.", context: "여: 죄송하지만 문 좀 열어 주시겠어요? 짐이 많아서요. 남: 네, 열어 드릴게요.", options: ["그림 1", "그림 2", "그림 3", "그림 4"], correctAnswer: 0, explanation: "문을 열어주는 상황의 그림이 정답입니다.", optionImages: ["/images/exam/listening/s2_l_37_1.png", "/images/exam/listening/s2_l_37_2.png", "/images/exam/listening/s2_l_37_3.png", "/images/exam/listening/s2_l_37_4.png"] },
+{ id: "s2_l_38", type: QuestionType.LISTENING, category: "내용 파악", questionText: "다음 이야기를 듣고 질문에 알맞은 대답을 고르십시오.", context: "여: 내일 오전에 같이 운동하러 갈래요? 남: 내일은 회사에 가야 해요. 여: 내일은 토요일인데 토요일에 쉬지 않아요? 남: 보통은 쉬는데 이번 주는 바빠서요. 오후에 같이 가요. 여: 그럼 오후 1시에 만날까요? 남: 1시는 너무 이른데 2시간 후에 만나면 어때요?", options: ["오후 1시", "오후 2시", "오후 3시", "오후 4시"], correctAnswer: 2, explanation: "오후 1시에서 2시간 후이므로 오후 3시에 만납니다." },
+{ id: "s2_l_39", type: QuestionType.LISTENING, category: "내용 파악", questionText: "다음 이야기를 듣고 질문에 알맞은 대답을 고르십시오.", context: "남: 리아 씨 내일 시간 있어요? 여: 네 있어요 왜요? 남: 내일 어머니 생신 선물을 사려고 하는데요. 같이 가서 골라 주시겠어요? 여: 그럼요. 몇 시에 만날까요? 남: 오후 3시 어때요? 여: 좋아요.", options: ["아버지", "어머니", "여동생", "남동생"], correctAnswer: 1, explanation: "어머니 생신 선물을 사러 가는 내용이므로 정답은 어머니입니다." },
+{ id: "s2_l_40", type: QuestionType.LISTENING, category: "내용 파악", questionText: "다음 이야기를 듣고 질문에 알맞은 대답을 고르십시오.", context: "여: 하늘 씨 내일 우리 집에 점심 먹으러 오세요. 남: 무슨 날이에요? 여: 제 생일이에요. 그런데 하늘 씨는 어떤 음식을 좋아하세요? 남: 저는 카레를 제일 좋아해요. 여: 그럼 카레를 만들게요.", options: ["라면", "볶음밥", "우동", "카레"], correctAnswer: 3, explanation: "하늘 씨가 카레를 제일 좋아한다고 했으므로 정답은 카레입니다." },
     type: QuestionType.READING,
     category: "어휘 선택",
     questionText: "다음 설명에 알맞은 어휘를 고르십시오.",
@@ -4603,9 +4623,9 @@ export const STATIC_EXAM_DATA: Question[] = [
     imageUrl: "/images/exam/reading/s12_r_14.png",
     imagePrompt: "A person standing and leaning back slightly to stretch their neck and back."
   },
-{ id: "s12_r_15", type: QuestionType.READING, category: "단어 관계",
+{ id: "s12_r_15", type: QuestionType.READING, category: "단어 관계", questionText: "다음 내용과 관계있는 것은 무엇입니까?", context: "라마단, 코란, 사원, 하루 5번 기도", options: ["불교", "기독교", "천주교", "이슬람교"], correctAnswer: 3, explanation: "'라마단', '코란', '사원', '하루 5번 기도'는 모두 이슬람교와 관련된 내용입니다."
     context: "내성적, 외향적, 개방적, 활발", questionText: "다음 단어와 관계 있는 것은 무엇입니까?", options: ["외모", "성격", "주장", "나이"], correctAnswer: 1, explanation: "제시된 형용사들은 모두 사람의 성격을 나타내는 말입니다.", },
-{ id: "s12_r_16", type: QuestionType.READING, category: "비슷한 말",
+{ id: "s12_r_16", type: QuestionType.READING, category: "반대말", questionText: "다음 단어의 반대말은 무엇입니까?", context: "복잡하다", options: ["분주하다", "분실하다", "간단하다", "이해하다"], correctAnswer: 2, explanation: "'복잡하다'의 반대말은 '간단하다'입니다."
     context: "정비하다", questionText: "다음 단어의 비슷한 말은 무엇입니까?", options: ["수리하다", "버리다", " 바꾸다", "구입하다"], correctAnswer: 0, explanation: "기계를 다듬고 고치는 '정비하다'의 비슷한 말은 '수리하다'입니다.", },
 { id: "s12_r_17", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "저는 올해 스무세 살입니다. ________에 스물다섯 살이 되면 결혼하고 싶습니다.", options: ["작년", "내년", "내후년", "내내년"], correctAnswer: 2, explanation: "23세에서 25세가 되는 해는 2년 뒤인 '내후년'입니다.", },
 { id: "s12_r_18", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "저는 ________이/가 나빠요. 그래서 안경을 쓰지 않으면 잘 안 보여요.", options: ["손", "눈", "귀", "머리"], correctAnswer: 1, explanation: "잘 보이지 않을 때 안경을 쓰므로 '눈'이 정답입니다.", },
@@ -4699,7 +4719,7 @@ export const STATIC_EXAM_DATA: Question[] = [
 { id: "s13_r_2", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "높은 곳에서 작업을 할 때는 아래로 떨어질 위험이 있습니다. 그러므로 반드시 ________를/을 매고 일을 해야 합니다.", options: ["보안면", "안전대", "안전화", "안전장갑"], correctAnswer: 1, explanation: "추락 방지를 위해 몸을 고정하는 '안전대' 착용이 필수입니다.", },
 { id: "s13_r_3", type: QuestionType.READING, category: "내용 관계",
     context: "지키다, 어기다, 준수하다", questionText: "다음 내용과 관계있는 것은 무엇입니까?", options: ["안전수칙", "정비수칙", "건강검진", "휴식시간"], correctAnswer: 0, explanation: "제시된 동사들은 규칙이나 수칙을 다룰 때 사용됩니다.", },
-{ id: "s13_r_4", type: QuestionType.READING, category: "반대말",
+{ id: "s13_r_4", type: QuestionType.READING, category: "비슷한 말", questionText: "다음 단어의 비슷한 말은 무엇입니까?", context: "산 꼭대기", options: ["바닥", "중간", "정상", "아래"], correctAnswer: 2, explanation: "'산 꼭대기'는 산의 가장 높은 곳을 의미하며, 비슷한 말은 '정상'입니다."
     context: "합격", questionText: "다음 단어와 반대 말은 무엇입니까?", options: ["불참", "불합격", "동참", "불명예"], correctAnswer: 1, explanation: "'합격'의 반대말은 '불합격'입니다.", },
 { id: "s13_r_5", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "가 : 월급이 언제 들어오는지 몰라서 답답해요.\n나 : 표준 근로 계약서에서 ________을/를 다시 찾아보세요.", options: ["소재지", "업체명", "임금 지급 날짜", "임금 지급 방법"], correctAnswer: 2, explanation: "월급 입금 시점은 '임금 지급 날짜' 항목에서 확인할 수 있습니다.", },
 { id: "s13_r_6", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "가 : ________을 확인해봤어요?\n나 : 네, 농장에서 사과 따는 일을 할 것 같아요.", options: ["근무 시간", "업무내용", "휴식 시간", "식사제공"], correctAnswer: 1, explanation: "구체적으로 하는 일(사과 따기)은 '업무내용'에 해당합니다.", },
@@ -4805,7 +4825,7 @@ export const STATIC_EXAM_DATA: Question[] = [
 { id: "s14_r_2", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "도로나 공원에 ________를 버리면 안 됩니다. 공공장소는 깨끗이 사용해야 합니다.", options: ["나무", "자판기", "쓰레기", "공중전화"], correctAnswer: 2, explanation: "깨끗한 사용을 위해 버리지 말아야 할 것은 '쓰레기'입니다.", },
 { id: "s14_r_3", type: QuestionType.READING, category: "내용 관계",
     context: "예습하다, 복습하다, 숙제하다", questionText: "다음 내용과 관계있는 것은 무엇입니까?", options: ["공부하다", "작업하다", "근무하다", "휴식하다"], correctAnswer: 0, explanation: "예습, 복습 등은 학습과 관련된 '공부하다' 범주에 속합니다.", },
-{ id: "s14_r_4", type: QuestionType.READING, category: "반대말",
+{ id: "s14_r_4", type: QuestionType.READING, category: "비슷한 말", questionText: "다음 단어의 비슷한 말은 무엇입니까?", context: "분류하다", options: ["합하다", "세어보다", "구별하다", "재어보다"], correctAnswer: 2, explanation: "'분류하다'는 종류에 따라 나누는 것으로, 비슷한 말은 '구별하다'입니다."
     context: "난방", questionText: "다음 단어와 반대 말은 무엇입니까?", options: ["냉수", "냉방", "온수", "온방"], correctAnswer: 1, explanation: "실내를 따뜻하게 하는 '난방'의 반대말은 시원하게 하는 '냉방'입니다.", },
 { id: "s14_r_5", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "가 : 눈이 많이 오네요. 눈이 그친 후에는 기온이 영하로 내려갈 거예요.\n나 : 그럼 날씨가 ________.", options: ["추워지겠네요", "낮아지겠네요", "빨라지겠네요", "더워지겠네요"], correctAnswer: 0, explanation: "기온이 영하로 내려가면 날씨가 '추워집니다'.", },
 { id: "s14_r_6", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "가 : 알리 씨, 요즘 일을 너무 많이 하는 거 아니에요? 일보다는 건강이 더 ________. ", options: ["많아요", "복잡해요", "위험해요", "중요해요"], correctAnswer: 3, explanation: "건강의 가치를 강조할 때 '중요해요'가 적절합니다.", },
@@ -4845,9 +4865,9 @@ export const STATIC_EXAM_DATA: Question[] = [
 { id: "s14_l_40", type: QuestionType.LISTENING, category: "날짜 파악", questionText: "남자는 무슨 요일에 한국말을 배웁니까?", context: "남: 아니요 월요일하고 수요일하고 금요일에 배워요.", options: ["화/목", "월/수/금", "토/일", "매일"], correctAnswer: 1, explanation: "월, 수, 금요일에 배운다고 답했습니다.", imageUrl: "/images/exam/listening/s14_l_40.png", imagePrompt: "A weekly schedule with 'Korean Class' marked on Monday, Wednesday, and Friday." },
 { id: "s15_r_1", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "화학 약품을 취급하는 작업을 하다가 가스에 중독되는 것을 막기 위해서는 ________를/을 자주 해야 합니다.", options: ["운동", "간식", "환기", "휴식"], correctAnswer: 2, explanation: "가스 중독 예방을 위해 공기를 순환시키는 '환기'가 필수입니다.", },
 { id: "s15_r_2", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "높은 곳에서 작업을 할 때는 아래로 떨어질 위험이 있습니다. 그러므로 반드시 ________를/을 매고 일을 해야 합니다.", options: ["보안면", "안전대", "안전화", "안전장갑"], correctAnswer: 1, explanation: "추락 사고 방지를 위해 몸에 착용하는 줄은 '안전대'입니다.", },
-{ id: "s15_r_3", type: QuestionType.READING, category: "단어 관계",
+{ id: "s15_r_3", type: QuestionType.READING, category: "단어 관계", questionText: "다음 내용과 관계있는 것은 무엇입니까?", context: "지키다, 어기다, 준수하다", options: ["안전수칙", "정비수칙", "건강검진", "휴식시간"], correctAnswer: 0, explanation: "'지키다', '어기다', '준수하다'는 모두 규칙과 관련된 단어로, 관계있는 것은 '안전수칙'입니다."
     context: "지키다, 어기다, 준수하다", questionText: "다음 내용과 관계있는 것은 무엇입니까?", options: ["안전수칙", "정비수칙", "건강검진", "휴식시간"], correctAnswer: 0, explanation: "규칙이나 수칙을 지키거나 어길 때 사용하는 표현들입니다.", },
-{ id: "s15_r_4", type: QuestionType.READING, category: "반대말",
+{ id: "s15_r_4", type: QuestionType.READING, category: "반대말", questionText: "다음 단어의 반대말은 무엇입니까?", context: "합격", options: ["불참", "불합격", "동참", "불명예"], correctAnswer: 1, explanation: "'합격'의 반대말은 '불합격'입니다."
     context: "합격", questionText: "다음 단어와 반대 말은 무엇입니까?", options: ["불참", "불합격", "동참", "불명예"], correctAnswer: 1, explanation: "'합격'의 반대되는 말은 '불합격'입니다.", },
 { id: "s15_r_5", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "가 : 월급이 언제 들어오는지 몰라서 답답해요.\n나 : 표준 근로 계약서에서 ________을/를 다시 찾아보세요.", options: ["소재지", "업체명", "임금 지급 날짜", "임금 지급 방법"], correctAnswer: 2, explanation: "월급이 들어오는 시점을 확인하려면 '임금 지급 날짜'를 보아야 합니다.", },
 { id: "s15_r_6", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "가 : ________을 확인해 봤어요?\n나 : 네, 농장에서 사과 따는 일을 할 것 같아요.", options: ["근무 시간", "업무 내용", "휴식 시간", "식사 제공"], correctAnswer: 1, explanation: "무슨 일을 하는지에 대한 답이므로 '업무 내용'이 질문에 적합합니다.", },
@@ -4889,7 +4909,7 @@ export const STATIC_EXAM_DATA: Question[] = [
 { id: "s16_r_2", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "도로나 공원에 ________를 버리면 안 됩니다. 공공장소는 깨끗이 사용해야 합니다.", options: ["나무", "자판기", "쓰레기", "공중전화"], correctAnswer: 2, explanation: "공공장소에 버리지 말아야 할 것은 '쓰레기'입니다.", },
 { id: "s16_r_3", type: QuestionType.READING, category: "내용 관계",
     context: "예습하다, 복습하다, 숙제하다", questionText: "다음 내용과 관계있는 것은 무엇입니까?", options: ["공부하다", "작업하다", "근무하다", "휴식하다"], correctAnswer: 0, explanation: "예습, 복습 등은 학습과 관련된 '공부하다' 범주에 속합니다.", },
-{ id: "s16_r_4", type: QuestionType.READING, category: "반대말",
+{ id: "s16_r_4", type: QuestionType.READING, category: "반대말", questionText: "다음 단어의 반대말은 무엇입니까?", context: "난방", options: ["냉수", "냉방", "온수", "온방"], correctAnswer: 1, explanation: "'난방'은 따뜻하게 하는 것이고, 반대말은 차갑게 하는 '냉방'입니다."
     context: "난방", questionText: "다음 단어와 반대 말은 무엇입니까?", options: ["냉수", "냉방", "온수", "온방"], correctAnswer: 1, explanation: "난방(따뜻함)의 반대말은 냉방(시원함)입니다.", },
 { id: "s16_r_5", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "눈이 많이 오네요. 기온이 영하로 내려갈 거예요. 그럼 날씨가 ________.", options: ["추워지겠네요", "낮아지겠네요", "빨라지겠네요", "더워지겠네요"], correctAnswer: 0, explanation: "기온이 영하로 떨어지면 날씨가 '추워집니다'.", },
 { id: "s16_r_6", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "알리 씨, 건강이 더 ________. 건강에 더 신경 쓰세요.", options: ["많아요", "복잡해요", "위험해요", "중요해요"], correctAnswer: 3, explanation: "가장 우선시해야 할 가치는 '중요해요'로 표현합니다.", },
@@ -4931,7 +4951,7 @@ export const STATIC_EXAM_DATA: Question[] = [
 { id: "s17_r_2", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "가 : 꺼멀 씨는 정말 한국말을 잘하시네요!\n나 : 처음 한국에 왔을 때는 한국말이 너무 ________ 지금은 좀 쉬워졌어요.", options: ["길었는데", "높았는데", "어려웠는데", "무거웠는데"], correctAnswer: 2, explanation: "지금 쉬워졌다는 말과 대비되어 과거에 '어려웠다'는 표현이 적절합니다.", },
 { id: "s17_r_3", type: QuestionType.READING, category: "내용 관계",
     context: "읽다, 쓰다, 외우다, 예습하다, 복습하다", questionText: "다음 내용과 관계있는 것은 무엇입니까?", options: ["근무하다", "작업하다", "공부하다", "휴식하다"], correctAnswer: 2, explanation: "제시된 어휘들은 모두 '공부'와 관련된 행위입니다.", },
-{ id: "s17_r_4", type: QuestionType.READING, category: "반대말",
+{ id: "s17_r_4", type: QuestionType.READING, category: "반대말", questionText: "다음 단어의 반대말은 무엇입니까?", context: "적다", options: ["작다", "많다", "크다", "낮다"], correctAnswer: 1, explanation: "'적다'의 반대말은 '많다'입니다."
     context: "적다", questionText: "다음 단어와 반대 말은 무엇입니까?", options: ["작다", "많다", "크다", "낮다"], correctAnswer: 1, explanation: "'적다(수량)'의 반대말은 '많다'입니다.", },
 { id: "s17_r_5", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "나는 저녁 식사 후에 ________ 운동을 합니다. 비가 와도 눈이 와도 매일 운동을 합니다.", options: ["가끔", "벌써", "항상", "전혀"], correctAnswer: 2, explanation: "매일 한다는 뜻을 강조하는 부사는 '항상'입니다.", },
 { id: "s17_r_6", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "이 작업장에는 먼지가 많으니까 반드시 ________을/를 써서 먼지를 마시지 않도록 하십시오.", options: ["마스크", "보안경", "귀마개", "보안면"], correctAnswer: 0, explanation: "먼지 흡입 방지를 위해 착용하는 것은 '마스크'입니다.", },
@@ -4973,7 +4993,7 @@ export const STATIC_EXAM_DATA: Question[] = [
 { id: "s18_r_2", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "가스는 편리합니다. 그러나 ________의 위험이 있기 때문에 항상 조심해서 사용해야 합니다.", options: ["감전", "추락", "폭발", "절단"], correctAnswer: 2, explanation: "가스의 주된 위험 요소는 화재나 '폭발'입니다.", },
 { id: "s18_r_3", type: QuestionType.READING, category: "내용 관계",
     context: "시청, 구청, 경찰서, 보건소, 주민센터", questionText: "다음 내용과 관계있는 것은 무엇입니까?", options: ["지식센터", "휴게소", "정보센터", "관공서"], correctAnswer: 3, explanation: "국가나 자치단체가 운영하는 사무소를 '관공서'라고 합니다.", },
-{ id: "s18_r_4", type: QuestionType.READING, category: "반대말",
+{ id: "s18_r_4", type: QuestionType.READING, category: "반대말", questionText: "다음 단어의 반대말은 무엇입니까?", context: "바쁘다", options: ["한심하다", "재미있다", "한가하다", "일이 없다"], correctAnswer: 2, explanation: "'바쁘다'의 반대말은 '한가하다'입니다."
     context: "바쁘다", questionText: "다음 단어와 반대 말은 무엇입니까?", options: ["한심하다", "재미있다", "한가하다", "일이 없다"], correctAnswer: 2, explanation: "일이 많아 경황이 없는 '바쁘다'의 반대말은 '한가하다'입니다.", },
 { id: "s18_r_5", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "우리는 일을 할 때에 제일 먼저 ________을/를 생각해야 합니다. 무엇보다도 중요한 것은 우리의 생명이기 때문입니다.", options: ["안전", "안보", "감전", "임금"], correctAnswer: 0, explanation: "생명을 지키기 위해 최우선으로 고려해야 할 것은 '안전'입니다.", },
 { id: "s18_r_6", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "공사장이나 공장에서 사고가 나지 않도록 하기 위해서는 ________을/를 반드시 지켜야 합니다.", options: ["안전 통로", "안전 수칙", "안전 벨트", "교통 안전"], correctAnswer: 1, explanation: "사고 예방을 위한 행동 규칙은 '안전 수칙'입니다.", },
@@ -5015,7 +5035,7 @@ export const STATIC_EXAM_DATA: Question[] = [
 { id: "s19_r_2", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "저는 눈이 나쁩니다. 그래서 책을 볼 때 ________을/를 끼어야 합니다.", options: ["안경", "장갑", "모자", "신발"], correctAnswer: 0, explanation: "시력 교정을 위해 착용하는 것은 '안경'입니다.", },
 { id: "s19_r_3", type: QuestionType.READING, category: "내용 관계",
     context: "쓰레받이, 빗자루, 먼지 털이개, 걸레", questionText: "다음 내용과 관계있는 것은 무엇입니까?", options: ["작업도구", "놀이도구", "운반도구", "청소도구"], correctAnswer: 3, explanation: "제시된 물건들은 모두 청소할 때 사용하는 '청소도구'입니다.", },
-{ id: "s19_r_4", type: QuestionType.READING, category: "비슷한 말",
+{ id: "s19_r_4", type: QuestionType.READING, category: "비슷한 말", questionText: "다음 단어의 비슷한 말은 무엇입니까?", context: "바쁘다", options: ["분주하다", "한가하다", "일이 적다", "일이 많다"], correctAnswer: 0, explanation: "'바쁘다'의 비슷한 말은 '분주하다'입니다."
     context: "바쁘다", questionText: "다음 단어와 비슷한 말은 무엇입니까?", options: ["분주하다", "한가하다", "일이 적다", "일이 많다"], correctAnswer: 0, explanation: "'바쁘다'와 유의어는 '분주하다'입니다.", },
 { id: "s19_r_5", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "여기는 교통 ________가 많이 나는 곳입니다. 조심해서 운전하십시오.", options: ["신호", "사고", "지도", "주차"], correctAnswer: 1, explanation: "주의해서 운전해야 하는 이유는 '사고' 위험 때문입니다.", },
 { id: "s19_r_6", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "열아홉 ________이 안 된 청소년에게 담배를 팔면 안 됩니다.", options: ["잔", "살", "명", "층"], correctAnswer: 1, explanation: "나이를 세는 단위는 '살'입니다.", },
@@ -5057,7 +5077,7 @@ export const STATIC_EXAM_DATA: Question[] = [
 { id: "s20_r_2", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "한국에서는 비가 오면 ________을/를 써요.", options: ["구두", "바지", "우산", "모자"], correctAnswer: 2, explanation: "비를 막기 위해 사용하는 도구는 '우산'입니다.", },
 { id: "s20_r_3", type: QuestionType.READING, category: "내용 관계",
     context: "여권, 학생증, 등록증, 주민증", questionText: "다음 내용과 관계있는 것은 무엇입니까?", options: ["출입증", "사원증", "증명서", "신분증"], correctAnswer: 3, explanation: "제시된 카드들은 본인임을 증명하는 '신분증'입니다.", },
-{ id: "s20_r_4", type: QuestionType.READING, category: "반대말",
+{ id: "s20_r_4", type: QuestionType.READING, category: "반대말", questionText: "다음 단어의 반대말은 무엇입니까?", context: "입다", options: ["신다", "벗다", "쓰다", "사다"], correctAnswer: 1, explanation: "'입다'의 반대말은 '벗다'입니다."
     context: "입다", questionText: "다음 단어와 반대말은 무엇입니까?", options: ["신다", "벗다", "쓰다", "사다"], correctAnswer: 1, explanation: "'입다(옷)'의 반대말은 '벗다'입니다.", },
 { id: "s20_r_5", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "가 : 이번 달에는 ________ 날이 많아서 좋아요.\n나 : 맞아요. 공휴일이 4일이나 있어요.", options: ["쉬는", "받는", "하는", "사는"], correctAnswer: 0, explanation: "공휴일은 업무를 하지 않고 '쉬는' 날입니다.", },
 { id: "s20_r_6", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "저는 회사에서 돌아오면 제일 먼저 손을 ________. 그러고 저녁을 먹어요.", options: ["벗어요", "입어요", "씻어요", "앉아요"], correctAnswer: 2, explanation: "식사 전 위생을 위해 손을 '씻는' 행위가 적절합니다.", },
@@ -5111,7 +5131,7 @@ export const STATIC_EXAM_DATA: Question[] = [
 { id: "s21_r_14", type: QuestionType.READING, category: "어휘 선택", questionText: "다음 설명에 맞는 단어는 무엇입니까?", context: "사람이 아프거나 다쳤을 때 치료를 해 주는 곳입니다.", options: ["은행", "병원", "학교", "경찰서"], correctAnswer: 1, explanation: "치료를 받는 장소는 병원입니다.", },
 { id: "s21_r_15", type: QuestionType.READING, category: "어휘 관계",
     context: "치마, 바지, 셔츠, 코트", questionText: "다음 단어와 관계있는 것은 무엇입니까?", options: ["음식", "운동", "옷", "가구"], correctAnswer: 2, explanation: "모두 의류에 해당합니다.", },
-{ id: "s21_r_16", type: QuestionType.READING, category: "비슷한 말",
+{ id: "s21_r_16", type: QuestionType.READING, category: "반대말", questionText: "다음 단어의 반대말은 무엇입니까?", context: "증가하다", options: ["늘어나다", "많아지다", "감소하다", "없어지다"], correctAnswer: 2, explanation: "'증가하다'는 늘어나는 것이고, 반대말은 줄어드는 것인 '감소하다'입니다."
     context: "고치다", questionText: "다음 단어와 비슷한 뜻을 가진 말은 무엇입니까?", options: ["부수다", "수리하다", "만들다", "팔다"], correctAnswer: 1, explanation: "물건을 수선하는 것은 수리하는 것입니다.", },
 { id: "s21_r_17", type: QuestionType.READING, category: "내용 일치", questionText: "글의 내용과 같은 것을 고르십시오.", context: "저는 매일 아침 지하철을 타고 회사에 갑니다. 집에서 회사까지 30분 걸립니다.", options: ["버스를 탐", "한 시간 걸림", "지하철을 탐", "걸어서 감"], correctAnswer: 2, explanation: "지하철을 타고 출근한다고 명시되어 있습니다.", },
 { id: "s21_r_18", type: QuestionType.READING, category: "내용 일치", questionText: "글의 내용과 같은 것을 고르십시오.", context: "이번 주 토요일에 기숙사 친구들과 고기 파티를 하기로 했습니다.", options: ["금요일 파티", "혼자 먹음", "토요일 파티", "식당에서 일함"], correctAnswer: 2, explanation: "토요일에 친구들과 파티를 한다는 내용이 일치합니다.", },
@@ -5183,7 +5203,7 @@ export const STATIC_EXAM_DATA: Question[] = [
 { id: "s23_r_2", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "가 : 월급을 ________ 뭐 할 거예요?\n나 : 먼저 고향에 좀 보내고 가방을 하나 사고 싶어요.", options: ["사면", "내면", "받으면", "구하면"], correctAnswer: 2, explanation: "일을 하고 대가를 얻는 것은 '받다'입니다.", },
 { id: "s23_r_3", type: QuestionType.READING, category: "내용 관계",
     context: "린스, 샴푸, 비누, 칫솔, 치약, 수건, 면도기", questionText: "다음 내용과 관계있는 것은 무엇입니까?", options: ["세면도구", "청소도구", "필기도구", "시험도구"], correctAnswer: 0, explanation: "씻을 때 사용하는 물건들은 '세면도구'입니다.", },
-{ id: "s23_r_4", type: QuestionType.READING, category: "비슷한 말",
+{ id: "s23_r_4", type: QuestionType.READING, category: "비슷한 말", questionText: "다음 단어의 비슷한 말은 무엇입니까?", context: "추수하다", options: ["수확하다", "수출하다", "수매하다", "내다팔다"], correctAnswer: 0, explanation: "'추수하다'는 곡식을 거두는 것으로, 비슷한 말은 '수확하다'입니다."
     context: "추수하다", questionText: "다음 단어와 비슷한 말은 무엇입니까?", options: ["수확하다", "수출하다", "수매하다", "내다팔다"], correctAnswer: 0, explanation: "농작물을 거두어들이는 '추수'와 '수확'은 유의어입니다.", },
 { id: "s23_r_5", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "휴지는 쓰레기통에 ________.", options: ["버리십시오", "쓰십시오", "벗으십시오", "꺼내십시오"], correctAnswer: 0, explanation: "쓰레기는 쓰레기통에 '버려야' 합니다.", },
 { id: "s23_r_6", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "가 : 한국어를 ________ 지 얼마나 됐어요?\n나 : 1년 됐어요. 하지만 아직 잘 못해요.", options: ["간", "받은", "본", "배운"], correctAnswer: 3, explanation: "언어나 기술을 습득하는 것은 '배우다'입니다.", },
@@ -5237,7 +5257,7 @@ export const STATIC_EXAM_DATA: Question[] = [
 { id: "s24_r_14", type: QuestionType.READING, category: "활동 파악", questionText: "다음 그림에 맞는 문장을 고르십시오.", options: ["목 돌리기", "다리 올리기", "허리 굽히기", "두 팔 높이 들기"], correctAnswer: 2, explanation: "상체를 앞으로 숙여서 허리를 굽히는 스트레칭 동작입니다.", imageUrl: "/images/exam/reading/s24_r_14.png", imagePrompt: "A man bending forward to touch his toes as a waist stretch exercise." },
 { id: "s24_r_15", type: QuestionType.READING, category: "어휘 관계",
     context: "내성적, 외향적, 개방적, 활발", questionText: "다음 단어와 관계 있는 것은 무엇입니까?", options: ["외모", "성격", "주장", "나이"], correctAnswer: 1, explanation: "사람의 성향을 나타내는 '성격' 관련 어휘입니다.", },
-{ id: "s24_r_16", type: QuestionType.READING, category: "비슷한 말",
+{ id: "s24_r_16", type: QuestionType.READING, category: "비슷한 말", questionText: "다음 단어의 비슷한 말은 무엇입니까?", context: "정비하다", options: ["수리하다", "버리다", "바꾸다", "구입하다"], correctAnswer: 0, explanation: "'정비하다'는 손질하여 고치는 것으로, 비슷한 말은 '수리하다'입니다."
     context: "정비하다", questionText: "다음 단어의 비슷한 말은 무엇입니까?", options: ["수리하다", "버리다", "바꾸다", "구입하다"], correctAnswer: 0, explanation: "기계를 점검하고 고치는 '정비'와 '수리'는 비슷합니다.", },
 { id: "s24_r_17", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "저는 올해 스무 살입니다. ________ 에 스물다섯 살이 되면 결혼하고 싶습니다.", options: ["작년", "내년", "내후년", "나중에"], correctAnswer: 3, explanation: "미래의 막연한 시점은 '나중에'가 적합합니다.", },
 { id: "s24_r_18", type: QuestionType.READING, category: "어휘 선택", questionText: "알맞은 어휘를 고르십시오.", context: "저는 ________이/가 나빠요. 그래서 안경을 쓰지 않으면 잘 안 보여요.", options: ["손", "눈", "귀", "머리"], correctAnswer: 1, explanation: "안경과 관련된 신체 부위는 '눈'입니다.", },
@@ -5279,7 +5299,7 @@ export const STATIC_EXAM_DATA: Question[] = [
 { id: "s25_r_14", type: QuestionType.READING, category: "활동 파악", questionText: "다음 그림에 맞는 문장을 고르십시오.", options: ["물건을 팔고 있음", "교통정리를 하고 있음", "횡단보도를 건너고 있음", "거리 청소를 하고 있음"], correctAnswer: 3, explanation: "녹색 어깨띠를 두른 사람들이 집게와 봉투를 들고 거리의 쓰레기를 줍고 있는 모습입니다.", imageUrl: "/images/exam/reading/s25_r_14.png", imagePrompt: "A group of people wearing green campaign sashes picking up trash and litter on a city sidewalk using tongs and plastic bags." },
 { id: "s25_r_15", type: QuestionType.READING, category: "어휘 관계",
     context: "소포, 우편물, 택배, 물건", questionText: "다음 단어와 관계 있는 것은 무엇입니까?", options: ["구매", "배달", "구입", "편달"], correctAnswer: 1, explanation: "우편물이나 택배 등은 모두 '배달'되는 대상입니다.", },
-{ id: "s25_r_16", type: QuestionType.READING, category: "반대말",
+{ id: "s25_r_16", type: QuestionType.READING, category: "반대말", questionText: "다음 단어의 반대말은 무엇입니까?", context: "구입하다", options: ["판매하다", "관리하다", "교환하다", "할인하다"], correctAnswer: 0, explanation: "'구입하다'는 사는 것이고, 반대말은 파는 것인 '판매하다'입니다."
     context: "구입하다", questionText: "다음 단어의 반대 말은 무엇입니까?", options: ["판매하다", "관리하다", "교환하다", "할인하다"], correctAnswer: 0, explanation: "사는 것(구입)의 반대말은 파는 것(판매)입니다.", },
 { id: "s25_r_17", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "날씨가 흐린 날은 낮에도 사무실이 ________ 그래서 불을 켜야 합니다.", options: ["밝습니다", "무겁습니다", "넓습니다", "어둡습니다"], correctAnswer: 3, explanation: "불을 켜야 하는 이유는 공간이 '어둡기' 때문입니다.", },
 { id: "s25_r_18", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "이 신발은 값도 ________ 질도 좋습니다. 우리 백화점의 인기 상품입니다.", options: ["작고", "싸고", "좁고", "낮고"], correctAnswer: 1, explanation: "물건이 인기 있는 이유는 가격이 '저렴(싸다)'하기 때문입니다.", },
@@ -5321,7 +5341,7 @@ export const STATIC_EXAM_DATA: Question[] = [
 { id: "s26_r_14", type: QuestionType.READING, category: "활동 파악", questionText: "다음 그림에 맞는 문장을 고르십시오.", options: ["사진사가 촬영 중", "의사가 치료 중", "교사가 교수 중", "의사가 진찰 중"], correctAnswer: 3, explanation: "의사가 아이의 목 상태를 살피며 진료하는 행위는 '진찰'입니다.", imageUrl: "/images/exam/reading/s26_r_14.png", imagePrompt: "A doctor examining a child's throat with a tongue depressor and light in a clinic." },
 { id: "s26_r_15", type: QuestionType.READING, category: "어휘 관계",
     context: "믿다, 기도하다, 예배, 예불, 미사", questionText: "다음 단어와 관계 있는 것은?", options: ["교육활동", "종교활동", "봉사활동", "취미활동"], correctAnswer: 1, explanation: "종교와 관련된 모든 행위는 '종교활동'에 포함됩니다.", },
-{ id: "s26_r_16", type: QuestionType.READING, category: "비슷한 말",
+{ id: "s26_r_16", type: QuestionType.READING, category: "비슷한 말", questionText: "다음 단어의 비슷한 말은 무엇입니까?", context: "수상하다", options: ["의심쩍다", "안심하다", "확실하다", "수출하다"], correctAnswer: 0, explanation: "'수상하다'는 의심스럽다는 뜻으로, 비슷한 말은 '의심쩍다'입니다."
     context: "수상하다", questionText: "다음 단어의 비슷한 말은 무엇입니까?", options: ["의심쩍다", "안심하다", "확실하다", "수출하다"], correctAnswer: 0, explanation: "미심쩍고 수상한 상태는 '의심쩍다'와 의미가 통합니다.", },
 { id: "s26_r_17", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "편지를 보내려고 하는데 ________은/는 어디에 붙여요?", options: ["수표", "우체국", "우표", "영수증"], correctAnswer: 2, explanation: "우편 봉투에 부착하는 것은 '우표'입니다.", },
 { id: "s26_r_18", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "이 서류 좀 복사해 주세요. 몇 ________ 복사해 드릴까요?", options: ["시", "장", "살", "잔"], correctAnswer: 1, explanation: "종이의 수량을 세는 단위는 '장'입니다.", },
@@ -5484,7 +5504,7 @@ export const STATIC_EXAM_DATA: Question[] = [
 { id: "s30_r_14", type: QuestionType.READING, category: "그림 해석", questionText: "다음 그림에 대한 설명으로 맞는 것은?", context: "방 2개, 화장실 2개, 거실, 부엌 평면도.", options: ["거실이 2층", "방이 한 개", "화장실이 두 개", "부엌 옆 화장실"], correctAnswer: 2, explanation: "평면도를 보면 침실 1, 2와 욕실 1, 2가 있어 화장실(욕실)이 총 '두 개'임을 알 수 있습니다.", imageUrl: "/images/exam/reading/s30_r_14.png", imagePrompt: "A detailed architectural floor plan of an apartment with 2 bedrooms, 2 bathrooms, a living room, and a kitchen." },
 { id: "s30_r_15", type: QuestionType.READING, category: "어휘 관계",
     context: "삼일절, 광복절, 제헌절, 한글날", questionText: "다음 단어와 관계있는 것은 무엇입니까?", options: ["대한민국 국경일", "대한민국 기념일", "대한민국 민속절", "대한민국 휴가철"], correctAnswer: 0, explanation: "나열된 날들은 한국의 공식 '국경일'입니다.", },
-{ id: "s30_r_16", type: QuestionType.READING, category: "반대말",
+{ id: "s30_r_16", type: QuestionType.READING, category: "반대말", questionText: "다음 단어의 반대말은 무엇입니까?", context: "많다", options: ["작다", "적다", "길다", "짧다"], correctAnswer: 1, explanation: "'많다'의 반대말은 '적다'입니다."
     context: "많다", questionText: "다음 단어의 반대말은 무엇입니까?", options: ["작다", "적다", "길다", "짧다"], correctAnswer: 1, explanation: "수량이 많은 것의 반대는 '적다'입니다. (작다는 크기)", },
 { id: "s30_r_17", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "지난번에 말다툼을 한 이후로 투안 씨와 사이가 ________.", options: ["좋아졌어요", "예뻐졌어요", "별로 안 좋아졌어요", "기뻐했어요"], correctAnswer: 2, explanation: "싸운 후에는 관계가 나빠지는 것이 자연스럽습니다.", },
 { id: "s30_r_18", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "기계가 작동하기 시작하면 손잡이를 움직여서 목재를 ________ 돼요.", options: ["만지면", "자르면", "움직이면", "두드리면"], correctAnswer: 1, explanation: "절단기를 사용하는 목적은 재료(목재)를 '자르기' 위함입니다.", },
