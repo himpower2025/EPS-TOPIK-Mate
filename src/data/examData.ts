@@ -88,13 +88,6 @@ export const STATIC_EXAM_DATA: Question[] = [
 { id: "s2_l_38", type: QuestionType.LISTENING, category: "내용 파악", questionText: "남자는 몇 시까지 일을 합니까?", context: "여: 내일 오전에 같이 운동하러 갈래요? 남: 내일은 회사에 가야 해요. 여: 내일은 토요일인데 토요일에 쉬지 않아요? 남: 보통은 쉬는데 이번 주는 바빠서요. 오후에 같이 가요. 여: 그럼 오후 1시에 만날까요? 남: 1시는 너무 이른데 2시간 후에 만나면 어때요?", options: ["오후 1시", "오후 2시", "오후 3시", "오후 4시"], correctAnswer: 2, explanation: "오후 1시에서 2시간 후이므로 오후 3시에 만납니다." },
 { id: "s2_l_39", type: QuestionType.LISTENING, category: "내용 파악", questionText: "남자는 누구 선물을 사려고 합니까?", context: "남: 리아 씨 내일 시간 있어요? 여: 네 있어요 왜요? 남: 내일 어머니 생신 선물을 사려고 하는데요. 같이 가서 골라 주시겠어요? 여: 그럼요. 몇 시에 만날까요? 남: 오후 3시 어때요? 여: 좋아요.", options: ["아버지", "어머니", "여동생", "남동생"], correctAnswer: 1, explanation: "어머니 생신 선물을 사러 가는 내용이므로 정답은 어머니입니다." },
 { id: "s2_l_40", type: QuestionType.LISTENING, category: "내용 파악", questionText: "남자가 좋아하는 음식은 무엇입니까?", context: "여: 하늘 씨 내일 우리 집에 점심 먹으러 오세요. 남: 무슨 날이에요? 여: 제 생일이에요. 그런데 하늘 씨는 어떤 음식을 좋아하세요? 남: 저는 카레를 제일 좋아해요. 여: 그럼 카레를 만들게요.", options: ["라면", "볶음밥", "우동", "카레"], correctAnswer: 3, explanation: "하늘 씨가 카레를 제일 좋아한다고 했으므로 정답은 카레입니다." },
-    category: "어휘 선택",
-    questionText: "다음 설명에 알맞은 어휘를 고르십시오.",
-    context: "여름에는 습하고 비가 많이 옵니다. 겨울에는 영하의 기온으로 떨어지고 눈이 많이 내립니다.",
-    options: ["취미", "날씨", "여행", "날자"],
-    correctAnswer: 1,
-    explanation: "사계절의 기후 특징을 설명하는 '날씨'에 대한 내용입니다."
-  },
 { id: "s3_r_1", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "오늘은 토요일입니다. ________은/는 월요일입니다.", options: ["그제", "어제", "내일", "모레"], correctAnswer: 3, explanation: "토요일 다음 다음 날(토-일-월)은 '모레'입니다." },
 { id: "s3_r_2", type: QuestionType.READING, category: "빈칸 채우기", questionText: "빈칸에 들어갈 가장 알맞은 것을 고르십시오.", context: "아침에 일어나니까 ________가 많이 아팠습니다. 그래서 약국에 가서 두통약을 사 먹었습니다.", options: ["이", "배", "머리", "다리"], correctAnswer: 2, explanation: "두통약(Headache pill)을 먹었으므로 아픈 곳은 '머리'입니다." },
 { id: "s3_r_3", type: QuestionType.READING, category: "관계 있는 단어", questionText: "다음 질문에 답 하십시오. 다음 내용과 관계있는 것은 무엇입니까?", context: "하다, 지키다, 어기다", options: ["약속", "숙제", "운동", "운전"], correctAnswer: 0, explanation: "'약속(Promise)'은 하다, 지키다, 어기다와 함께 쓰입니다." },
@@ -1214,5 +1207,5 @@ export const STATIC_EXAM_DATA: Question[] = [
 { id: "s30_l_37", type: QuestionType.LISTENING, category: "장소 파악", questionText: "반방 씨는 어디에서 일하고 있습니까?", context: "건물을 짓는 공사장에서 일하고 있어요.", options: ["건설 현장", "정비 현장", "가구 제작", "제설 작업"], correctAnswer: 0, explanation: "건물이 올라가고 있는 공사 현장 그림을 고릅니다.", imageUrl: "/images/exam/listening/s30_l_37.png", imagePrompt: "A construction site with a steel frame of a building." },
 { id: "s30_l_38", type: QuestionType.LISTENING, category: "활동 파악", questionText: "여자는 지금 무엇을 하려고 합니까?", context: "극장 앞에 차를 세워도 돼요? 아니요.", options: ["차 구매", "차 세우기", "택시비 지불", "주차비 지불"], correctAnswer: 1, explanation: "주차 가능 여부를 묻는 것은 '차를 세우려는' 목적입니다.", imageUrl: "/images/exam/listening/s30_l_38.png", imagePrompt: "A woman pointing at a car space in front of a cinema." },
 { id: "s30_l_39", type: QuestionType.LISTENING, category: "활동 파악", questionText: "남자는 지금 무엇을 하고 있습니까?", context: "드라마 대장금 노래를 듣고 있어요.", options: ["음악 듣기", "운동 하기", "노래 부르기", "책 읽기"], correctAnswer: 0, explanation: "헤드셋이나 이어폰으로 음악을 감상하는 중입니다.", imageUrl: "/images/exam/listening/s30_l_39.png", imagePrompt: "A man wearing headphones, looking relaxed." },
-{ id: "s30_l_40", type: QuestionType.LISTENING, category: "인원 파악", questionText: "이 공장에서 일하는 외국인은 모두 몇 명입니까?", context: "4명 있어요. 3명은 외국 사람이고 한 명은 한국 사람이에요.", options: ["1명", "2명", "3명", "4명"], correctAnswer: 2, explanation: "전체 4명 중 외국인 수인 '3명'이 정답입니다.", }
+{ id: "s30_l_40", type: QuestionType.LISTENING, category: "인원 파악", questionText: "이 공장에서 일하는 외국인은 모두 몇 명입니까?", context: "4명 있어요. 3명은 외국 사람이고 한 명은 한국 사람이에요.", options: ["1명", "2명", "3명", "4명"], correctAnswer: 2, explanation: "전체 4명 중 외국인 수인 '3명'이 정답입니다.", },
 ];
