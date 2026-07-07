@@ -9,7 +9,7 @@ import { LoginModal } from './components/LoginModal';
 import { ProfileModal } from './components/ProfileModal';
 import { FaviconManager } from './components/FaviconManager';
 import { InstallPwa } from './components/InstallPwa';
-import { LegalModal } from './components/LegalModal';
+import { LegalModal } from './components/LegalModal'; // Terms & Privacy modal
 import { ExamSession, User, ExamMode } from './types';
 
 import { auth, db } from './firebase';

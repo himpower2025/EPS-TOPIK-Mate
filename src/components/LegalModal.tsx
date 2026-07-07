@@ -1,3 +1,4 @@
+// LegalModal component for displaying Terms of Service and Privacy Policy
 import React from 'react';
 import { X, Shield, FileText } from 'lucide-react';
 
