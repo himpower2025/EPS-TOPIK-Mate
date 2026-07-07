@@ -3,9 +3,10 @@ import { PlayCircle, ShieldCheck, ArrowRight, Zap } from 'lucide-react';
 
 interface LandingPageProps {
   onLoginClick: () => void;
+  onLegalClick: (type: 'terms' | 'privacy') => void;
 }
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
+export const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onLegalClick }) => {
   return (
     <div className="flex flex-col h-full bg-white overflow-y-auto">
       {/* Navbar */}
@@ -74,9 +75,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
              </div>
            ))}
         </div>
+
+        {/* Company Info */}
+        <div className="mb-20 p-8 bg-indigo-50/50 rounded-[3rem] border border-indigo-100/50 text-center">
+           <h3 className="text-indigo-900 font-black text-xs uppercase tracking-[0.4em] mb-4">Official Developer</h3>
+           <div className="text-2xl font-black text-indigo-950 mb-2">Himpower Pvt. Ltd.</div>
+           <p className="text-indigo-700/60 text-sm font-medium max-w-md mx-auto">
+             Himpower Pvt. Ltd. is a leading technology company specializing in AI-driven educational solutions for global workforce mobility.
+           </p>
+        </div>
       </div>
-      <div className="text-center py-8 text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] border-t border-gray-50 shrink-0">
-        © EPS Mate • Global Study Partner
+      <div className="text-center py-10 text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] border-t border-gray-50 shrink-0 bg-gray-50/50">
+        <div className="mb-2">© EPS Mate • Global Study Partner</div>
+        <div className="text-gray-500 font-black tracking-[0.3em] mb-4">Developed by Himpower Pvt. Ltd.</div>
+        <div className="flex justify-center gap-6 text-indigo-600 font-black normal-case">
+          <button onClick={() => onLegalClick('terms')} className="hover:underline">Terms of Service</button>
+          <span className="text-gray-300">•</span>
+          <button onClick={() => onLegalClick('privacy')} className="hover:underline">Privacy Policy</button>
+        </div>
       </div>
     </div>
   );

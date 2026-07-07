@@ -9,6 +9,7 @@ import { LoginModal } from './components/LoginModal';
 import { ProfileModal } from './components/ProfileModal';
 import { FaviconManager } from './components/FaviconManager';
 import { InstallPwa } from './components/InstallPwa';
+import { LegalModal } from './components/LegalModal';
 import { ExamSession, User, ExamMode } from './types';
 
 import { auth, db } from './firebase';
@@ -35,6 +36,7 @@ const App: React.FC = () => {
   const [lastSession, setLastSession] = useState<ExamSession | null>(null);
   const [examMode, setExamMode] = useState<ExamMode>('FULL');
   const [selectedSet, setSelectedSet] = useState(1);
+  const [showLegalType, setShowLegalType] = useState<'terms' | 'privacy' | null>(null);
   
   // Guard states for mobile redirect loops
   const [isInitializing, setIsInitializing] = useState(true);
@@ -49,8 +51,7 @@ const App: React.FC = () => {
       const snap = await getDoc(userRef);
       let userData: User;
       
-      const adminEmails = ['abraham0715@gmail.com', 'huoung@gmail.com'];
-      const isAdmin = firebaseUser.email && adminEmails.includes(firebaseUser.email);
+      const isAdmin = firebaseUser.email === 'abraham0715@gmail.com';
       const expiryDate = isAdmin ? new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString() : null;
 
       if (snap.exists()) {
@@ -193,6 +194,10 @@ const App: React.FC = () => {
   };
 
   const handleSetSelect = (setNum: number) => {
+    if (user?.plan === 'free' && setNum !== 10) {
+      setShowPaywall(true);
+      return;
+    }
     setSelectedSet(setNum);
     setCurrentState(AppState.EXAM);
   };
@@ -231,13 +236,26 @@ const App: React.FC = () => {
       <FaviconManager />
       <InstallPwa />
       
-      {currentState === AppState.LANDING && !user && <LandingPage onLoginClick={() => setShowLoginModal(true)} />}
+      {currentState === AppState.LANDING && !user && (
+        <LandingPage 
+          onLoginClick={() => setShowLoginModal(true)} 
+          onLegalClick={(type) => setShowLegalType(type)} 
+        />
+      )}
       
       {showLoginModal && (
         <LoginModal 
           onClose={() => setShowLoginModal(false)} 
           onLogin={handleGoogleLogin} 
           onEmailAuth={handleEmailAuth}
+          onLegalClick={(type) => setShowLegalType(type)}
+        />
+      )}
+
+      {showLegalType && (
+        <LegalModal 
+          type={showLegalType} 
+          onClose={() => setShowLegalType(null)} 
         />
       )}
       

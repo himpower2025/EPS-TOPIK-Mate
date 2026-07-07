@@ -5,9 +5,10 @@ interface LoginModalProps {
   onClose: () => void;
   onLogin: () => void;
   onEmailAuth: (email: string, pass: string, isSignUp: boolean) => Promise<void>;
+  onLegalClick?: (type: 'terms' | 'privacy') => void;
 }
 
-export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLogin, onEmailAuth }) => {
+export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLogin, onEmailAuth, onLegalClick }) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
@@ -119,6 +120,15 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLogin, onEmai
           >
             {isSignUp ? 'Already have an account? Login' : "Don't have an account? Sign Up"}
           </button>
+
+          {onLegalClick && (
+            <p className="mt-8 text-[9px] text-gray-400 font-bold leading-relaxed text-center">
+              By continuing, you agree to our{' '}
+              <button onClick={() => onLegalClick('terms')} className="text-indigo-600 underline">Terms of Service</button>
+              {' '}and{' '}
+              <button onClick={() => onLegalClick('privacy')} className="text-indigo-600 underline">Privacy Policy</button>.
+            </p>
+          )}
         </div>
       </div>
     </div>
