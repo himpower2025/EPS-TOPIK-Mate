@@ -1,0 +1,634 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>EPS-TOPIK 데이터 품질 검수 보고서</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; background: #f4f7f6; }
+        .summary { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .issue-card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #e74c3c; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-right: 10px; }
+        .badge-id { background: #3498db; color: white; }
+        .badge-cat { background: #95a5a6; color: white; }
+        .reason { color: #e74c3c; font-weight: bold; margin-bottom: 10px; }
+        .content { background: #f9f9f9; padding: 10px; border-radius: 4px; border: 1px solid #eee; }
+        h1 { color: #2c3e50; }
+        .fixed { color: #27ae60; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>📊 EPS-TOPIK 데이터 품질 검수 보고서</h1>
+    <div class="summary">
+        <p>전체 문제 수: <strong>1179</strong></p>
+        <p class="fixed">✅ 제목에서 제시어 자동 추출: <strong>33 건</strong></p>
+        <p class="fixed">✅ 빈칸 기호 표준화: <strong>70 건</strong></p>
+        <p>⚠️ 추가 확인이 필요한 문제: <strong>50 건</strong></p>
+    </div>
+
+    <h2>⚠️ 수동 확인이 필요한 리스트</h2>
+    <p>아래 문제들은 자동 교정 후에도 데이터가 부족하거나 형식이 의심스러운 것들입니다. 하나씩 확인하시고 저에게 번호와 수정 내용을 말씀해 주세요.</p>
+    
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s1_r_10</span>
+            <span class="badge badge-cat">안내문</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 다음 안내문에 대한 바른 설명은 무엇입니까?<br>
+            <strong>제시문:</strong> 미소치과 휴일진료 안내\n12월 19일(수) 선거일 정상진료\n미소치과는 선거당일 정상진료합니다. 저희 병원은 고객분들의 편의를 위해 항상 노력하고 있습니다. - 미소치과 -
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 제시문(context) 누락</div>
+        <div>
+            <span class="badge badge-id">s8_r_19</span>
+            <span class="badge badge-cat">어휘 선택</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 공사현장에서 지켜야 할 행동 기준을 무엇이라 합니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 제시문(context) 누락</div>
+        <div>
+            <span class="badge badge-id">s8_r_20</span>
+            <span class="badge badge-cat">어휘 선택</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 건강을 좋게 하기 위해 노력하는 것을 무엇이라 합니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 제시문(context) 누락</div>
+        <div>
+            <span class="badge badge-id">s9_r_13</span>
+            <span class="badge badge-cat">어휘 선택</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 전기가 몸으로 들어와 사람이 다치는 것을 무엇이라 합니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 제시문(context) 누락</div>
+        <div>
+            <span class="badge badge-id">s9_r_19</span>
+            <span class="badge badge-cat">어휘 선택</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 가스, 휘발유, 페인트, 신나처럼 불이 잘 붙는 물질은?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 제시문(context) 누락</div>
+        <div>
+            <span class="badge badge-id">s9_r_20</span>
+            <span class="badge badge-cat">어휘 선택</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 안전모, 안전화, 보안경 등 작업자를 보호하는 장구는?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s12_r_4</span>
+            <span class="badge badge-cat">그래프 해석</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 자신의 일을 좋아하는 사람이 제일 많은 회사는 어디입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s13_r_10</span>
+            <span class="badge badge-cat">그래프 해석</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 외국으로 여행을 가려고 하는 사람은 얼마나 됩니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s13_r_11</span>
+            <span class="badge badge-cat">시각 정보</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 다음을 설명한 것으로 맞지 않는 것을 고르십시오.<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s14_r_9</span>
+            <span class="badge badge-cat">시각 정보</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 안내판을 보고 오른쪽으로 가야 하는 사람은 누구입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s14_r_10</span>
+            <span class="badge badge-cat">시각 정보</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 지하철 벽면에 붙어 있는 표지입니다. 바르게 설명한 것을 고르십시오.<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s14_r_11</span>
+            <span class="badge badge-cat">그래프 해석</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 교통비를 가장 많이 지출한 달은 언제입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s15_r_10</span>
+            <span class="badge badge-cat">그래프 해석</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 외국으로 여행을 가려고 하는 사람은 얼마나 됩니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s15_r_12</span>
+            <span class="badge badge-cat">시각 정보</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 다음 중 '안내소(안내하는 곳)'를 뜻하는 표지판은 어느 것입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s16_r_11</span>
+            <span class="badge badge-cat">그래프 해석</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 교통비를 가장 많이 지출한 달은 언제입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s17_r_10</span>
+            <span class="badge badge-cat">시각 정보</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 다음 그림과 관계가 있는 말을 고르십시오.<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s17_r_12</span>
+            <span class="badge badge-cat">그래프 해석</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 교통비와 외식비가 동일하게 지출된 달은 언제입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s18_r_12</span>
+            <span class="badge badge-cat">그래프 해석</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 수출을 가장 많이 한 지역은 어디입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s19_r_9</span>
+            <span class="badge badge-cat">그래프 해석</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 관광객이 제일 많은 지역은 어느 지역입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s19_r_12</span>
+            <span class="badge badge-cat">시각 정보</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 보관소에 물건을 맡기려고 합니다. 어떤 표지를 찾아야 합니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 제시문(context) 누락</div>
+        <div>
+            <span class="badge badge-id">s19_r_20</span>
+            <span class="badge badge-cat">어휘 선택</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 회식 때 술을 마시지 않는다면 미리 알려 양해를 구하는 것입니다.<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s20_r_9</span>
+            <span class="badge badge-cat">그래프 해석</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 귀국할 때 사고 싶은 가장 좋아하는 품목은 무엇입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s20_r_10</span>
+            <span class="badge badge-cat">시각 정보</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 이 카드로 할 수 없는 것은 무엇입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s20_r_11</span>
+            <span class="badge badge-cat">시각 정보</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 이 기계를 가장 많이 쓰는 곳은 어디입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s20_r_12</span>
+            <span class="badge badge-cat">시각 정보</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 밥을 지을 때 필요한 것은 어떤 것입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 제시문(context) 누락</div>
+        <div>
+            <span class="badge badge-id">s20_r_19</span>
+            <span class="badge badge-cat">어휘 선택</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 신체 접촉이나 성적 언동으로 불쾌하게 하는 행동입니다.<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 제시문(context) 누락</div>
+        <div>
+            <span class="badge badge-id">s20_r_20</span>
+            <span class="badge badge-cat">어휘 선택</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 리한 씨에게 용접봉 좀 가져다 주세요. 찾고 있었어요.<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s21_r_4</span>
+            <span class="badge badge-cat">그래프 해석</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 가장 많이 사용하는 교통수단은 무엇입니까?<br>
+            <strong>제시문:</strong> 버스(55%), 지하철(30%), 택시(10%), 기타(5%)
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s21_r_10</span>
+            <span class="badge badge-cat">도구 파악</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 나무를 자를 때 사용하는 공구는 무엇입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s21_r_11</span>
+            <span class="badge badge-cat">도구 파악</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 무거운 물건을 들어 올리는 기계는 무엇입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s22_r_4</span>
+            <span class="badge badge-cat">그래프 해석</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 가장 적게 하는 여가 활동은 무엇입니까?<br>
+            <strong>제시문:</strong> TV 시청(40%), 독서(30%), 운동(20%), 여행(10%)
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s23_r_9</span>
+            <span class="badge badge-cat">도구 파악</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 다음 공구로 할 수 있는 것을 맞게 설명한 것을 고르십시오.<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s23_r_10</span>
+            <span class="badge badge-cat">도구 파악</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 다음 그림을 맞게 설명한 것을 고르십시오.<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s23_r_11</span>
+            <span class="badge badge-cat">도구 파악</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 다음 사진을 바르게 설명한 것을 고르십시오.<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s23_r_12</span>
+            <span class="badge badge-cat">그래프 해석</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 표에 대한 설명으로 맞지 않는 것을 고르십시오.<br>
+            <strong>제시문:</strong> 1일 근로 시간: 10~12시간(40.9%), 12시간 이상(29.6%), 8~10시간(21.5%), 8시간 이하(8%)
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s24_r_4</span>
+            <span class="badge badge-cat">그래프 해석</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 자신의 일을 좋아하는 사람이 제일 많은 회사는 어느 회사입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s25_r_4</span>
+            <span class="badge badge-cat">그래프 해석</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 노인들에게 가장 어려운 문제는 무엇입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s25_r_12</span>
+            <span class="badge badge-cat">도구 파악</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 모내기 할 때 모를 옮겨심는 기계는 무엇입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s26_r_4</span>
+            <span class="badge badge-cat">그래프 해석</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 지훈 씨는 토요일에 얼마 동안 휴대전화를 사용했습니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s26_r_12</span>
+            <span class="badge badge-cat">도구 파악</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 벼, 보리의 이삭에서 낟알을 떨어내는 농기계는 무엇입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s27_r_1</span>
+            <span class="badge badge-cat">표지판</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 이 표지는 무슨 뜻입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s27_r_3</span>
+            <span class="badge badge-cat">시각 정보</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 이 사람이 일하는 부서는 어디입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s27_r_4</span>
+            <span class="badge badge-cat">그래프 해석</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 사람들이 언제 책을 가장 적게 샀습니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s27_r_13</span>
+            <span class="badge badge-cat">시각 정보</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 다음 그림을 보고 맞는 문장을 고르십시오.<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s27_l_36</span>
+            <span class="badge badge-cat">시각 정보</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 들은 내용과 관계있는 그림을 고르십시오.<br>
+            <strong>제시문:</strong> 중요한 메모지를 집에 놓고 왔어요... 4월 29일이라고 써 있어요.
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s28_r_3</span>
+            <span class="badge badge-cat">시각 정보</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 이 표지가 있는 곳에서 할 수 없는 것은 무엇입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s28_r_4</span>
+            <span class="badge badge-cat">시각 정보</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 선호도가 가장 낮은 관광지는 어디입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s28_r_14</span>
+            <span class="badge badge-cat">시각 정보</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 다음 사진을 맞게 설명한 것을 고르십시오.<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s29_r_4</span>
+            <span class="badge badge-cat">그래프 해석</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 한국 사람들이 가장 많이 먹는 과일은 무엇입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+    <div class="issue-card">
+        <div class="reason">사유: 이미지(imageUrl/optionImages) 누락</div>
+        <div>
+            <span class="badge badge-id">s30_r_6</span>
+            <span class="badge badge-cat">그래프 해석</span>
+        </div>
+        <div class="content">
+            <strong>질문:</strong> 외국 사람들이 가장 좋아하는 한국 음식은 무엇입니까?<br>
+            <strong>제시문:</strong> <span style="color:#ccc">없음</span>
+        </div>
+    </div>
+    
+</body>
+</html>

@@ -119,8 +119,16 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
   }, [loading, timeLeft]);
   const handlePlayAudio = async () => {
     const q = questions[currentIndex];
-    const rawScript = q.context || q.questionText;
-    const { script, lines, isDialogue } = prepareAudioScript(rawScript);
+
+    // 실제 EPS-TOPIK 은 대화가 끝난 뒤 질문을 읽어줍니다.
+    // context(대본) 와 questionText(질문) 가 다르면 질문을 뒤에 이어 붙입니다.
+    const isInstruction = /고르십시오|고르세요|들은 것을/.test(q.questionText || '');
+    const rawScript =
+      q.context && q.questionText && !isInstruction && q.context !== q.questionText
+        ? `${q.context}\n${q.questionText}`
+        : q.context || q.questionText;
+
+    const { script, lines } = prepareAudioScript(rawScript);
 
     if (!script) return;
     
@@ -141,17 +149,28 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
 
     setLoadingAudio(true);
     try {
-      // 대화체는 브라우저 TTS 폴백으로 2인칬 재생
-      if (isDialogue) {
-        throw new Error("Force Sequential TTS for dialogue gap support");
-      }
-
+      // 대화형도 Gemini 멀티스피커 TTS 로 재생합니다.
+      // (기존에는 여기서 강제로 throw 해서 항상 브라우저 음성으로 떨어졌습니다)
       const success = await initAudio();
       if (!success || !audioContextRef.current) {
         throw new Error("AudioContext initialization failed");
       }
 
-      const buffer = await generateSpeech(rawScript, audioContextRef.current);
+      let buffer: AudioBuffer | null = null;
+
+      // 사전 생성된 음성 파일(public/audio/...)이 있으면 API 호출 없이 재생
+      if (q.audioUrl) {
+        try {
+          const res = await fetch(q.audioUrl);
+          if (res.ok) {
+            buffer = await audioContextRef.current.decodeAudioData(await res.arrayBuffer());
+          }
+        } catch (e) {
+          console.warn('사전 생성 음성 로드 실패, 실시간 TTS 로 전환:', e);
+        }
+      }
+
+      if (!buffer) buffer = await generateSpeech(rawScript, audioContextRef.current);
 
       if (buffer && audioContextRef.current) {
         if (audioContextRef.current.state === 'suspended') {
@@ -183,7 +202,13 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
         const koVoices = voices.filter(v => v.lang.startsWith('ko'));
         if (koVoices.length === 0) return null;
         if (koVoices.length === 1) return koVoices[0];
-        // 두 개 이상이면 첫 번째를 남성, 두 번째를 여성으로 사용
+
+        // 이름으로 성별을 먼저 판별 (기기마다 목록 순서가 달라 인덱스 추측은 부정확)
+        const MALE = /male|남성|남자|InJoon|Gook|Hyunsu|Yuna_male/i;
+        const FEMALE = /female|여성|여자|Yuna|Sora|SunHi|Heami|Jiyoung/i;
+        const named = koVoices.find(v => (preferMale ? MALE : FEMALE).test(v.name));
+        if (named) return named;
+
         return preferMale ? koVoices[0] : koVoices[koVoices.length - 1];
       };
 
@@ -200,20 +225,21 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
           utterance.volume = 1.0;
 
           // 화자별 목소리 및 톤 설정 (성별이 같더라도 순서에 따라 피치를 다르게 함)
-          const isEven = i % 2 === 0;
+          // 시험 낭독용 톤: 피치를 올리지 않습니다.
+          // (기존 1.1 / 1.25 설정이 "하이톤으로 거북하다"의 직접 원인이었습니다)
           if (line.speaker === 'Man') {
             const maleVoice = getKoreanVoice(true);
             if (maleVoice) utterance.voice = maleVoice;
-            utterance.pitch = isEven ? 0.9 : 0.8;    // 남성1: 0.9, 남성2: 0.8
-            utterance.rate = 0.9;
+            utterance.pitch = 0.85;
+            utterance.rate = 0.85;
           } else if (line.speaker === 'Woman') {
             const femaleVoice = getKoreanVoice(false);
             if (femaleVoice) utterance.voice = femaleVoice;
-            utterance.pitch = isEven ? 1.1 : 1.25;   // 여성1: 1.1, 여성2: 1.25
-            utterance.rate = 0.95;
-          } else {
             utterance.pitch = 1.0;
-            utterance.rate = 0.9;
+            utterance.rate = 0.85;
+          } else {
+            utterance.pitch = 0.95;
+            utterance.rate = 0.85;
           }
 
           await new Promise<void>((resolve) => {
@@ -261,8 +287,13 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
   const currentQ = questions[currentIndex];
   const isLast = currentIndex === questions.length - 1;
   const isListening = currentQ.type === QuestionType.LISTENING;
-  // 카테고리 상관없이 imageUrl 또는 imagePrompt가 있으면 이미지 문제로 처리
-  const hasImage = !!(currentQ.imageUrl || currentQ.imagePrompt);
+  // 그림 표시 규칙
+  //   읽기  : 그림이 있으면 항상 표시
+  //   듣기  : imageRole === 'stimulus' 일 때만 표시.
+  //           'hint' 는 대본에 이미 답이 나오는 삽화라 표시하면 정답이 유출됩니다.
+  const hasImage =
+    !!(currentQ.imageUrl || currentQ.imagePrompt) &&
+    (currentQ.type !== QuestionType.LISTENING || currentQ.imageRole === 'stimulus');
 
   const displayQuestionText = cleanText(currentQ.questionText);
   const displayContext = cleanText(currentQ.context || "");
@@ -329,13 +360,16 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                 {isListening ? "Listening" : currentQ.category} Section
               </div>
               <h2 className="text-xl md:text-2xl lg:text-3xl font-black text-gray-900 leading-tight mb-2 md:mb-4">
-                {isListening ? "질문을 잘 듣고 알맞은 답을 고르십시오." : displayQuestionText}
+                {displayQuestionText}
               </h2>
               <p className="text-[10px] md:text-xs text-gray-400 font-bold uppercase tracking-widest opacity-60">
                 {isListening ? "Listening Comprehension" : currentQ.category}
               </p>
             </div>
 
+            {/* 보여줄 자료(그림·지문·재생 버튼)가 하나도 없으면 빈 상자를 그리지 않습니다.
+                보기가 그림인 표지판 문제 등이 여기 해당합니다. */}
+            {(isListening || hasImage || displayContext) && (
             <div className="bg-white rounded-[2rem] md:rounded-[3rem] border-2 border-dashed border-gray-200 overflow-hidden shadow-sm flex flex-col items-center justify-center p-4 md:p-8 transition-all min-h-[250px] md:min-h-[400px]">
               {isGeneratingVisuals && !questionImage ? (
                 <div className="flex flex-col items-center gap-4 md:gap-6 py-8 md:py-12 text-center animate-pulse">
@@ -347,7 +381,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
               ) : (
                 <div className="w-full space-y-4 md:space-y-8">
                   {/* 이미지가 있는 문제: 읽기 문제인 경우에만 표시 (듣기는 이미지 제거) */}
-                  {!isListening && hasImage && questionImage ? (
+                  {hasImage && questionImage ? (
                     <div className="w-full flex items-center justify-center">
                       <img
                         src={questionImage}
@@ -358,7 +392,7 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                       />
                     </div>
                   ) : (
-                    hasImage && !isListening && !isGeneratingVisuals && (
+                    hasImage && !isGeneratingVisuals && (
                       <div className="flex flex-col items-center gap-4 py-8">
                         <p className="text-gray-400 text-sm font-medium">Image failed to load</p>
                         <button
@@ -380,6 +414,13 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                         </button>
                       </div>
                     )
+                  )}
+
+                  {/* 지문과 그림이 모두 있는 문제(안내문+사진 등)는 둘 다 보여줍니다 */}
+                  {!isListening && displayContext && (
+                    <div className="p-6 md:p-10 text-lg md:text-xl lg:text-2xl font-serif leading-relaxed text-gray-800 bg-indigo-50/30 rounded-2xl md:rounded-[2.5rem] w-full border border-indigo-100 italic shadow-inner text-center whitespace-pre-line">
+                      {displayContext}
+                    </div>
                   )}
 
                   {isListening ? (
@@ -409,16 +450,11 @@ export const ExamSimulator: React.FC<ExamSimulatorProps> = ({ mode, setNumber, o
                         </div>
                       </div>
                     </div>
-                  ) : (
-                    !questionImage && displayContext && (
-                      <div className="p-6 md:p-10 text-lg md:text-xl lg:text-2xl font-serif leading-relaxed text-gray-800 bg-indigo-50/30 rounded-2xl md:rounded-[2.5rem] w-full border border-indigo-100 italic shadow-inner text-center">
-                        "{displayContext}"
-                      </div>
-                    )
-                  )}
+                  ) : null}
                 </div>
               )}
             </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 gap-3 md:gap-4 h-full content-start">

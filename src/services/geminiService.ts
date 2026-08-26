@@ -1,8 +1,30 @@
-import { GoogleGenAI, Type, Modality } from "@google/genai";
+/// <reference types="vite/client" />
+import { Modality } from "@google/genai";
 import { Question, QuestionType, AnalyticsFeedback, ExamSession, ExamMode, PlanType } from '../types';
 import { STATIC_EXAM_DATA } from '../data/examData';
 
-const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+// ──────────────────────────────────────────────────────────────
+// Firebase Functions URL
+// 배포 후에는 실제 Functions URL 로 바꾸세요.
+// 개발 중에는 로컬 에뮬레이터 URL을 씁니다.
+// ──────────────────────────────────────────────────────────────
+const FUNCTIONS_BASE =
+  import.meta.env.VITE_FUNCTIONS_URL ||
+  'http://localhost:5001/eps-topik-mate/us-central1';
+
+/** Functions 엔드포인트를 호출하는 공통 헬퍼 */
+async function callFunction<T>(name: string, body: unknown): Promise<T> {
+  const res = await fetch(`${FUNCTIONS_BASE}/${name}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`[${name}] ${res.status}: ${text.slice(0, 200)}`);
+  }
+  return res.json() as Promise<T>;
+}
 
 function decodeBase64(base64: string): Uint8Array {
   const binaryString = window.atob(base64);
@@ -39,8 +61,6 @@ async function decodeAudioData(
   }
 }
 
-const cleanJson = (text: string | undefined): string =>
-  (text ?? "").replace(/```json/g, '').replace(/```/g, '').replace(/\/\*.*?\*\//gs, '').trim();
 
 // ============================================================
 // ✅ cleanText 수정
@@ -77,9 +97,15 @@ export const prepareAudioScript = (rawText: string): { script: string; isDialogu
   // 3단계: 말줄임표(...) 정리 — TTS가 자연스럽게 읽도록
   text = text.replace(/\.\.\./g, '. ');
 
-  // 3.5단계: 정답 유추를 방지하기 위한 "1번", "2번" 등 숫자 마커 제거
-  text = text.replace(/\d+\s?번/g, ''); // "1번", "2번" 제거
-  text = text.replace(/^\d+[\.\)]\s*/gm, ''); // "1.", "1)" 등 라인 시작 숫자 제거
+  // 3.5단계: 숫자 마커 처리
+  //  - 보기 4개를 번호와 함께 낭독하는 유형(1번…2번…3번…4번…)은 실제 시험과
+  //    동일하므로 번호를 그대로 살린다. 지우면 단어 나열만 들려 문제가 성립하지 않는다.
+  //  - 그 외에 정답 번호만 남아 있는 경우("1번 비누입니다")는 정답 유출이므로 제거한다.
+  const readsAllOptions = /1\s?번[\s\S]{0,60}2\s?번[\s\S]{0,60}3\s?번/.test(text);
+  if (!readsAllOptions) {
+    text = text.replace(/\d+\s?번/g, '');
+    text = text.replace(/^\d+[\.\)]\s*/gm, '');
+  }
 
   // 4단계: 교대 기호 ("/") 를 개행으로 변경
   text = text.replace(/\s*\/\s*/g, '\n');
@@ -88,7 +114,7 @@ export const prepareAudioScript = (rawText: string): { script: string; isDialogu
   let hasTags = /(가|나|남|여|남자|여자|Man|Woman|A|B)\s*:/.test(text);
 
   // 숨겨진 대화 감지(태그 없이 물음표로 질문과 대답이 나뉘는 경우)
-  if (!hasTags && text.includes('?') && !text.includes('1번')) {
+  if (!hasTags && !readsAllOptions && text.includes('?')) {
     const firstQ = text.indexOf('?');
     // 물음표 뒤에 글자가 있으면 대화로 간주하여 강제 분리
     if (firstQ !== -1 && firstQ < text.length - 2) {
@@ -217,12 +243,7 @@ export const generateQuestionsBySet = async (
     }
   }
 
-  const ai = getAI();
-  const difficultyContext =
-    plan === 'free'
-      ? "Standard Beginner Level"
-      : "High-tier Workplace and Technical Industry Scenarios";
-
+  // 샘플 문항 3개를 서버에 보내면 참고용으로 활용됩니다.
   const samples = STATIC_EXAM_DATA
     .filter(q => mode === 'FULL' || q.type === mode)
     .sort(() => Math.random() - 0.5)
@@ -233,81 +254,26 @@ export const generateQuestionsBySet = async (
       context: q.context,
       options: q.options,
       correctAnswer: q.correctAnswer,
-      imagePrompt: q.imagePrompt
+      imagePrompt: q.imagePrompt,
     }));
 
-  const prompt = `You are an elite EPS-TOPIK Question Designer.
-  TASK: Generate 20 high-fidelity questions for Round ${roundNumber}.
-  USER STATUS: ${plan} (${difficultyContext}).
-  TYPE: ${mode} (Match exactly).
-
-  CORE INSTRUCTIONS:
-  1. NO REDUNDANCY: Each question must feature a unique workplace scenario.
-  2. IMAGE PROMPT PRECISION: Provide extremely descriptive 'imagePrompt' for an illustrator.
-  3. AUDIO FORMAT: For LISTENING questions, write dialogue using ONLY these tags:
-     - Single speaker: plain Korean text
-     - Two speakers: use "Man: [text]" and "Woman: [text]" tags on separate lines
-     Do NOT use 가:/나: or 남:/여: tags. Use Man:/Woman: ONLY.
-  4. LANGUAGE:
-     - Exam content (questionText, options, context): Korean text, but dialogue tags in English (Man:/Woman:)
-     - Metadata (category, explanation, imagePrompt): STRICTLY ENGLISH.
-  5. CATEGORIES (Use these English names ONLY):
-     Fill in the Blanks, Related Words, Signboards, Sentence Comprehension,
-     Listening Comprehension, Picture Selection, Action Identification,
-     Location Identification, Person Counting, Time Identification,
-     Conversation Response, Story Comprehension, Place Identification,
-     Weather Identification, Object Identification.
-  6. REFERENCE SAMPLES:
-     ${JSON.stringify(samples, null, 2)}
-
-  JSON FORMAT REQUIRED.`;
-
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              id: { type: Type.STRING },
-              type: { type: Type.STRING, enum: [QuestionType.READING, QuestionType.LISTENING] },
-              category: { type: Type.STRING },
-              questionText: { type: Type.STRING },
-              context: { type: Type.STRING },
-              options: { type: Type.ARRAY, items: { type: Type.STRING } },
-              correctAnswer: { type: Type.INTEGER },
-              explanation: { type: Type.STRING },
-              imagePrompt: { type: Type.STRING }
-            },
-            required: ["id", "type", "questionText", "options", "correctAnswer", "imagePrompt"]
-          }
-        }
-      }
+    const generated = await callFunction<Question[]>('generateQuestions', {
+      roundNumber, mode, plan, samples,
     });
-
-    const text = response.text;
-    if (!text) throw new Error("Empty AI response");
-
-    let generated: Question[] = JSON.parse(cleanJson(text));
-    generated = generated
+    return generated
       .map(q => ({
         ...q,
-        category: q.category || "General",
+        category: q.category || 'General',
         imagePrompt:
           q.imagePrompt ||
           (q.type === QuestionType.READING
             ? `A clear educational illustration of: ${q.questionText}`
-            : undefined)
+            : undefined),
       }))
       .filter((q: Question) => mode === 'FULL' || q.type === mode);
-
-    return generated;
   } catch (err) {
-    console.error("AI Generation Error:", err);
+    console.error('generateQuestions error:', err);
     const filtered = STATIC_EXAM_DATA.filter(q => mode === 'FULL' || q.type === mode);
     return [...filtered].sort(() => Math.random() - 0.5).slice(0, 20);
   }
@@ -323,181 +289,152 @@ export const generateImage = async (
   if (imageUrl) return imageUrl;
   if (!prompt) return null;
 
-  const ai = getAI();
-  const enhancedPrompt = `A clear, high-quality educational illustration for a Korean language exam.
-Style: Simple 2D vector art, clean lines, white background, no decorative text overlays.
-Subject: ${prompt}`;
-
   try {
-    const response = await ai.models.generateImages({
-      model: 'imagen-3.0-generate-002',
-      prompt: enhancedPrompt,
-      config: { numberOfImages: 1, aspectRatio: '1:1' }
-    });
-    const imageBytes = response.generatedImages?.[0]?.image?.imageBytes;
-    if (imageBytes) return `data:image/png;base64,${imageBytes}`;
+    const data = await callFunction<{ image: string }>('generateImage', { prompt });
+    return data.image ?? null;
   } catch (err) {
-    console.warn('Imagen 3 failed, trying Fast:', err);
+    console.error('generateImage error:', err);
+    return null;
   }
-
-  try {
-    const response = await ai.models.generateImages({
-      model: 'imagen-3.0-fast-generate-001',
-      prompt: enhancedPrompt,
-      config: { numberOfImages: 1, aspectRatio: '1:1' }
-    });
-    const imageBytes = response.generatedImages?.[0]?.image?.imageBytes;
-    if (imageBytes) return `data:image/png;base64,${imageBytes}`;
-  } catch (err) {
-    console.error('All image generation failed:', err);
-  }
-
-  return null;
 };
 
 // ============================================================
-// ✅ generateSpeech 전면 수정
+// 🎧 EPS-TOPIK 듣기 음성 엔진
 //
-// 변경 사항:
-//   1. prepareAudioScript()로 스크립트 전처리 (대화태그 통일)
-//   2. 단일 발화: Kore 목소리 (한국어 여성)
-//   3. 대화형: Puck(남) + Kore(여) 멀티스피커
-//   4. TTS 프롬프트에 한국어 자연스러운 억양 지시 추가
+// 기존 문제점
+//   1. model 이 "gemini-2.5-flash" 였습니다. 이 모델은 AUDIO 모달리티를
+//      지원하지 않아 매번 실패했고, 결국 100% 브라우저 speechSynthesis
+//      폴백으로 재생되고 있었습니다. "어색하고 하이톤"의 실제 원인입니다.
+//   2. 폴백에서 여성 pitch 를 1.1 / 1.25 로 올려 더 높게 만들었습니다.
+//   3. Puck(Upbeat) / Kore(Firm) 는 시험 낭독용 음색이 아닙니다.
+//
+// 변경 사항
+//   1. 전용 TTS 모델 사용 (gemini-2.5-flash-preview-tts)
+//   2. 시험 낭독에 맞는 차분한 음색으로 교체 (아래 EXAM_VOICES 에서 조절)
+//   3. 프롬프트를 공식 가이드 구조(Audio Profile / Director's Notes /
+//      TRANSCRIPT)로 재작성 — 지시문을 그대로 읽어버리는 오작동 방지
+//   4. 동일 대본 재요청을 막는 캐시
+//   5. 폴백 음성도 pitch 1.0 기준으로 정상화
 // ============================================================
+
+/**
+ * 음색을 바꾸고 싶으면 이 값만 고치면 됩니다.
+ * 사용 가능한 30종 중 시험 낭독에 적합한 후보:
+ *   남성 — Charon(차분·설명체) / Iapetus(또렷) / Algenib(저음) / Rasalgethi(안정)
+ *   여성 — Erinome(또렷) / Gacrux(성숙) / Achernar(부드러움) / Schedar(균일) / Vindemiatrix(온화)
+ * 피해야 할 음색 — Puck·Laomedeia(Upbeat), Fenrir(Excitable), Leda(Youthful), Zephyr·Autonoe(Bright)
+ */
+export const EXAM_VOICES = {
+  man: 'Rasalgethi',      // Informative — 낮고 안정적인 설명체 남성
+  woman: 'Achernar',  // Soft — 부드럽고 낮게 깔리는 여성
+  narrator: 'Schedar' // 기복 없는 안내 방송 톤
+} as const;
+
+const TTS_MODELS = [
+  'gemini-2.5-flash-preview-tts', // 정확한 낭독에 안정적
+  'gemini-3.1-flash-tts-preview'  // 1차 실패 시 대체
+];
+
+/** 같은 대본을 두 번 생성하지 않도록 하는 세션 캐시 */
+const audioCache = new Map<string, AudioBuffer>();
+
+const DIRECTOR_NOTES = `You are generating the official audio track for a Korean
+language proficiency exam (EPS-TOPIK, beginner level, for foreign workers).
+
+# AUDIO PROFILE
+Professional Korean exam narrators recording in a quiet studio. Standard Seoul
+Korean. Neutral, composed, unhurried — the tone of a public announcement, not
+a drama or an advertisement.
+
+# DIRECTOR'S NOTES
+Style: Calm and even. No emotional colouring, no rising sing-song intonation,
+  no cheerfulness. Keep the pitch in a comfortable middle register; never
+  bright or shrill.
+Articulation: Every syllable clearly separated. Final consonants fully
+  pronounced. This is for learners who are still building listening skills.
+Pace: Slightly slower than natural conversation, but never robotic.
+Pause: Leave about one second of silence between speaker turns and about
+  0.6 seconds between sentences.
+Accent: Standard Seoul Korean, textbook pronunciation.
+
+Read ONLY the lines under TRANSCRIPT. Do not read these notes aloud, do not
+add greetings, comments, or sound effects.
+
+# TRANSCRIPT`;
+
 export const generateSpeech = async (
   rawText: string,
   ctx: AudioContext
 ): Promise<AudioBuffer | null> => {
-  const ai = getAI();
-
   const { script, isDialogue } = prepareAudioScript(rawText);
-
   if (!script) return null;
 
-  try {
-    let config: any;
+  const cacheKey = `${isDialogue ? 'd' : 's'}:${script}`;
+  const cached = audioCache.get(cacheKey);
+  if (cached) return cached;
 
-    if (isDialogue) {
-      config = {
-        responseModalities: [Modality.AUDIO],
-        speechConfig: {
-          multiSpeakerVoiceConfig: {
-            speakerVoiceConfigs: [
-              {
-                speaker: 'Man',
-                voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Puck' } }
-              },
-              {
-                speaker: 'Woman',
-                voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } }
-              }
-            ]
-          }
-        }
-      };
-    } else {
-      config = {
-        responseModalities: [Modality.AUDIO],
-        speechConfig: {
-          voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } }
-        }
-      };
-    }
-
-    const ttsInstruction = isDialogue
-      ? `[EPS-TOPIK \ud55c\uad6d\uc5b4 \ub4e4\uae30 \uc2dc\ud5d8 \uc74c\uc131 \uc0dd\uc131 \uc9c0\uce68]
-
-\u2022 Man\uacfc Woman \ub450 \uc0ac\ub78c\uc774 \uc2dc\uc885 \uba85\ud655\ud788 \ub2e4\ub978 \ubaa9\uc18c\ub9ac\ub85c \ub300\ud654\ud574\uc57c \ud569\ub2c8\ub2e4.
-\u2022 Man: \ub099\uace0 \ucc28\ubd84\ud55c \ub0a8\uc131\uc74c, Woman: \ub192\uace0 \uc6e8\uc225\ud55c \uc5ec\uc131\uc74c\uc73c\ub85c \ud45c\ud604\ud574\uc8fc\uc138\uc694.
-\u2022 \uac01 \ubc1c\ud654 \uc0ac\uc774\uc5d0 \uc790\uc5f0\uc2a4\ub7ec\uc6b4 \uc27c (1~1.5\ucd08)\uc744 \ub450\uc5b4 \uccad\ucde8\uc790\uac00 \ub0b4\uc6a9\uc744 \uc774\ud574\ud560 \uc218 \uc788\ub3c4\ub85d \ud574\uc8fc\uc138\uc694.
-\u2022 \ubc1c\uc74c\uc740 \ub9e4\uc6b0 \uba85\ud655\ud558\uace0 \ub610\ub81b\ud558\uac8c, \uc18d\ub3c4\ub294 \uc2dc\ud5d8\uc5d0 \uc801\ud569\ud55c \uc77c\ubc18\uc801\uc778 \ud55c\uad6d\uc5b4 \ub300\ud654 \uc18d\ub3c4\ub85c \ucca0\ub450\ucca0\ubbf8 \uc77c\uc0c1 \ud68c\ud654\uccb4\ub85c \uc77d\uc5b4\uc8fc\uc138\uc694.
-\u2022 \uac15\uc694\ud558\uac70\ub098 \uc911\uc694\ud55c \ub2e8\uc5b4\ub294 \uc57d\uac04 \uac15\uc870\ud558\uc5ec \ub098\ud50c\ub7ec\uc8fc\uc138\uc694.
-
-\ub300\ubcf8:
-${script}`
-      : `[EPS-TOPIK \ud55c\uad6d\uc5b4 \ub4e4\uae30 \uc2dc\ud5d8 \uc74c\uc131 \uc0dd\uc131 \uc9c0\uce68]
-
-\u2022 \ud55c\uad6d\uc5b4 \uc6d0\uc5b4\ubbfc\uc758 \uc790\uc5f0\uc2a4\ub7ec\uc6b4 \ubc1c\uc74c\uacfc \uc5b5\uc591\uc73c\ub85c \uc77d\uc5b4\uc8fc\uc138\uc694.
-\u2022 \ubc1c\uc74c\uc740 \ub9e4\uc6b0 \uba85\ud655\ud558\uace0 \ub610\ub81b\ud558\uac8c \ud574\uc8fc\uc138\uc694.
-\u2022 \uc18d\ub3c4\ub294 \uc2dc\ud5d8\uc5d0 \uc801\ud569\ud558\uac8c \uc57d\uac04 \ub290\ub9ac\uac8c (0.85\ubc30 \uc6d0\uc5b4\ubbfc \uc18d\ub3c4 \uae30\uc900), \uc9c0\ub098\uce58\uac8c \ub290\ub9b0 \uac83\uc740 \uc548 \ub429\ub2c8\ub2e4.
-\u2022 \ubb38\uc7a5\uacfc \ubb38\uc7a5 \uc0ac\uc774\uc5d0 \uc790\uc5f0\uc2a4\ub7ec\uc6b4 \uc27c (\uc57d 0.7\ucd08)\uc744 \ub450\uc5b4\uc8fc\uc138\uc694.
-\u2022 \ub2e8\uc870\ub86d\uc9c0 \uc54a\uac8c, \uc2e4\uc81c \ud55c\uad6d\uc5b4 \ube44\uc219\ud55c \uc0c1\ud669\uc5d0 \ub9de\ub294 \uc5b5\uc591\uc73c\ub85c \ud45c\ud604\ud574\uc8fc\uc138\uc694.
-
-\ub0b4\uc6a9:
-${script}`;
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: [{ parts: [{ text: ttsInstruction }] }],
-      config
-    });
-
-    const candidates = response.candidates;
-    if (!candidates || candidates.length === 0 || !candidates[0].content) {
-      console.error("No valid candidates returned from AI for audio.");
-      return null;
-    }
-
-    // Search for the part containing audio data
-    const audioPart = candidates[0].content.parts?.find(p => p.inlineData?.data);
-    const audioData = audioPart?.inlineData?.data;
-    
-    if (audioData) {
-      return await decodeAudioData(decodeBase64(audioData), ctx, 24000, 1);
-    }
-    
-    console.error("AI responded but no audio parts were found. Modality might be unsupported in this key's region.");
-    return null;
-  } catch (err: any) {
-    console.error("Speech engine failed with error:", err.message, err);
+  // TTS 는 음성 사전 생성 완료 후 이 경로를 거치지 않습니다.
+  // 사전 생성이 안 된 문항의 실시간 폴백입니다. 키를 VITE_GEMINI_KEY 로 넣으세요.
+  const ttsKey = (import.meta as any).env?.VITE_GEMINI_KEY ?? '';
+  if (!ttsKey) {
+    console.warn('[TTS] VITE_GEMINI_KEY 없음 — 브라우저 음성으로 폴백합니다.');
     return null;
   }
+  const { GoogleGenAI: _GAI } = await import('@google/genai');
+  const ai = new _GAI({ apiKey: ttsKey });
+
+  const speechConfig = isDialogue
+    ? {
+        multiSpeakerVoiceConfig: {
+          speakerVoiceConfigs: [
+            { speaker: 'Man', voiceConfig: { prebuiltVoiceConfig: { voiceName: EXAM_VOICES.man } } },
+            { speaker: 'Woman', voiceConfig: { prebuiltVoiceConfig: { voiceName: EXAM_VOICES.woman } } }
+          ]
+        }
+      }
+    : {
+        voiceConfig: { prebuiltVoiceConfig: { voiceName: EXAM_VOICES.woman } }
+      };
+
+  const prompt = `${DIRECTOR_NOTES}\n${script}`;
+
+  for (const model of TTS_MODELS) {
+    try {
+      const response = await ai.models.generateContent({
+        model,
+        contents: [{ parts: [{ text: prompt }] }],
+        config: { responseModalities: [Modality.AUDIO], speechConfig }
+      });
+
+      const audioData = response.candidates?.[0]?.content?.parts?.find(
+        (p: any) => p.inlineData?.data
+      )?.inlineData?.data;
+
+      if (!audioData) {
+        console.warn(`[TTS] ${model}: 오디오 파트 없음, 다음 모델 시도`);
+        continue;
+      }
+
+      // Gemini TTS 출력은 24kHz 16bit mono PCM(L16) 입니다.
+      const buffer = await decodeAudioData(decodeBase64(audioData), ctx, 24000, 1);
+      audioCache.set(cacheKey, buffer);
+      return buffer;
+    } catch (err: any) {
+      console.warn(`[TTS] ${model} 실패:`, err?.message ?? err);
+    }
+  }
+
+  console.error('[TTS] 모든 TTS 모델 실패 — 브라우저 음성으로 폴백합니다.');
+  return null;
 };
 
 export const analyzePerformance = async (
   session: ExamSession
 ): Promise<AnalyticsFeedback | null> => {
-  const ai = getAI();
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
-      contents: `Perform an expert analysis on these results. Score: ${session.score}/${session.questions.length}.
-      
-      SESSION DATA:
-      - Mode: ${session.mode}
-      - Questions: ${JSON.stringify(
-        session.questions.map(q => ({
-          category: q.category,
-          correct: session.userAnswers[q.id] === q.correctAnswer
-        }))
-      )}
-
-      OUTPUT REQUIREMENTS:
-      - All text MUST be in STRICT ENGLISH.
-      - overallAssessment: 2-3 sentence summary.
-      - strengths: Categories where they performed well.
-      - weaknesses: Categories needing focus.
-      - studyPlan: Actionable 7-day plan.
-
-      Return JSON.`,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            overallAssessment: { type: Type.STRING },
-            strengths: { type: Type.ARRAY, items: { type: Type.STRING } },
-            weaknesses: { type: Type.ARRAY, items: { type: Type.STRING } },
-            studyPlan: { type: Type.STRING }
-          },
-          required: ["overallAssessment", "strengths", "weaknesses", "studyPlan"]
-        }
-      }
-    });
-    const text = response.text;
-    if (!text) return null;
-    return JSON.parse(cleanJson(text));
-  } catch {
+    return await callFunction<AnalyticsFeedback>('analyzePerformance', { session });
+  } catch (err) {
+    console.error('analyzePerformance error:', err);
     return null;
   }
 };
